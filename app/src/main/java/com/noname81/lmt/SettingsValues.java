@@ -25,7 +25,7 @@ class SettingsValues extends SettingsValuesBase {
     private boolean mVisiblePieActivationAreas;
 
     String getVersion() {
-        return "v3.10";
+        return "v3.11";
     }
 
     private SettingsValues(Context context) {

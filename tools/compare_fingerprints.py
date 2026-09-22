@@ -16,6 +16,15 @@ from collections import Counter
 
 ref = json.load(open(sys.argv[1]))
 ours = json.load(open(sys.argv[2]))
+
+# Deliberate, reviewed divergences. Anything not listed here that differs in
+# content is reported as UNEXPLAINED.
+import os
+_dev_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "accepted-deviations.json")
+ACCEPTED = {}
+if os.path.exists(_dev_path):
+    for d in json.load(open(_dev_path))["deviations"]:
+        ACCEPTED[(d["class"], d["method"])] = d["reason"]
 verbose = "--verbose" in sys.argv
 
 EXPECTED_NEW = {"FrameworkFragmentStatePagerAdapter.smali"}
@@ -193,10 +202,19 @@ def classify(deltas):
         return "same method, different receiver type (devirtualization / anon rename)"
     return None
 
-benign, unexplained = [], []
+benign, unexplained, accepted = [], [], []
 for item in real:
+    key = (item[0].split("/")[-1], item[1])
+    if key in ACCEPTED:
+        accepted.append((item, ACCEPTED[key]))
+        continue
     cat = classify(item[2])
     (benign if cat else unexplained).append((item, cat))
+
+if accepted:
+    print(f"\n{'='*66}\nACCEPTED DEVIATIONS ({len(accepted)})\n{'='*66}")
+    for (name, sig, _d), reason in accepted:
+        print(f"  {name} :: {sig}\n      {reason}")
 
 if benign:
     print(f"\n{'='*66}\nKNOWN-BENIGN DIFFERENCES ({len(benign)} methods)\n{'='*66}")
@@ -223,6 +241,7 @@ print(f"methods reordered only: {len(reordered)}   (compiler scheduling - benign
 print(f"synthetic-only methods: {len(synthetic_only)}   (accessor/lambda/outline plumbing)")
 print(f"methods differing     : {len(real)}")
 print(f"  known-benign        : {len(benign)}")
+print(f"  accepted deviations : {len(accepted)}")
 print(f"  UNEXPLAINED         : {len(unexplained)}")
 ok = not unexplained and not missing and not added
 print("RESULT:", "EQUIVALENT" if ok else "REVIEW REQUIRED")

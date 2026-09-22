@@ -1,0 +1,10 @@
+{
+  "_comment": "Deliberate, reviewed divergences from the reference smali. Each entry must name the class, the method, and why the change is intended. The oracle reports anything not listed here as UNEXPLAINED - so this file is the record of every behavioural decision taken since the reconstruction reached equivalence.",
+  "deviations": [
+    {
+      "class": "SettingsValues.smali",
+      "method": "getVersion()Ljava/lang/String;",
+      "reason": "Version string bumped v3.10 -> v3.11 to match the APK's versionName. Upstream did this at build time with a sed over the smali (see reference/build.sh); here it lives in the source. Keeping the two in sync by hand is a known wart - see docs/recommendations.md for the BuildConfig fix that would remove it."
+    }
+  ]
+}
