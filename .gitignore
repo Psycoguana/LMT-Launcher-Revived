@@ -1,0 +1,12 @@
+keystore/
+*.jks
+*.keystore
+key.properties
+build-out/
+generated/
+app/build/
+.gradle/
+local.properties
+
+# vendored upstream reference (cloned by tools/, not ours to track)
+reference/

@@ -1,0 +1,38 @@
+{
+  "CommandSelectActivity$CommandSelectSimpleAdapter$1": [
+    "position"
+  ],
+  "DebugHelper$1": [
+    "context"
+  ],
+  "GesturesFragment$CommandSimpleAdapterGestures$1": [
+    "position"
+  ],
+  "GesturesFragment$CommandSimpleAdapterGestures$2": [
+    "position"
+  ],
+  "InfoFragment$1": [
+    "gd"
+  ],
+  "IsasFragment$CommandSimpleAdapterIsas$2": [
+    "position"
+  ],
+  "MultiSelectActivity$AppSimpleAdapter$1": [
+    "position"
+  ],
+  "PieFragment$CommandSimpleAdapter$1": [
+    "position"
+  ],
+  "PieFragment$CommandSimpleAdapter$1OnClickListenerWithPosition$1": [
+    "fileName",
+    "path"
+  ],
+  "PieFragment$CommandSimpleAdapter$2": [
+    "position"
+  ],
+  "SettingsViewHelper$4": [
+    "factorXFinal",
+    "factorYFinal",
+    "inputDeviceFinal"
+  ]
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:layout_gravity="center" android:id="@id/listitem_icondescriptionicon_icon" android:paddingLeft="30.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:contentDescription="@string/image" android:paddingStart="30.0dp" />
+    <LinearLayout android:orientation="vertical" android:paddingLeft="15.0dp" android:paddingTop="10.0dp" android:paddingRight="15.0dp" android:paddingBottom="10.0dp" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0" android:paddingStart="15.0dp" android:paddingEnd="15.0dp">
+        <TextView android:textAppearance="?android:textAppearanceSmall" android:textStyle="bold" android:textColor="@color/qc_normal_white" android:id="@id/listitem_icondescriptionicon_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAllCaps="true" />
+        <TextView android:textAppearance="?android:textAppearanceSmall" android:id="@id/listitem_icondescriptionicon_caption" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    </LinearLayout>
+    <ImageView android:layout_gravity="end|center" android:id="@id/listitem_icondescriptionicon_icon2" android:paddingRight="30.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:contentDescription="@string/image" android:paddingEnd="30.0dp" />
+</LinearLayout>

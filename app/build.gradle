@@ -1,0 +1,68 @@
+plugins { id 'com.android.application' }
+
+// Version scheme carried over from the upstream build.sh:
+//   versionCode = major * 1000 + minor * 100   (3.10 -> 4000, 3.11 -> 4100)
+def versionMajor = 3
+def versionMinor = 11
+
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file("keystore/key.properties")
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+
+android {
+    namespace 'com.noname81.lmt'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.noname81.lmt'
+        minSdk 15
+        targetSdk 34
+        versionCode versionMajor * 1000 + versionMinor * 100
+        versionName "${versionMajor}.${versionMinor}"
+    }
+
+    signingConfigs {
+        release {
+            if (keystoreProps['storeFile']) {
+                storeFile rootProject.file("keystore/${keystoreProps['storeFile']}")
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Kept off during the reconstruction: the equivalence oracle diffs our
+            // dex against the reference smali, and shrinking would rewrite it.
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        jniLibs { useLegacyPackaging = true }
+    }
+
+    lint {
+        abortOnError false
+    }
+}
+
+dependencies {
+    // The only genuine third-party dependency in the whole app: ViewPager.
+    // Everything else the decompiler attributed to android.support.* turned out
+    // to be jadx substituting library constants for plain integer literals.
+    implementation 'androidx.viewpager:viewpager:1.0.0'
+}

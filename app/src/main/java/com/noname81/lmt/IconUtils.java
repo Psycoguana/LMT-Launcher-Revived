@@ -1,0 +1,183 @@
+package com.noname81.lmt;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
+import android.util.Base64;
+import android.util.TypedValue;
+import android.widget.ImageView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+
+/* JADX INFO: loaded from: classes.dex */
+class IconUtils {
+    IconUtils() {}
+
+    static String convertDrawableToBase64String(Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
+        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        return Base64.encodeToString(byteArrayOutputStream.toByteArray(), 0);
+    }
+
+    static BitmapDrawable convertBase64StringToDrawable(Context context, String str) {
+        if (str == null || str.length() <= 0) {
+            return null;
+        }
+        try {
+            byte[] bArrDecode = Base64.decode(str, 0);
+            return new BitmapDrawable(
+                    context.getResources(),
+                    BitmapFactory.decodeByteArray(bArrDecode, 0, bArrDecode.length));
+        } catch (Exception unused) {
+            return null;
+        }
+    }
+
+    static Drawable resizeImage(Context context, Drawable drawable, int i) {
+        Resources resources = context.getResources();
+        boolean z = i == 1;
+        if (i > 0 && i <= 2) {
+            i = (int) TypedValue.applyDimension(1, 35.0f, resources.getDisplayMetrics());
+        }
+        if (i <= 0) {
+            if (z) {
+                drawable.setLevel(1);
+            }
+            return drawable;
+        }
+        BitmapDrawable bitmapDrawable =
+                new BitmapDrawable(
+                        resources,
+                        Bitmap.createScaledBitmap(getBitmapFromDrawable(drawable), i, i, true));
+        if (z) {
+            bitmapDrawable.setChangingConfigurations(1);
+        }
+        return bitmapDrawable;
+    }
+
+    static void saveImageToFile(Bitmap bitmap, String str, String str2) {
+        try {
+            FileUtils.createFolder(str);
+            FileOutputStream fileOutputStream = new FileOutputStream(new File(str + str2));
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+            fileOutputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static Bitmap getScaledBitmapFromUri(Context context, Uri uri, int i) {
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            int i2 = 1;
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(
+                    context.getContentResolver().openInputStream(uri), null, options);
+            int i3 = options.outWidth;
+            int i4 = options.outHeight;
+            while (i3 / 2 >= i && i4 / 2 >= i) {
+                i3 /= 2;
+                i4 /= 2;
+                i2 *= 2;
+            }
+            BitmapFactory.Options options2 = new BitmapFactory.Options();
+            options2.inSampleSize = i2;
+            return BitmapFactory.decodeStream(
+                    context.getContentResolver().openInputStream(uri), null, options2);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    static Drawable getDrawable(Context context, int i) {
+        if (Build.VERSION.SDK_INT >= 21) {
+            return context.getResources().getDrawable(i, context.getTheme());
+        }
+        return context.getResources().getDrawable(i);
+    }
+
+    static Drawable getIconForPieShortPress(Context context) {
+        return getDrawable(context, R.drawable.pie_s);
+    }
+
+    static Drawable getIconForPieLongPress(Context context) {
+        return getDrawable(context, R.drawable.pielp_s);
+    }
+
+    static Drawable getIconForGesture(Context context, String str) {
+        return getDrawable(
+                context,
+                context.getResources()
+                        .getIdentifier(str + "_s", "drawable", context.getPackageName()));
+    }
+
+    static Drawable getIconForISA(Context context) {
+        return getDrawable(context, R.drawable.isa_s);
+    }
+
+    static Drawable getIconForOK(Context context) {
+        return getDrawable(context, R.drawable.ok);
+    }
+
+    static Drawable getIconForAction(Context context, Action action, String str) {
+        return action.getDrawable(context, str, 0, 1, true);
+    }
+
+    static void setMaxSizeForImageView(Context context, ImageView imageView) {
+        Resources resources = context.getResources();
+        imageView.setAdjustViewBounds(true);
+        imageView.setMaxHeight(
+                (int) TypedValue.applyDimension(1, 70.0f, resources.getDisplayMetrics()));
+        imageView.setMaxWidth(
+                (int) TypedValue.applyDimension(1, 70.0f, resources.getDisplayMetrics()));
+    }
+
+    static String getNamePie(int i) {
+        return "pie" + i + ".png";
+    }
+
+    private static Bitmap getBitmapFromDrawable(Drawable drawable) {
+        if (Build.VERSION.SDK_INT >= 26) {
+            return getBitmapFromDrawableV26(drawable);
+        }
+        return ((BitmapDrawable) drawable).getBitmap();
+    }
+
+    private static Bitmap getBitmapFromDrawableV26(Drawable drawable) {
+        try {
+            if (drawable instanceof BitmapDrawable) {
+                return ((BitmapDrawable) drawable).getBitmap();
+            }
+            if (!(drawable instanceof AdaptiveIconDrawable)) {
+                return null;
+            }
+            AdaptiveIconDrawable adaptiveIconDrawableM284m = ((AdaptiveIconDrawable) drawable);
+            Bitmap bitmapCreateBitmap =
+                    Bitmap.createBitmap(
+                            adaptiveIconDrawableM284m.getIntrinsicWidth(),
+                            adaptiveIconDrawableM284m.getIntrinsicHeight(),
+                            Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmapCreateBitmap);
+            adaptiveIconDrawableM284m.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            adaptiveIconDrawableM284m.draw(canvas);
+            return bitmapCreateBitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}

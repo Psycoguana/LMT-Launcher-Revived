@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="horizontal" android:id="@id/alpha_layout" android:layout_width="match_parent" android:layout_height="match_parent">
+            <TextView android:id="@id/alpha_label" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="50.0dp" android:layout_height="wrap_content" android:paddingStart="7.0dp" android:paddingEnd="7.0dp" />
+            <TextView android:id="@id/alpha_value" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="40.0dp" android:layout_height="wrap_content" android:paddingStart="7.0dp" android:paddingEnd="7.0dp" />
+            <SeekBar android:id="@id/alpha_seek" android:paddingTop="7.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="255" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/red_layout" android:layout_width="match_parent" android:layout_height="match_parent">
+            <TextView android:id="@id/red_label" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="50.0dp" android:layout_height="wrap_content" android:paddingStart="7.0dp" android:paddingEnd="7.0dp" />
+            <TextView android:id="@id/red_value" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="40.0dp" android:layout_height="wrap_content" android:paddingStart="7.0dp" android:paddingEnd="7.0dp" />
+            <SeekBar android:id="@id/red_seek" android:paddingTop="7.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="255" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/green_layout" android:layout_width="match_parent" android:layout_height="match_parent">
+            <TextView android:id="@id/green_label" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="50.0dp" android:layout_height="wrap_content" android:paddingStart="7.0dp" android:paddingEnd="7.0dp" />
+            <TextView android:id="@id/green_value" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="40.0dp" android:layout_height="wrap_content" android:paddingStart="7.0dp" android:paddingEnd="7.0dp" />
+            <SeekBar android:id="@id/green_seek" android:paddingTop="7.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="255" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/blue_layout" android:layout_width="match_parent" android:layout_height="match_parent">
+            <TextView android:id="@id/blue_label" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="50.0dp" android:layout_height="wrap_content" android:paddingStart="7.0dp" android:paddingEnd="7.0dp" />
+            <TextView android:id="@id/blue_value" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="40.0dp" android:layout_height="wrap_content" android:paddingStart="7.0dp" android:paddingEnd="7.0dp" />
+            <SeekBar android:id="@id/blue_seek" android:paddingTop="7.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="255" />
+        </LinearLayout>
+        <RelativeLayout android:orientation="horizontal" android:id="@id/button_layout" android:layout_width="match_parent" android:layout_height="match_parent">
+            <Button android:textColor="@color/qc_normal_white" android:gravity="center" android:id="@id/color_preview" android:layout_width="match_parent" android:layout_height="40.0dp" android:layout_marginLeft="7.0dp" android:layout_marginTop="7.0dp" android:layout_marginRight="7.0dp" android:layout_centerHorizontal="true" />
+            <Button android:gravity="center" android:id="@id/color_last" android:layout_width="40.0dp" android:layout_height="40.0dp" android:layout_marginLeft="7.0dp" android:layout_marginTop="7.0dp" android:layout_marginRight="7.0dp" android:layout_alignParentLeft="true" android:layout_alignParentStart="true" />
+            <Button android:gravity="center" android:id="@id/color_next" android:layout_width="40.0dp" android:layout_height="40.0dp" android:layout_marginLeft="7.0dp" android:layout_marginTop="7.0dp" android:layout_marginRight="7.0dp" android:layout_alignParentRight="true" android:layout_alignParentEnd="true" />
+        </RelativeLayout>
+        <EditText android:id="@id/color_string" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="7.0dp" android:layout_marginRight="7.0dp" android:inputType="text" />
+    </LinearLayout>
+</ScrollView>
