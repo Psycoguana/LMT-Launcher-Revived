@@ -3,7 +3,7 @@ plugins { id 'com.android.application' }
 // Version scheme carried over from the upstream build.sh:
 //   versionCode = major * 1000 + minor * 100   (3.10 -> 4000, 3.11 -> 4100)
 def versionMajor = 3
-def versionMinor = 11
+def versionMinor = 10
 
 def keystoreProps = new Properties()
 def keystorePropsFile = rootProject.file("keystore/key.properties")
