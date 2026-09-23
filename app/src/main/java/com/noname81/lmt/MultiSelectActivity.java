@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/* JADX INFO: loaded from: classes.dex */
 public class MultiSelectActivity extends Activity implements AdapterView.OnItemClickListener {
     public static int AppSelectMode = 0;
     public static final int REQUEST_CREATE_SHORTCUT = 1;
@@ -60,17 +59,17 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
         this.mPackageManager = getPackageManager();
         LinkedList linkedList = new LinkedList();
         SeparatedListAdapter separatedListAdapter = new SeparatedListAdapter(this);
-        int i = AppSelectMode;
-        if (i == 2) {
+        int mode = AppSelectMode;
+        if (mode == 2) {
             try {
                 this.mPackageInfo =
                         this.mPackageManager.getPackageInfo(
                                 this.mSettings.getCurrentAction().getString(), 1);
                 this.mActivityInfos = new LinkedList();
                 if (this.mPackageInfo.activities != null) {
-                    for (int i2 = 0; i2 < this.mPackageInfo.activities.length; i2++) {
-                        if (this.mPackageInfo.activities[i2].exported) {
-                            this.mActivityInfos.add(this.mPackageInfo.activities[i2]);
+                    for (int index = 0; index < this.mPackageInfo.activities.length; index++) {
+                        if (this.mPackageInfo.activities[index].exported) {
+                            this.mActivityInfos.add(this.mPackageInfo.activities[index]);
                         }
                     }
                 }
@@ -79,10 +78,12 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
                                 .applicationInfo
                                 .loadLabel(this.mPackageManager)
                                 .toString();
-                for (int i3 = 0; i3 < this.mActivityInfos.size(); i3++) {
+                for (int activityIndex = 0;
+                        activityIndex < this.mActivityInfos.size();
+                        activityIndex++) {
                     linkedList.add(
                             SeparatedListAdapter.createItem(
-                                    string, this.mActivityInfos.get(i3).name));
+                                    string, this.mActivityInfos.get(activityIndex).name));
                 }
                 separatedListAdapter.addSection(
                         getString(R.string.app_choose_an_activity),
@@ -90,19 +91,21 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             }
-        } else if (i == 5) {
+        } else if (mode == 5) {
             try {
                 this.mShortcuts =
                         this.mPackageManager.queryIntentActivities(
                                 new Intent("android.intent.action.CREATE_SHORTCUT"), 0);
-                for (int i4 = 0; i4 < this.mShortcuts.size(); i4++) {
+                for (int shortcutIndex = 0;
+                        shortcutIndex < this.mShortcuts.size();
+                        shortcutIndex++) {
                     linkedList.add(
                             SeparatedListAdapter.createItem(
                                     this.mShortcuts
-                                            .get(i4)
+                                            .get(shortcutIndex)
                                             .loadLabel(this.mPackageManager)
                                             .toString(),
-                                    this.mShortcuts.get(i4).activityInfo.packageName));
+                                    this.mShortcuts.get(shortcutIndex).activityInfo.packageName));
                 }
                 separatedListAdapter.addSection(
                         getString(R.string.app_choose_a_shortcut),
@@ -112,21 +115,21 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
             }
         } else {
             this.mPackageInfos = this.mPackageManager.getInstalledPackages(1);
-            int i5 = 0;
-            while (i5 < this.mPackageInfos.size()) {
-                PackageInfo packageInfo = this.mPackageInfos.get(i5);
+            int count = 0;
+            while (count < this.mPackageInfos.size()) {
+                PackageInfo packageInfo = this.mPackageInfos.get(count);
                 if (packageInfo.activities != null) {
                     packageInfo.applicationInfo.name =
                             packageInfo.applicationInfo.loadLabel(this.mPackageManager).toString();
                 } else {
-                    this.mPackageInfos.remove(i5);
-                    i5--;
+                    this.mPackageInfos.remove(count);
+                    count--;
                 }
-                i5++;
+                count++;
             }
             Collections.sort(this.mPackageInfos, comparator);
-            for (int i6 = 0; i6 < this.mPackageInfos.size(); i6++) {
-                PackageInfo packageInfo2 = this.mPackageInfos.get(i6);
+            for (int packageIndex = 0; packageIndex < this.mPackageInfos.size(); packageIndex++) {
+                PackageInfo packageInfo2 = this.mPackageInfos.get(packageIndex);
                 linkedList.add(
                         SeparatedListAdapter.createItem(
                                 packageInfo2.applicationInfo.name,
@@ -143,15 +146,14 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
     }
 
     @Override // android.app.Activity
-    protected void onActivityResult(int i, int i2, Intent intent) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Drawable drawable;
-        if (i == 1 && i2 == -1) {
-            Bundle extras = intent.getExtras();
+        if (requestCode == 1 && resultCode == -1) {
+            Bundle extras = data.getExtras();
             extras.getClass();
             String uri = ((Intent) extras.get("android.intent.extra.shortcut.INTENT")).toUri(0);
             Resources resources = getResources();
-            Bitmap bitmap =
-                    (Bitmap) intent.getParcelableExtra("android.intent.extra.shortcut.ICON");
+            Bitmap bitmap = (Bitmap) data.getParcelableExtra("android.intent.extra.shortcut.ICON");
             if (bitmap != null) {
                 drawable = new BitmapDrawable(resources, bitmap);
             } else {
@@ -159,7 +161,7 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
                 try {
                     Intent.ShortcutIconResource shortcutIconResource =
                             (Intent.ShortcutIconResource)
-                                    intent.getParcelableExtra(
+                                    data.getParcelableExtra(
                                             "android.intent.extra.shortcut.ICON_RESOURCE");
                     Resources resourcesForApplication =
                             getPackageManager()
@@ -173,40 +175,42 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
             }
             this.mSettings.setCurrentAction(this, new Action(33, uri, drawable));
         }
-        super.onActivityResult(i, i2, intent);
+        super.onActivityResult(requestCode, resultCode, data);
         finish();
     }
 
     @Override // android.widget.AdapterView.OnItemClickListener
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        int i2 = AppSelectMode;
-        if (i2 == 0) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        int mode = AppSelectMode;
+        if (mode == 0) {
             this.mSettings.setCurrentAction(
-                    this, new Action(2, this.mPackageInfos.get(i - 1).packageName));
+                    this, new Action(2, this.mPackageInfos.get(position - 1).packageName));
             onBackPressed();
             return;
         }
-        if (i2 == 1) {
+        if (mode == 1) {
             this.mSettings.setCurrentAction(
-                    this, new Action(2, this.mPackageInfos.get(i - 1).applicationInfo.packageName));
+                    this,
+                    new Action(
+                            2, this.mPackageInfos.get(position - 1).applicationInfo.packageName));
             AppSelectMode = 2;
             startActivityForResult(
                     new Intent(view.getContext(), (Class<?>) MultiSelectActivity.class), 0);
             finish();
             return;
         }
-        if (i2 == 3) {
-            this.mSettings.setBlacklisted(this.mPackageInfos.get(i - 1).packageName);
+        if (mode == 3) {
+            this.mSettings.setBlacklisted(this.mPackageInfos.get(position - 1).packageName);
             onBackPressed();
             return;
         }
-        if (i2 == 4) {
-            this.mSettings.setBlacklistedPie(this.mPackageInfos.get(i - 1).packageName);
+        if (mode == 4) {
+            this.mSettings.setBlacklistedPie(this.mPackageInfos.get(position - 1).packageName);
             onBackPressed();
             return;
         }
-        if (i2 == 5) {
-            ActivityInfo activityInfo = this.mShortcuts.get(i - 1).activityInfo;
+        if (mode == 5) {
+            ActivityInfo activityInfo = this.mShortcuts.get(position - 1).activityInfo;
             ComponentName componentName =
                     new ComponentName(activityInfo.applicationInfo.packageName, activityInfo.name);
             Intent intent = new Intent();
@@ -217,10 +221,10 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
         }
         SettingsValues settingsValues = this.mSettings;
         StringBuilder sb = new StringBuilder();
-        int i3 = i - 1;
-        sb.append(this.mActivityInfos.get(i3).packageName);
+        int selected = position - 1;
+        sb.append(this.mActivityInfos.get(selected).packageName);
         sb.append("/");
-        sb.append(this.mActivityInfos.get(i3).name);
+        sb.append(this.mActivityInfos.get(selected).name);
         settingsValues.setCurrentAction(this, new Action(27, sb.toString()));
         onBackPressed();
     }
@@ -246,7 +250,6 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
                     MultiSelectActivity.this.getApplicationContext(), imageView);
             new AsyncDrawableTask(imageView, R.drawable.none) { // from class:
                 // com.noname81.lmt.MultiSelectActivity.AppSimpleAdapter.1
-                /* JADX WARN: Can't rename method to resolve collision */
                 @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
                 protected Drawable doInBackground(Void... voidArr) {
                     if (MultiSelectActivity.AppSelectMode == 2) {

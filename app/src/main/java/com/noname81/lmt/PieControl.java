@@ -8,7 +8,6 @@ import android.widget.FrameLayout;
 
 import java.util.Vector;
 
-/* JADX INFO: loaded from: classes.dex */
 class PieControl extends PieControlBase
         implements View.OnClickListener, View.OnLongClickListener, View.OnKeyListener {
     private Launcher mLauncher;
@@ -21,11 +20,11 @@ class PieControl extends PieControlBase
         PieItem mPieItem;
         boolean mTempAction;
 
-        PieItemAction(PieItem pieItem, Action action, Action action2, boolean z) {
+        PieItemAction(PieItem pieItem, Action shortPress, Action longPress, boolean isRecentApp) {
             this.mPieItem = pieItem;
-            this.mClickAction = action;
-            this.mLongClickAction = action2;
-            this.mTempAction = z;
+            this.mClickAction = shortPress;
+            this.mLongClickAction = longPress;
+            this.mTempAction = isRecentApp;
         }
     }
 
@@ -40,98 +39,98 @@ class PieControl extends PieControlBase
     protected void populateMenu() {
         int iLoadPieShowScaleUserImages = this.mSettings.loadPieShowScaleUserImages();
         int iLoadPieShowScaleAppImages = this.mSettings.loadPieShowScaleAppImages();
-        for (int i = 0; i < 9; i += 2) {
-            if (this.mSettings.getPieAction(i).getType() > 1) {
-                int i2 = i + 1;
+        for (int slot1 = 0; slot1 < 9; slot1 += 2) {
+            if (this.mSettings.getPieAction(slot1).getType() > 1) {
+                int longSlot1 = slot1 + 1;
                 this.mPieItemActions.add(
                         new PieItemAction(
                                 makeItem(
                                         this.mSettings
-                                                .getPieAction(i)
+                                                .getPieAction(slot1)
                                                 .getDrawable(
                                                         this.mContext,
-                                                        IconUtils.getNamePie(i),
+                                                        IconUtils.getNamePie(slot1),
                                                         iLoadPieShowScaleUserImages,
                                                         iLoadPieShowScaleAppImages,
                                                         false),
                                         this.mSettings
-                                                .getPieAction(i2)
+                                                .getPieAction(longSlot1)
                                                 .getDrawable(
                                                         this.mContext,
-                                                        IconUtils.getNamePie(i2),
+                                                        IconUtils.getNamePie(longSlot1),
                                                         iLoadPieShowScaleUserImages,
                                                         iLoadPieShowScaleAppImages,
                                                         false),
                                         1),
-                                this.mSettings.getPieAction(i),
-                                this.mSettings.getPieAction(i2),
+                                this.mSettings.getPieAction(slot1),
+                                this.mSettings.getPieAction(longSlot1),
                                 false));
             }
         }
-        for (int i3 = 10; i3 < 23; i3 += 2) {
-            if (this.mSettings.getPieAction(i3).getType() > 1) {
-                int i4 = i3 + 1;
+        for (int slot2 = 10; slot2 < 23; slot2 += 2) {
+            if (this.mSettings.getPieAction(slot2).getType() > 1) {
+                int longSlot2 = slot2 + 1;
                 this.mPieItemActions.add(
                         new PieItemAction(
                                 makeItem(
                                         this.mSettings
-                                                .getPieAction(i3)
+                                                .getPieAction(slot2)
                                                 .getDrawable(
                                                         this.mContext,
-                                                        IconUtils.getNamePie(i3),
+                                                        IconUtils.getNamePie(slot2),
                                                         iLoadPieShowScaleUserImages,
                                                         iLoadPieShowScaleAppImages,
                                                         false),
                                         this.mSettings
-                                                .getPieAction(i4)
+                                                .getPieAction(longSlot2)
                                                 .getDrawable(
                                                         this.mContext,
-                                                        IconUtils.getNamePie(i4),
+                                                        IconUtils.getNamePie(longSlot2),
                                                         iLoadPieShowScaleUserImages,
                                                         iLoadPieShowScaleAppImages,
                                                         false),
                                         2),
-                                this.mSettings.getPieAction(i3),
-                                this.mSettings.getPieAction(i4),
+                                this.mSettings.getPieAction(slot2),
+                                this.mSettings.getPieAction(longSlot2),
                                 false));
             }
         }
-        for (int i5 = 24; i5 < 37; i5 += 2) {
-            if (this.mSettings.getPieAction(i5).getType() > 1) {
-                int i6 = i5 + 1;
+        for (int slot3 = 24; slot3 < 37; slot3 += 2) {
+            if (this.mSettings.getPieAction(slot3).getType() > 1) {
+                int longSlot3 = slot3 + 1;
                 this.mPieItemActions.add(
                         new PieItemAction(
                                 makeItem(
                                         this.mSettings
-                                                .getPieAction(i5)
+                                                .getPieAction(slot3)
                                                 .getDrawable(
                                                         this.mContext,
-                                                        IconUtils.getNamePie(i5),
+                                                        IconUtils.getNamePie(slot3),
                                                         iLoadPieShowScaleUserImages,
                                                         iLoadPieShowScaleAppImages,
                                                         false),
                                         this.mSettings
-                                                .getPieAction(i6)
+                                                .getPieAction(longSlot3)
                                                 .getDrawable(
                                                         this.mContext,
-                                                        IconUtils.getNamePie(i6),
+                                                        IconUtils.getNamePie(longSlot3),
                                                         iLoadPieShowScaleUserImages,
                                                         iLoadPieShowScaleAppImages,
                                                         false),
                                         3),
-                                this.mSettings.getPieAction(i5),
-                                this.mSettings.getPieAction(i6),
+                                this.mSettings.getPieAction(slot3),
+                                this.mSettings.getPieAction(longSlot3),
                                 false));
             }
         }
         if (this.mPieItemActions.size() == 0) {
             createDefaultPieActions();
         }
-        for (int i7 = 0; i7 < this.mPieItemActions.size(); i7++) {
-            this.mPie.addItem(this.mPieItemActions.get(i7).mPieItem);
-            setClickListener(this, this.mPieItemActions.get(i7).mPieItem);
-            setLongClickListener(this, this.mPieItemActions.get(i7).mPieItem);
-            setKeyListener(this, this.mPieItemActions.get(i7).mPieItem);
+        for (int index = 0; index < this.mPieItemActions.size(); index++) {
+            this.mPie.addItem(this.mPieItemActions.get(index).mPieItem);
+            setClickListener(this, this.mPieItemActions.get(index).mPieItem);
+            setLongClickListener(this, this.mPieItemActions.get(index).mPieItem);
+            setKeyListener(this, this.mPieItemActions.get(index).mPieItem);
         }
     }
 
@@ -142,13 +141,13 @@ class PieControl extends PieControlBase
         if (packageNamesOfRecentApps.length() > 0) {
             String[] strArrSplit = packageNamesOfRecentApps.split(" ");
             Vector vector = new Vector();
-            int i = 0;
+            int slot = 0;
             while (true) {
-                int i2 = 1;
-                if (i >= strArrSplit.length) {
+                int level = 1;
+                if (slot >= strArrSplit.length) {
                     break;
                 }
-                Action action = new Action(2, strArrSplit[i]);
+                Action action = new Action(2, strArrSplit[slot]);
                 Action action2 = new Action(1, "");
                 Drawable drawable =
                         action.getDrawable(
@@ -164,24 +163,24 @@ class PieControl extends PieControlBase
                                 iLoadPieShowScaleUserImages,
                                 iLoadPieShowScaleAppImages,
                                 false);
-                if (i > 4) {
-                    i2 = 2;
+                if (slot > 4) {
+                    level = 2;
                 }
                 Vector vector2 = vector;
                 vector2.add(
                         new PieItemAction(
-                                makeItem(drawable, drawable2, i2), action, action2, true));
-                i++;
+                                makeItem(drawable, drawable2, level), action, action2, true));
+                slot++;
                 vector = vector2;
             }
             Vector vector3 = vector;
             this.mPie.clearItems();
-            for (int i3 = 0; i3 < vector3.size(); i3++) {
-                this.mPie.addItem(((PieItemAction) vector3.get(i3)).mPieItem);
-                setClickListener(this, ((PieItemAction) vector3.get(i3)).mPieItem);
-                setLongClickListener(this, ((PieItemAction) vector3.get(i3)).mPieItem);
-                setKeyListener(this, ((PieItemAction) vector3.get(i3)).mPieItem);
-                this.mPieItemActions.add((PieItemAction) vector3.get(i3));
+            for (int index = 0; index < vector3.size(); index++) {
+                this.mPie.addItem(((PieItemAction) vector3.get(index)).mPieItem);
+                setClickListener(this, ((PieItemAction) vector3.get(index)).mPieItem);
+                setLongClickListener(this, ((PieItemAction) vector3.get(index)).mPieItem);
+                setKeyListener(this, ((PieItemAction) vector3.get(index)).mPieItem);
+                this.mPieItemActions.add((PieItemAction) vector3.get(index));
             }
             this.mPie.relayoutPie();
         }
@@ -189,22 +188,22 @@ class PieControl extends PieControlBase
 
     @Override // com.noname81.lmt.PieControlBase
     protected void attachToContainer(FrameLayout frameLayout) {
-        int i = 0;
-        boolean z = false;
-        while (i < this.mPieItemActions.size()) {
-            if (this.mPieItemActions.get(i).mTempAction) {
-                this.mPieItemActions.remove(i);
-                if (i > 0) {
-                    i--;
+        int level = 0;
+        boolean hasRecentApps = false;
+        while (level < this.mPieItemActions.size()) {
+            if (this.mPieItemActions.get(level).mTempAction) {
+                this.mPieItemActions.remove(level);
+                if (level > 0) {
+                    level--;
                 }
-                z = true;
+                hasRecentApps = true;
             }
-            i++;
+            level++;
         }
-        if (z) {
+        if (hasRecentApps) {
             this.mPie.clearItems();
-            for (int i2 = 0; i2 < this.mPieItemActions.size(); i2++) {
-                this.mPie.addItem(this.mPieItemActions.get(i2).mPieItem);
+            for (int index = 0; index < this.mPieItemActions.size(); index++) {
+                this.mPie.addItem(this.mPieItemActions.get(index).mPieItem);
             }
         }
         super.attachToContainer(frameLayout);
@@ -212,9 +211,9 @@ class PieControl extends PieControlBase
 
     @Override // android.view.View.OnClickListener
     public void onClick(View view) {
-        for (int i = 0; i < this.mPieItemActions.size(); i++) {
-            if (this.mPieItemActions.get(i).mPieItem.getView() == view) {
-                this.mLauncher.fireAction(this.mPieItemActions.get(i).mClickAction);
+        for (int index = 0; index < this.mPieItemActions.size(); index++) {
+            if (this.mPieItemActions.get(index).mPieItem.getView() == view) {
+                this.mLauncher.fireAction(this.mPieItemActions.get(index).mClickAction);
                 return;
             }
         }
@@ -222,13 +221,13 @@ class PieControl extends PieControlBase
 
     @Override // android.view.View.OnLongClickListener
     public boolean onLongClick(View view) {
-        for (int i = 0; i < this.mPieItemActions.size(); i++) {
-            if (this.mPieItemActions.get(i).mPieItem.getView() == view) {
-                if (this.mPieItemActions.get(i).mLongClickAction.getType() != 1) {
-                    this.mLauncher.fireAction(this.mPieItemActions.get(i).mLongClickAction);
+        for (int index = 0; index < this.mPieItemActions.size(); index++) {
+            if (this.mPieItemActions.get(index).mPieItem.getView() == view) {
+                if (this.mPieItemActions.get(index).mLongClickAction.getType() != 1) {
+                    this.mLauncher.fireAction(this.mPieItemActions.get(index).mLongClickAction);
                     break;
                 }
-                this.mLauncher.fireAction(this.mPieItemActions.get(i).mClickAction);
+                this.mLauncher.fireAction(this.mPieItemActions.get(index).mClickAction);
                 break;
             }
         }
@@ -236,19 +235,19 @@ class PieControl extends PieControlBase
     }
 
     @Override // android.view.View.OnKeyListener
-    public boolean onKey(View view, int i, KeyEvent keyEvent) {
-        for (int i2 = 0; i2 < this.mPieItemActions.size(); i2++) {
-            if (this.mPieItemActions.get(i2).mPieItem.getView() == view) {
-                if (i == 36) {
-                    if (this.mPieItemActions.get(i2).mClickAction.getType() == 44) {
+    public boolean onKey(View view, int keyCode, KeyEvent event) {
+        for (int index = 0; index < this.mPieItemActions.size(); index++) {
+            if (this.mPieItemActions.get(index).mPieItem.getView() == view) {
+                if (keyCode == 36) {
+                    if (this.mPieItemActions.get(index).mClickAction.getType() == 44) {
                         this.mPie.activatePiePointer();
-                    } else if (this.mPieItemActions.get(i2).mClickAction.getType() == 45) {
+                    } else if (this.mPieItemActions.get(index).mClickAction.getType() == 45) {
                         activatePieRecentApps();
                     }
-                } else if (i == 40) {
-                    if (this.mPieItemActions.get(i2).mLongClickAction.getType() == 44) {
+                } else if (keyCode == 40) {
+                    if (this.mPieItemActions.get(index).mLongClickAction.getType() == 44) {
                         this.mPie.activatePiePointer();
-                    } else if (this.mPieItemActions.get(i2).mLongClickAction.getType() == 45) {
+                    } else if (this.mPieItemActions.get(index).mLongClickAction.getType() == 45) {
                         activatePieRecentApps();
                     }
                 }

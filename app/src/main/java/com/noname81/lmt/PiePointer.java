@@ -11,7 +11,6 @@ import android.graphics.Shader;
 import android.os.Handler;
 import android.widget.FrameLayout;
 
-/* JADX INFO: loaded from: classes.dex */
 class PiePointer implements PieMenu.PieView {
     private static final float EMPTY_ANGLE = 0.19634955f;
     private static final int STROKE_SIZE = 4;
@@ -35,7 +34,7 @@ class PiePointer implements PieMenu.PieView {
     private float mY;
     private float mYO;
 
-    PiePointer(FrameLayout frameLayout, Context context, int i) {
+    PiePointer(FrameLayout frameLayout, Context context, int color) {
         this.mContext = context;
         SettingsValues settingsValues = SettingsValues.getInstance(context);
         this.mSettings = settingsValues;
@@ -45,7 +44,7 @@ class PiePointer implements PieMenu.PieView {
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(4.0f);
-        paint.setColor(i);
+        paint.setColor(color);
         Paint paint2 = new Paint();
         this.mPointerPaintOutline = paint2;
         paint2.setAntiAlias(true);
@@ -73,12 +72,19 @@ class PiePointer implements PieMenu.PieView {
 
     @Override // com.noname81.lmt.PieMenu.PieView
     public void layout(
-            boolean z, Point point, int i, int i2, int i3, boolean z2, boolean z3, boolean z4) {
-        this.mCenter = point;
-        this.mRadius = i;
-        this.mRadiusInc = i2;
-        this.mLevels = i3;
-        this.mOnTheBottom = z3;
+            boolean visible,
+            Point center,
+            int radius,
+            int radiusInc,
+            int levels,
+            boolean onTheLeft,
+            boolean onTheBottom,
+            boolean onTheRight) {
+        this.mCenter = center;
+        this.mRadius = radius;
+        this.mRadiusInc = radiusInc;
+        this.mLevels = levels;
+        this.mOnTheBottom = onTheBottom;
         this.mPointerPaint.setShader(
                 new RadialGradient(
                         this.mCenter.x,
@@ -122,38 +128,39 @@ class PiePointer implements PieMenu.PieView {
     }
 
     @Override // com.noname81.lmt.PieMenu.PieView
-    public boolean onTouchEvent(int i, float f, float f2, float f3, float f4, PointF pointF) {
-        if (this.mFromTheEgdes && pointF.y > this.mRadius) {
-            if ((this.mOnTheBottom && pointF.x > 1.3744469f) || pointF.x < -1.3744469f) {
+    public boolean onTouchEvent(
+            int action, float x, float y, float deltaX, float deltaY, PointF polar) {
+        if (this.mFromTheEgdes && polar.y > this.mRadius) {
+            if ((this.mOnTheBottom && polar.x > 1.3744469f) || polar.x < -1.3744469f) {
                 this.mActivated = true;
-            } else if (!this.mOnTheBottom && (pointF.x > 2.9452431f || pointF.x < EMPTY_ANGLE)) {
+            } else if (!this.mOnTheBottom && (polar.x > 2.9452431f || polar.x < EMPTY_ANGLE)) {
                 this.mActivated = true;
             }
         }
-        if (2 == i && this.mActivated) {
-            this.mX = f + ((this.mWarpFactor - 1.0f) * (f - this.mCenter.x));
-            this.mY = f2 + ((this.mWarpFactor - 1.0f) * (f2 - this.mCenter.y));
-            this.mXO = f3;
-            this.mYO = f4;
-            this.mPolar = pointF;
-            pointF.y *= this.mWarpFactor;
-            float f5 = this.mX;
-            float f6 = this.mMargin;
-            if (f5 < f6) {
-                this.mX = f6;
+        if (2 == action && this.mActivated) {
+            this.mX = x + ((this.mWarpFactor - 1.0f) * (x - this.mCenter.x));
+            this.mY = y + ((this.mWarpFactor - 1.0f) * (y - this.mCenter.y));
+            this.mXO = deltaX;
+            this.mYO = deltaY;
+            this.mPolar = polar;
+            polar.y *= this.mWarpFactor;
+            float pointerX = this.mX;
+            float marginX = this.mMargin;
+            if (pointerX < marginX) {
+                this.mX = marginX;
             }
             if (this.mX + this.mXO > this.mSettings.getScreenWidth() - this.mMargin) {
                 this.mX = (this.mSettings.getScreenWidth() - this.mXO) - this.mMargin;
             }
-            float f7 = this.mY;
-            float f8 = this.mMargin;
-            if (f7 < f8) {
-                this.mY = f8;
+            float pointerY = this.mY;
+            float marginY = this.mMargin;
+            if (pointerY < marginY) {
+                this.mY = marginY;
             }
             if (this.mY + this.mYO > this.mSettings.getScreenHeight() - this.mMargin) {
                 this.mY = (this.mSettings.getScreenHeight() - this.mYO) - this.mMargin;
             }
-            double d = pointF.y;
+            double d = polar.y;
             double d2 = this.mRadius;
             double d3 = this.mRadiusInc;
             Double.isNaN(d3);
