@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/* JADX INFO: loaded from: classes.dex */
 public class CommandSelectActivity extends Activity implements AdapterView.OnItemClickListener {
     private int mPos = 0;
 
@@ -94,30 +93,30 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
     }
 
     @Override // android.widget.AdapterView.OnItemClickListener
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        this.mPos = i;
-        if (i == 2) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        this.mPos = position;
+        if (position == 2) {
             MultiSelectActivity.AppSelectMode = 0;
             startActivityForResult(
                     new Intent(view.getContext(), (Class<?>) MultiSelectActivity.class), 0);
             finish();
             return;
         }
-        if (i == 27) {
+        if (position == 27) {
             MultiSelectActivity.AppSelectMode = 1;
             startActivityForResult(
                     new Intent(view.getContext(), (Class<?>) MultiSelectActivity.class), 0);
             finish();
             return;
         }
-        if (i == 33) {
+        if (position == 33) {
             MultiSelectActivity.AppSelectMode = 5;
             startActivityForResult(
                     new Intent(view.getContext(), (Class<?>) MultiSelectActivity.class), 0);
             finish();
             return;
         }
-        if ((i > 25 && i < 30) || i == 32) {
+        if ((position > 25 && position < 30) || position == 32) {
             Action currentAction =
                     SettingsValues.getInstance(getApplicationContext()).getCurrentAction();
             String string = currentAction.getType() == this.mPos ? currentAction.getString() : "";
@@ -132,11 +131,11 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
                     string,
                     false) { // from class: com.noname81.lmt.CommandSelectActivity.1
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str) {
+                public boolean onOkClicked(String value) {
                     SettingsValues.getInstance(CommandSelectActivity.this.getApplicationContext())
                             .setCurrentAction(
                                     CommandSelectActivity.this.getParent(),
-                                    new Action(CommandSelectActivity.this.mPos, str));
+                                    new Action(CommandSelectActivity.this.mPos, value));
                     CommandSelectActivity.this.onBackPressed();
                     return true;
                 }
@@ -151,26 +150,27 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
     class CommandSelectSimpleAdapter extends SimpleAdapter {
         private final int mOffset;
 
-        CommandSelectSimpleAdapter(Context context, List<? extends Map<String, ?>> list, int i) {
+        CommandSelectSimpleAdapter(
+                Context context, List<? extends Map<String, ?>> items, int resource) {
             super(
                     context,
-                    list,
+                    items,
                     R.layout.listitem_icondescriptionicon,
                     new String[] {"title", "caption"},
                     new int[] {
                         R.id.listitem_icondescriptionicon_text,
                         R.id.listitem_icondescriptionicon_caption
                     });
-            this.mOffset = i;
+            this.mOffset = resource;
         }
 
         @Override // android.widget.SimpleAdapter, android.widget.Adapter
-        public View getView(final int position, View view, ViewGroup viewGroup) {
-            View view2 = super.getView(position, view, viewGroup);
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            View row = super.getView(position, convertView, parent);
             ImageView imageView =
-                    (ImageView) view2.findViewById(R.id.listitem_icondescriptionicon_icon);
+                    (ImageView) row.findViewById(R.id.listitem_icondescriptionicon_icon);
             ImageView imageView2 =
-                    (ImageView) view2.findViewById(R.id.listitem_icondescriptionicon_icon2);
+                    (ImageView) row.findViewById(R.id.listitem_icondescriptionicon_icon2);
             IconUtils.setMaxSizeForImageView(
                     CommandSelectActivity.this.getApplicationContext(), imageView);
             new AsyncDrawableTask(imageView, R.drawable.none) { // from class:
@@ -194,7 +194,7 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
             } else {
                 imageView2.setImageDrawable(null);
             }
-            return view2;
+            return row;
         }
     }
 }

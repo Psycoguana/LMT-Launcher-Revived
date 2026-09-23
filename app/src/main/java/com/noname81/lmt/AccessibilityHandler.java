@@ -17,7 +17,6 @@ import android.widget.Toast;
 
 import java.util.Objects;
 
-/* JADX INFO: loaded from: classes.dex */
 public class AccessibilityHandler extends AccessibilityService {
     private static boolean DEBUG = false;
     private static final String TAG = "LMT::Accessibility";
@@ -94,38 +93,38 @@ public class AccessibilityHandler extends AccessibilityService {
         mInitialized = false;
     }
 
-    static void setDebug(int i) {
-        DEBUG = i == 1;
+    static void setDebug(int enabled) {
+        DEBUG = enabled == 1;
     }
 
-    static boolean isAccessibilityAvailable(Context context, boolean z) {
-        boolean z2 = Build.VERSION.SDK_INT >= 16 && mInitialized && instance != null;
-        if (z && !z2) {
+    static boolean isAccessibilityAvailable(Context context, boolean log) {
+        boolean available = Build.VERSION.SDK_INT >= 16 && mInitialized && instance != null;
+        if (log && !available) {
             Toast.makeText(context, R.string.accessibility_service_activate, 0).show();
             Log.e(TAG, String.valueOf(R.string.accessibility_service_activate));
         }
-        return z2;
+        return available;
     }
 
-    static void performAction(int i) {
+    static void performAction(int globalAction) {
         AccessibilityHandler accessibilityHandler;
         if (DEBUG) {
-            Log.d(TAG, "performAction(" + i + ")");
+            Log.d(TAG, "performAction(" + globalAction + ")");
         }
         if (Build.VERSION.SDK_INT < 16
                 || !mInitialized
                 || (accessibilityHandler = instance) == null) {
             return;
         }
-        boolean zPerformGlobalAction = accessibilityHandler.performGlobalAction(i);
+        boolean zPerformGlobalAction = accessibilityHandler.performGlobalAction(globalAction);
         if (DEBUG) {
             Log.d(TAG, "result: " + zPerformGlobalAction);
         }
     }
 
-    private static GestureDescription createClick(float f, float f2) {
+    private static GestureDescription createClick(float x, float y) {
         Path path = new Path();
-        path.moveTo(f, f2);
+        path.moveTo(x, y);
         GestureDescription.StrokeDescription strokeDescription =
                 new GestureDescription.StrokeDescription(path, 0L, 1L);
         GestureDescription.Builder builder = new GestureDescription.Builder();
@@ -133,10 +132,10 @@ public class AccessibilityHandler extends AccessibilityService {
         return builder.build();
     }
 
-    static void performClick(float f, float f2) {
+    static void performClick(float x, float y) {
         AccessibilityHandler accessibilityHandler;
         if (DEBUG) {
-            Log.d(TAG, "performClick(x " + f + " y " + f2 + ")");
+            Log.d(TAG, "performClick(x " + x + " y " + y + ")");
         }
         if (Build.VERSION.SDK_INT < 24
                 || !mInitialized
@@ -145,7 +144,7 @@ public class AccessibilityHandler extends AccessibilityService {
         }
         boolean zDispatchGesture =
                 accessibilityHandler.dispatchGesture(
-                        createClick(f, f2),
+                        createClick(x, y),
                         new AccessibilityService.GestureResultCallback() { // from class:
                             // com.noname81.lmt.AccessibilityHandler.1
                             @Override // android.accessibilityservice.AccessibilityService.GestureResultCallback

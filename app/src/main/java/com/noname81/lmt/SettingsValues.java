@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-/* JADX INFO: loaded from: classes.dex */
 class SettingsValues extends SettingsValuesBase {
     private static SettingsValues instance;
     private int mOrientation;
@@ -75,38 +74,46 @@ class SettingsValues extends SettingsValuesBase {
         return this.mVisiblePieActivationAreas;
     }
 
-    void setVisiblePieActivationAread(boolean z) {
-        this.mVisiblePieActivationAreas = z;
+    void setVisiblePieActivationAread(boolean visible) {
+        this.mVisiblePieActivationAreas = visible;
     }
 
-    Action getIsaAction(int i, float f, float f2) {
-        float f3 = f / this.mTouchscreenScreenFactorX;
-        float f4 = f2 / this.mTouchscreenScreenFactorY;
-        int i2 = this.mOrientation;
-        if (i2 == 1 || i2 == 3) {
-            f4 = this.mScreenHeight - f4;
+    /**
+     * Maps a swipe to one of the twelve Individual Swipe Areas: three zones on each screen edge,
+     * chosen by where the swipe started and which direction it went.
+     *
+     * @param gesture the recognised swipe (14 left, 15 right, 16 up, 17 down)
+     * @param rawX raw touchscreen coordinates, scaled here into screen space
+     */
+    Action getIsaAction(int gesture, float rawX, float rawY) {
+        float x = rawX / this.mTouchscreenScreenFactorX;
+        float y = rawY / this.mTouchscreenScreenFactorY;
+        int orientation = this.mOrientation;
+        if (orientation == 1 || orientation == 3) {
+            y = this.mScreenHeight - y;
         }
-        if (f4 > this.mScreenHeight - this.mSingleSwipesAArea && i == 16) {
-            return getIsaAction((int) ((f3 * 3.0f) / this.mScreenWidth));
+        if (y > this.mScreenHeight - this.mSingleSwipesAArea && gesture == 16) {
+            return getIsaAction((int) ((x * 3.0f) / this.mScreenWidth));
         }
-        if (f4 < this.mSingleSwipesAArea && i == 17) {
-            return getIsaAction(((int) ((f3 * 3.0f) / this.mScreenWidth)) + 3);
+        if (y < this.mSingleSwipesAArea && gesture == 17) {
+            return getIsaAction(((int) ((x * 3.0f) / this.mScreenWidth)) + 3);
         }
-        if (f3 < this.mSingleSwipesAArea && i == 14) {
-            return getIsaAction(((int) ((f4 * 3.0f) / this.mScreenHeight)) + 6);
+        if (x < this.mSingleSwipesAArea && gesture == 14) {
+            return getIsaAction(((int) ((y * 3.0f) / this.mScreenHeight)) + 6);
         }
-        if (f3 > this.mScreenWidth - this.mSingleSwipesAArea && i == 15) {
-            return getIsaAction(((int) ((f4 * 3.0f) / this.mScreenHeight)) + 9);
+        if (x > this.mScreenWidth - this.mSingleSwipesAArea && gesture == 15) {
+            return getIsaAction(((int) ((y * 3.0f) / this.mScreenHeight)) + 9);
         }
         return new Action(1);
     }
 
-    String getPackageNamesOfRecentApps(int i) {
+    String getPackageNamesOfRecentApps(int wanted) {
         String packageName;
-        int i2 = 0;
+        int returned = 0;
         if (Build.VERSION.SDK_INT >= 21) {
             if (this.mRootContext.isRootAvailable(false)) {
-                return this.mRootContext.runCommandRemoteResult("am get-recent-app " + i, true);
+                return this.mRootContext.runCommandRemoteResult(
+                        "am get-recent-app " + wanted, true);
             }
             UsageStatsManager usageStatsManagerM283m =
                     ((UsageStatsManager) this.mContext.getSystemService("usagestats"));
@@ -117,7 +124,7 @@ class SettingsValues extends SettingsValuesBase {
             if (listQueryUsageStats == null || listQueryUsageStats.size() <= 0) {
                 return "";
             }
-            if (i > 1) {
+            if (wanted > 1) {
                 TreeMap<Long, UsageStats> treeMap = new TreeMap<>(Collections.reverseOrder());
                 Iterator it = listQueryUsageStats.iterator();
                 while (it.hasNext()) {
@@ -126,43 +133,44 @@ class SettingsValues extends SettingsValuesBase {
                 }
                 StringBuilder sb = new StringBuilder();
                 for (Map.Entry<Long, UsageStats> entry : treeMap.entrySet()) {
-                    if (i2 != 0) {
+                    if (returned != 0) {
                         sb.append(" ");
                     }
                     sb.append(entry.getValue().getPackageName());
-                    if (i2 >= i) {
+                    if (returned >= wanted) {
                         break;
                     }
-                    i2++;
+                    returned++;
                 }
                 packageName = sb.toString();
             } else {
                 long lastTimeUsed = 0;
-                int i3 = 0;
-                while (i2 < listQueryUsageStats.size()) {
-                    if (((UsageStats) listQueryUsageStats.get(i2)).getLastTimeUsed()
+                int index = 0;
+                while (returned < listQueryUsageStats.size()) {
+                    if (((UsageStats) listQueryUsageStats.get(returned)).getLastTimeUsed()
                             > lastTimeUsed) {
-                        lastTimeUsed = ((UsageStats) listQueryUsageStats.get(i2)).getLastTimeUsed();
-                        i3 = i2;
+                        lastTimeUsed =
+                                ((UsageStats) listQueryUsageStats.get(returned)).getLastTimeUsed();
+                        index = returned;
                     }
-                    i2++;
+                    returned++;
                 }
-                packageName = ((UsageStats) listQueryUsageStats.get(i3)).getPackageName();
+                packageName = ((UsageStats) listQueryUsageStats.get(index)).getPackageName();
             }
             return packageName;
         }
         List<ActivityManager.RunningTaskInfo> runningTasks =
-                this.mActivityManager.getRunningTasks(i);
+                this.mActivityManager.getRunningTasks(wanted);
         if (runningTasks.size() <= 0) {
             return "";
         }
         StringBuilder sb2 = new StringBuilder();
-        while (i2 < runningTasks.size()) {
-            if (i2 != 0) {
+        while (returned < runningTasks.size()) {
+            if (returned != 0) {
                 sb2.append(" ");
             }
-            sb2.append(runningTasks.get(i2).topActivity.getPackageName());
-            i2++;
+            sb2.append(runningTasks.get(returned).topActivity.getPackageName());
+            returned++;
         }
         return sb2.toString();
     }

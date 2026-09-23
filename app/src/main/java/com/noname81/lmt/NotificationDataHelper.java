@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
 
-/* JADX INFO: loaded from: classes.dex */
 class NotificationDataHelper {
     private static NotificationDataHelper instance;
     private ArrayList<NotificationData> mNotificationList = new ArrayList<>();
@@ -19,18 +18,18 @@ class NotificationDataHelper {
         long mTime;
 
         NotificationData(
-                String str,
-                long j,
-                String str2,
-                PendingIntent pendingIntent,
-                PendingIntent pendingIntent2,
-                Drawable drawable) {
-            this.mName = str;
-            this.mTime = j;
-            this.mText = str2;
-            this.mStartIntent = pendingIntent;
-            this.mDeleteIntent = pendingIntent2;
-            this.mIcon = drawable;
+                String name,
+                long postedAt,
+                String text,
+                PendingIntent startIntent,
+                PendingIntent deleteIntent,
+                Drawable icon) {
+            this.mName = name;
+            this.mTime = postedAt;
+            this.mText = text;
+            this.mStartIntent = startIntent;
+            this.mDeleteIntent = deleteIntent;
+            this.mIcon = icon;
         }
     }
 
@@ -44,27 +43,27 @@ class NotificationDataHelper {
     }
 
     void addNotificationData(
-            String str,
-            long j,
-            String str2,
-            PendingIntent pendingIntent,
-            PendingIntent pendingIntent2,
-            Drawable drawable) {
-        int i = 0;
-        while (i < this.mNotificationList.size()) {
-            if (this.mNotificationList.get(i) != null
-                    && this.mNotificationList.get(i).mName != null) {
-                if (this.mNotificationList.get(i).mName.equals(str)) {
-                    this.mNotificationList.remove(i);
-                    if (i > 0) {
-                        i--;
+            String name,
+            long postedAt,
+            String text,
+            PendingIntent startIntent,
+            PendingIntent deleteIntent,
+            Drawable icon) {
+        int index = 0;
+        while (index < this.mNotificationList.size()) {
+            if (this.mNotificationList.get(index) != null
+                    && this.mNotificationList.get(index).mName != null) {
+                if (this.mNotificationList.get(index).mName.equals(name)) {
+                    this.mNotificationList.remove(index);
+                    if (index > 0) {
+                        index--;
                     }
                 }
             }
-            i++;
+            index++;
         }
         this.mNotificationList.add(
-                0, new NotificationData(str, j, str2, pendingIntent, pendingIntent2, drawable));
+                0, new NotificationData(name, postedAt, text, startIntent, deleteIntent, icon));
         if (this.mNotificationList.size() > 5) {
             ArrayList<NotificationData> arrayList = this.mNotificationList;
             arrayList.remove(arrayList.size() - 1);
@@ -75,42 +74,42 @@ class NotificationDataHelper {
         return this.mNotificationList.size();
     }
 
-    String getNotificationDataName(int i) {
-        return (i < 0 || i >= this.mNotificationList.size())
+    String getNotificationDataName(int index) {
+        return (index < 0 || index >= this.mNotificationList.size())
                 ? ""
-                : this.mNotificationList.get(i).mName;
+                : this.mNotificationList.get(index).mName;
     }
 
-    long getNotificationDataTime(int i) {
-        if (i < 0 || i >= this.mNotificationList.size()) {
+    long getNotificationDataTime(int index) {
+        if (index < 0 || index >= this.mNotificationList.size()) {
             return 0L;
         }
-        return this.mNotificationList.get(i).mTime;
+        return this.mNotificationList.get(index).mTime;
     }
 
-    PendingIntent getNotificationDataStartIntent(int i) {
-        if (i < 0 || i >= this.mNotificationList.size()) {
+    PendingIntent getNotificationDataStartIntent(int index) {
+        if (index < 0 || index >= this.mNotificationList.size()) {
             return null;
         }
-        return this.mNotificationList.get(i).mStartIntent;
+        return this.mNotificationList.get(index).mStartIntent;
     }
 
-    String getNotificationDataText(int i) {
-        return (i < 0 || i >= this.mNotificationList.size())
+    String getNotificationDataText(int index) {
+        return (index < 0 || index >= this.mNotificationList.size())
                 ? ""
-                : this.mNotificationList.get(i).mText;
+                : this.mNotificationList.get(index).mText;
     }
 
-    void removeNotificationData(int i) {
-        if (i < 0 || i >= this.mNotificationList.size()) {
+    void removeNotificationData(int index) {
+        if (index < 0 || index >= this.mNotificationList.size()) {
             return;
         }
         try {
-            if (this.mNotificationList.get(i).mDeleteIntent != null) {
-                this.mNotificationList.get(i).mDeleteIntent.send();
+            if (this.mNotificationList.get(index).mDeleteIntent != null) {
+                this.mNotificationList.get(index).mDeleteIntent.send();
             }
         } catch (Exception unused) {
         }
-        this.mNotificationList.remove(i);
+        this.mNotificationList.remove(index);
     }
 }

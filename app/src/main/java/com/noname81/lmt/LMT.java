@@ -14,7 +14,6 @@ import androidx.viewpager.widget.ViewPager;
 
 import java.util.ArrayList;
 
-/* JADX INFO: loaded from: classes.dex */
 public class LMT extends Activity {
     private static final String TAG = "LMT::LMT";
     TabsAdapter mTabsAdapter;
@@ -81,11 +80,11 @@ public class LMT extends Activity {
     }
 
     @Override // android.app.Activity
-    protected void onActivityResult(int i, int i2, Intent intent) {
-        if (i == PermissionChecker.DRAW_OVER_APPS_REQUEST_CODE) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PermissionChecker.DRAW_OVER_APPS_REQUEST_CODE) {
             PermissionChecker.getInstance().hasDrawOverAppsPermission(this, true);
         }
-        if (i == PermissionChecker.USAGE_STATS_REQUEST_CODE) {
+        if (requestCode == PermissionChecker.USAGE_STATS_REQUEST_CODE) {
             PermissionChecker.getInstance().hasUsageStatsPermission(this, true);
         }
     }
@@ -98,10 +97,10 @@ public class LMT extends Activity {
         private final ViewPager mViewPager;
 
         @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-        public void onPageScrollStateChanged(int i) {}
+        public void onPageScrollStateChanged(int state) {}
 
         @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-        public void onPageScrolled(int i, float f, int i2) {}
+        public void onPageScrolled(int position, float offset, int offsetPixels) {}
 
         @Override // android.app.ActionBar.TabListener
         public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {}
@@ -144,22 +143,22 @@ public class LMT extends Activity {
         }
 
         @Override // FrameworkFragmentStatePagerAdapter
-        public Fragment getItem(int i) {
-            TabInfo tabInfo = this.mTabs.get(i);
+        public Fragment getItem(int position) {
+            TabInfo tabInfo = this.mTabs.get(position);
             return Fragment.instantiate(this.mContext, tabInfo.clss.getName(), tabInfo.args);
         }
 
         @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-        public void onPageSelected(int i) {
-            this.mActionBar.setSelectedNavigationItem(i);
+        public void onPageSelected(int position) {
+            this.mActionBar.setSelectedNavigationItem(position);
         }
 
         @Override // android.app.ActionBar.TabListener
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
             Object tag = tab.getTag();
-            for (int i = 0; i < this.mTabs.size(); i++) {
-                if (this.mTabs.get(i) == tag) {
-                    this.mViewPager.setCurrentItem(i);
+            for (int index = 0; index < this.mTabs.size(); index++) {
+                if (this.mTabs.get(index) == tag) {
+                    this.mViewPager.setCurrentItem(index);
                 }
             }
         }

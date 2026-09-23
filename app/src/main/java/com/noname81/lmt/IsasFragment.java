@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/* JADX INFO: loaded from: classes.dex */
 public class IsasFragment extends Fragment implements AdapterView.OnItemClickListener {
     public static final int offsetIsasBottom = 0;
     public static final int offsetIsasLeft = 6;
@@ -101,20 +100,20 @@ public class IsasFragment extends Fragment implements AdapterView.OnItemClickLis
     }
 
     @Override // android.widget.AdapterView.OnItemClickListener
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        if (i >= 0) {
-            i--;
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (position >= 0) {
+            position--;
         }
-        if (i >= 3) {
-            i--;
+        if (position >= 3) {
+            position--;
         }
-        if (i >= 6) {
-            i--;
+        if (position >= 6) {
+            position--;
         }
-        if (i >= 9) {
-            i--;
+        if (position >= 9) {
+            position--;
         }
-        SettingsValues.getInstance(getActivity()).setCurrentIsa(i);
+        SettingsValues.getInstance(getActivity()).setCurrentIsa(position);
         startActivityForResult(
                 new Intent(view.getContext(), (Class<?>) CommandSelectActivity.class), 0);
     }
@@ -122,26 +121,27 @@ public class IsasFragment extends Fragment implements AdapterView.OnItemClickLis
     class CommandSimpleAdapterIsas extends SimpleAdapter {
         private int mOffset;
 
-        CommandSimpleAdapterIsas(Context context, List<? extends Map<String, ?>> list, int i) {
+        CommandSimpleAdapterIsas(
+                Context context, List<? extends Map<String, ?>> items, int resource) {
             super(
                     context,
-                    list,
+                    items,
                     R.layout.listitem_icondescriptionicon,
                     new String[] {"title", "caption"},
                     new int[] {
                         R.id.listitem_icondescriptionicon_text,
                         R.id.listitem_icondescriptionicon_caption
                     });
-            this.mOffset = i;
+            this.mOffset = resource;
         }
 
         @Override // android.widget.SimpleAdapter, android.widget.Adapter
-        public View getView(final int position, View view, ViewGroup viewGroup) {
-            View view2 = super.getView(position, view, viewGroup);
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            View row = super.getView(position, convertView, parent);
             ImageView imageView =
-                    (ImageView) view2.findViewById(R.id.listitem_icondescriptionicon_icon);
+                    (ImageView) row.findViewById(R.id.listitem_icondescriptionicon_icon);
             ImageView imageView2 =
-                    (ImageView) view2.findViewById(R.id.listitem_icondescriptionicon_icon2);
+                    (ImageView) row.findViewById(R.id.listitem_icondescriptionicon_icon2);
             IconUtils.setMaxSizeForImageView(IsasFragment.this.getActivity(), imageView);
             new AsyncDrawableTask(imageView, R.drawable.none) { // from class:
                 // com.noname81.lmt.IsasFragment.CommandSimpleAdapterIsas.1
@@ -164,7 +164,7 @@ public class IsasFragment extends Fragment implements AdapterView.OnItemClickLis
                             null);
                 }
             }.execute(new Void[0]);
-            return view2;
+            return row;
         }
     }
 }

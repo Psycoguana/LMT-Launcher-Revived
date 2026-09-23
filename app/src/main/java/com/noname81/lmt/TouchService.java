@@ -18,7 +18,6 @@ import android.widget.Toast;
 import java.io.File;
 import java.lang.ref.WeakReference;
 
-/* JADX INFO: loaded from: classes.dex */
 public class TouchService extends Service {
     private static final String TAG = "LMT::TouchService";
     private Launcher mLauncher;
@@ -39,8 +38,8 @@ public class TouchService extends Service {
     private final class TouchServiceThread extends HandlerThread {
         boolean stopped;
 
-        TouchServiceThread(String str) {
-            super(str);
+        TouchServiceThread(String name) {
+            super(name);
             this.stopped = false;
         }
 
@@ -200,7 +199,7 @@ public class TouchService extends Service {
     }
 
     @Override // android.app.Service
-    public int onStartCommand(Intent intent, int i, int i2) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         Toast.makeText(this, "LMT started", 0).show();
         Log.d(TAG, "TouchService started");
         return 1;

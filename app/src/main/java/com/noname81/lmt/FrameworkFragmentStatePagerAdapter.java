@@ -134,13 +134,13 @@ public abstract class FrameworkFragmentStatePagerAdapter extends PagerAdapter {
             mSavedState.toArray(states);
             state.putParcelableArray("states", states);
         }
-        for (int i = 0; i < mFragments.size(); i++) {
-            Fragment fragment = mFragments.get(i);
+        for (int position = 0; position < mFragments.size(); position++) {
+            Fragment fragment = mFragments.get(position);
             if (fragment != null && fragment.isAdded()) {
                 if (state == null) {
                     state = new Bundle();
                 }
-                mFragmentManager.putFragment(state, "f" + i, fragment);
+                mFragmentManager.putFragment(state, "f" + position, fragment);
             }
         }
         return state;

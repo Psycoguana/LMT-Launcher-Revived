@@ -11,7 +11,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-/* JADX INFO: loaded from: classes.dex */
 class PermissionChecker {
     static int DRAW_OVER_APPS_REQUEST_CODE = 5469;
     private static final String TAG = "LMT::PermissionChecker";
@@ -27,82 +26,82 @@ class PermissionChecker {
         return instance;
     }
 
-    boolean hasPhoneCallPermission(Context context, boolean z) {
-        boolean z2 = true;
+    boolean hasPhoneCallPermission(Context context, boolean log) {
+        boolean granted = true;
         if (Build.VERSION.SDK_INT >= 23
                 && context.checkSelfPermission("android.permission.CALL_PHONE") != 0) {
-            z2 = false;
+            granted = false;
         }
-        if (z) {
-            Log.d(TAG, "hasPhoneCallPermission(" + z2 + ")");
+        if (log) {
+            Log.d(TAG, "hasPhoneCallPermission(" + granted + ")");
         }
-        return z2;
+        return granted;
     }
 
-    boolean checkAndRequestPhoneCallPermission(Activity activity, boolean z) {
-        if (Build.VERSION.SDK_INT < 23 || hasPhoneCallPermission(activity, z)) {
+    boolean checkAndRequestPhoneCallPermission(Activity activity, boolean log) {
+        if (Build.VERSION.SDK_INT < 23 || hasPhoneCallPermission(activity, log)) {
             return true;
         }
         Toast.makeText(activity, R.string.app_please_grant_phone_call_permission, 1).show();
         activity.requestPermissions(new String[] {"android.permission.CALL_PHONE"}, 0);
-        return hasPhoneCallPermission(activity, z);
+        return hasPhoneCallPermission(activity, log);
     }
 
-    boolean hasExternalStorageReadPermission(Context context, boolean z) {
-        boolean z2 = true;
+    boolean hasExternalStorageReadPermission(Context context, boolean log) {
+        boolean granted = true;
         if (Build.VERSION.SDK_INT >= 23
                 && context.checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != 0) {
-            z2 = false;
+            granted = false;
         }
-        if (z) {
-            Log.d(TAG, "hasExternalStorageReadPermission(" + z2 + ")");
+        if (log) {
+            Log.d(TAG, "hasExternalStorageReadPermission(" + granted + ")");
         }
-        return z2;
+        return granted;
     }
 
-    boolean checkAndRequestExternalStorageReadPermission(Activity activity, boolean z) {
-        if (Build.VERSION.SDK_INT >= 33 || hasExternalStorageReadPermission(activity, z)) {
+    boolean checkAndRequestExternalStorageReadPermission(Activity activity, boolean log) {
+        if (Build.VERSION.SDK_INT >= 33 || hasExternalStorageReadPermission(activity, log)) {
             return true;
         }
         Toast.makeText(activity, R.string.app_please_grant_external_storage_read_permission, 1)
                 .show();
         activity.requestPermissions(new String[] {"android.permission.READ_EXTERNAL_STORAGE"}, 0);
-        return hasExternalStorageReadPermission(activity, z);
+        return hasExternalStorageReadPermission(activity, log);
     }
 
-    boolean hasExternalStorageWritePermission(Context context, boolean z) {
-        boolean z2 = true;
+    boolean hasExternalStorageWritePermission(Context context, boolean log) {
+        boolean granted = true;
         if (Build.VERSION.SDK_INT >= 23
                 && context.checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != 0) {
-            z2 = false;
+            granted = false;
         }
-        if (z) {
-            Log.d(TAG, "hasExternalStorageWritePermission(" + z2 + ")");
+        if (log) {
+            Log.d(TAG, "hasExternalStorageWritePermission(" + granted + ")");
         }
-        return z2;
+        return granted;
     }
 
-    boolean checkAndRequestExternalStorageWritePermission(Activity activity, boolean z) {
-        if (Build.VERSION.SDK_INT < 23 || hasExternalStorageWritePermission(activity, z)) {
+    boolean checkAndRequestExternalStorageWritePermission(Activity activity, boolean log) {
+        if (Build.VERSION.SDK_INT < 23 || hasExternalStorageWritePermission(activity, log)) {
             return true;
         }
         Toast.makeText(activity, R.string.app_please_grant_external_storage_write_permission, 1)
                 .show();
         activity.requestPermissions(new String[] {"android.permission.WRITE_EXTERNAL_STORAGE"}, 0);
-        return hasExternalStorageWritePermission(activity, z);
+        return hasExternalStorageWritePermission(activity, log);
     }
 
-    boolean hasDrawOverAppsPermission(Context context, boolean z) {
-        boolean z2 =
+    boolean hasDrawOverAppsPermission(Context context, boolean log) {
+        boolean granted =
                 (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(context)) ? true : false;
-        if (z) {
-            Log.d(TAG, "hasDrawOverAppsPermission(" + z2 + ")");
+        if (log) {
+            Log.d(TAG, "hasDrawOverAppsPermission(" + granted + ")");
         }
-        return z2;
+        return granted;
     }
 
-    boolean checkAndRequestDrawOverAppsPermission(Activity activity, boolean z) {
-        if (Build.VERSION.SDK_INT < 23 || hasDrawOverAppsPermission(activity, z)) {
+    boolean checkAndRequestDrawOverAppsPermission(Activity activity, boolean log) {
+        if (Build.VERSION.SDK_INT < 23 || hasDrawOverAppsPermission(activity, log)) {
             return true;
         }
         Toast.makeText(activity, R.string.app_please_grant_draw_over_apps_permission, 1).show();
@@ -115,8 +114,8 @@ class PermissionChecker {
         return false;
     }
 
-    boolean hasUsageStatsPermission(Context context, boolean z) {
-        boolean z2 = true;
+    boolean hasUsageStatsPermission(Context context, boolean log) {
+        boolean granted = true;
         if (Build.VERSION.SDK_INT >= 23
                 && ((AppOpsManager) context.getSystemService("appops"))
                                 .checkOpNoThrow(
@@ -124,16 +123,16 @@ class PermissionChecker {
                                         Process.myUid(),
                                         context.getPackageName())
                         != 0) {
-            z2 = false;
+            granted = false;
         }
-        if (z) {
-            Log.d(TAG, "hasUsageStatsPermission(" + z2 + ")");
+        if (log) {
+            Log.d(TAG, "hasUsageStatsPermission(" + granted + ")");
         }
-        return z2;
+        return granted;
     }
 
-    boolean checkAndRequestUsageStatsPermission(Activity activity, boolean z) {
-        if (Build.VERSION.SDK_INT < 23 || hasUsageStatsPermission(activity, z)) {
+    boolean checkAndRequestUsageStatsPermission(Activity activity, boolean log) {
+        if (Build.VERSION.SDK_INT < 23 || hasUsageStatsPermission(activity, log)) {
             return true;
         }
         Toast.makeText(activity, R.string.app_please_grant_usage_stats_permission, 1).show();
