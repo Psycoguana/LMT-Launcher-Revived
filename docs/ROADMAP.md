@@ -19,7 +19,7 @@ intentional divergence with a reason; anything else that differs is reported as
 `UNEXPLAINED` by the oracle.
 
 ### 1.2 Write tests  🟡 started
-**Done:** JUnit + Robolectric wired up (`app/src/test/`), 15 tests green.
+**Done:** JUnit + Robolectric wired up (`app/src/test/`), 28 tests green.
 `ActionTest` pins the catalogue invariants — `names[]`/`captions[]` parity, every id
 constant matching its slot, the `Offset*` sentinels staying ordered — plus a
 regression test for the `toString()` off-by-one (verified it fails against the old
@@ -36,8 +36,16 @@ Test dependencies do not reach the release APK; the oracle stays `EQUIVALENT`.
   import/export (1.4) will depend on.
 - **`Action`** — the id ↔ name ↔ caption tables, `toString()`, and the
   `Offset*` sentinel grouping that `CommandSelectActivity` relies on. Pure data.
-- **`PieMenu.findItem()` geometry** — hit-testing by `innerRadius`/`outerRadius`/
-  `start`/`sweep` is pure maths and is where a third-ring regression would surface.
+- ~~**`PieMenu.findItem()` geometry**~~ — **done**, 13 tests. `getPolar` and
+  `findItem` are private methods on a `FrameLayout` subclass, so they are driven by
+  reflection against a real `PieMenu` and the scenario is installed by writing the
+  private geometry fields. That exercises the shipped code and needs no production
+  change, which matters while the oracle is still the safety net. Covers the polar
+  branches (including the left-edge mirroring when `mCenter.x < mSlop`), ring
+  bracketing, `mTouchOffset` widening, exclusive sweep bounds, and the
+  `expandTriggerArea` branch where the outermost ring goes unbounded — which is
+  exactly what a third ring re-points. Mutation-verified: flipping
+  `getLevel() == mLevels` to `!=` and `<` to `<=` each fail the intended tests.
 - **Instrumented smoke test** — service starts, pie opens, three rings render.
   This is currently done by hand via argent; `argent-qa-flows` could record it.
 
