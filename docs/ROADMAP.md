@@ -88,6 +88,12 @@ source and full bytecode verification at the same time.
   constants that already exist in `Action.java` (`Action.Home`, `Action.Back`, …).
 - Add class-level javadoc from the architecture in `reference/plan.md`.
 
+> **Rule for this pass: rename and comment only — do not add fields.** Extracting a
+> magic number into a `private static final` emits a new field, which the oracle
+> correctly reports as a real structural difference. Accumulating accepted
+> deviations for cosmetics would erode exactly the signal that makes doing this in
+> Java worthwhile. Named constants can come later as a separate, reviewed step.
+
 ### 1.4 App search + "show system apps" toggle in the app picker
 `MultiSelectActivity` currently builds one flat list from `getInstalledPackages`.
 Needs: a `SearchView` filtering the adapter, and a menu toggle for

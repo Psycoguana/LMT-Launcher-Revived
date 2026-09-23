@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/* JADX INFO: loaded from: classes.dex */
 class SeparatedListAdapter extends BaseAdapter {
     static final String ITEM_CAPTION = "caption";
     static final String ITEM_TITLE = "title";
@@ -25,14 +24,14 @@ class SeparatedListAdapter extends BaseAdapter {
     }
 
     @Override // android.widget.Adapter
-    public long getItemId(int i) {
-        return i;
+    public long getItemId(int position) {
+        return position;
     }
 
-    static Map<String, ?> createItem(String str, String str2) {
+    static Map<String, ?> createItem(String title, String caption) {
         HashMap map = new HashMap();
-        map.put(ITEM_TITLE, str);
-        map.put(ITEM_CAPTION, str2);
+        map.put(ITEM_TITLE, title);
+        map.put(ITEM_CAPTION, caption);
         return map;
     }
 
@@ -40,23 +39,23 @@ class SeparatedListAdapter extends BaseAdapter {
         this.headers = new ArrayAdapter<>(context, R.layout.listheader);
     }
 
-    void addSection(String str, Adapter adapter) {
-        this.headers.add(str);
-        this.sections.put(str, adapter);
+    void addSection(String header, Adapter adapter) {
+        this.headers.add(header);
+        this.sections.put(header, adapter);
     }
 
     @Override // android.widget.Adapter
-    public Object getItem(int i) {
-        for (String str : this.sections.keySet()) {
-            Adapter adapter = this.sections.get(str);
+    public Object getItem(int position) {
+        for (String header : this.sections.keySet()) {
+            Adapter adapter = this.sections.get(header);
             int count = adapter.getCount() + 1;
-            if (i == 0) {
-                return str;
+            if (position == 0) {
+                return header;
             }
-            if (i < count) {
-                return adapter.getItem(i - 1);
+            if (position < count) {
+                return adapter.getItem(position - 1);
             }
-            i -= count;
+            position -= count;
         }
         return null;
     }
@@ -82,47 +81,47 @@ class SeparatedListAdapter extends BaseAdapter {
     }
 
     @Override // android.widget.BaseAdapter, android.widget.Adapter
-    public int getItemViewType(int i) {
+    public int getItemViewType(int position) {
         Iterator<String> it = this.sections.keySet().iterator();
         int viewTypeCount = 1;
         while (it.hasNext()) {
             Adapter adapter = this.sections.get(it.next());
             int count = adapter.getCount() + 1;
-            if (i == 0) {
+            if (position == 0) {
                 return 0;
             }
-            if (i < count) {
-                return viewTypeCount + adapter.getItemViewType(i - 1);
+            if (position < count) {
+                return viewTypeCount + adapter.getItemViewType(position - 1);
             }
-            i -= count;
+            position -= count;
             viewTypeCount += adapter.getViewTypeCount();
         }
         return -1;
     }
 
     @Override // android.widget.BaseAdapter, android.widget.ListAdapter
-    public boolean isEnabled(int i) {
-        if (getItemViewType(i) != 0) {
+    public boolean isEnabled(int position) {
+        if (getItemViewType(position) != 0) {
             return true;
         }
         return false;
     }
 
     @Override // android.widget.Adapter
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         Iterator<String> it = this.sections.keySet().iterator();
-        int i2 = 0;
+        int headerIndex = 0;
         while (it.hasNext()) {
             Adapter adapter = this.sections.get(it.next());
             int count = adapter.getCount() + 1;
-            if (i == 0) {
-                return this.headers.getView(i2, view, viewGroup);
+            if (position == 0) {
+                return this.headers.getView(headerIndex, convertView, parent);
             }
-            if (i < count) {
-                return adapter.getView(i - 1, view, viewGroup);
+            if (position < count) {
+                return adapter.getView(position - 1, convertView, parent);
             }
-            i -= count;
-            i2++;
+            position -= count;
+            headerIndex++;
         }
         return null;
     }

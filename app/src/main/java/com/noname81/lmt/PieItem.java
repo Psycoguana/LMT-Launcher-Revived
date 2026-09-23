@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
 
-/* JADX INFO: loaded from: classes.dex */
 class PieItem {
     private float animate;
     private int inner;
@@ -21,21 +20,21 @@ class PieItem {
     private float start;
     private float sweep;
 
-    PieItem(View view, int i) {
+    PieItem(View view, int level) {
         this.mView = view;
-        this.level = i;
+        this.level = level;
     }
 
-    void setColor(int i) {
-        if (i != this.mColor) {
-            if (i != 0) {
+    void setColor(int color) {
+        if (color != this.mColor) {
+            if (color != 0) {
                 Drawable drawable = this.mDrawableShort;
                 if (drawable != null && drawable.getChangingConfigurations() != 1) {
-                    this.mDrawableShort.setColorFilter(i, PorterDuff.Mode.MULTIPLY);
+                    this.mDrawableShort.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
                 }
                 Drawable drawable2 = this.mDrawableLong;
                 if (drawable2 != null && drawable2.getChangingConfigurations() != 1) {
-                    this.mDrawableLong.setColorFilter(i, PorterDuff.Mode.MULTIPLY);
+                    this.mDrawableLong.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
                 }
             } else {
                 Drawable drawable3 = this.mDrawableShort;
@@ -47,20 +46,20 @@ class PieItem {
                     drawable4.clearColorFilter();
                 }
             }
-            this.mColor = i;
+            this.mColor = color;
         }
     }
 
-    void setSelected(boolean z) {
-        this.mSelected = z;
+    void setSelected(boolean selected) {
+        this.mSelected = selected;
         View view = this.mView;
         if (view != null) {
-            view.setSelected(z);
+            view.setSelected(selected);
         }
     }
 
-    void setAnimationAngle(float f) {
-        this.animate = f;
+    void setAnimationAngle(float angle) {
+        this.animate = angle;
     }
 
     float getAnimationAngle() {
@@ -75,11 +74,11 @@ class PieItem {
         return this.level;
     }
 
-    void setGeometry(float f, float f2, int i, int i2, Path path) {
-        this.start = f;
-        this.sweep = f2;
-        this.inner = i;
-        this.outer = i2;
+    void setGeometry(float start, float sweep, int inner, int outer, Path path) {
+        this.start = start;
+        this.sweep = sweep;
+        this.inner = inner;
+        this.outer = outer;
         this.mPath = path;
     }
 
@@ -116,21 +115,21 @@ class PieItem {
         this.mDrawableLong = drawable2;
     }
 
-    void setAlpha(int i) {
+    void setAlpha(int alpha) {
         Drawable drawable = this.mDrawableShort;
         if (drawable != null) {
-            drawable.setAlpha(i);
+            drawable.setAlpha(alpha);
         }
         Drawable drawable2 = this.mDrawableLong;
         if (drawable2 != null) {
-            drawable2.setAlpha(i);
+            drawable2.setAlpha(alpha);
         }
     }
 
-    void selectImage(int i) {
+    void selectImage(int which) {
         Drawable drawable;
         ImageView imageView = (ImageView) this.mView;
-        if (i == 0 && (drawable = this.mDrawableShort) != null) {
+        if (which == 0 && (drawable = this.mDrawableShort) != null) {
             imageView.setImageDrawable(drawable);
             return;
         }

@@ -14,8 +14,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-/* JADX INFO: loaded from: classes.dex */
 public class InfoFragment extends Fragment {
+
     @Override // android.app.Fragment
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
@@ -30,7 +30,7 @@ public class InfoFragment extends Fragment {
         textView.setGravity(17);
         textView.setLinksClickable(true);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
-        String str =
+        String html =
                 "LMT "
                         + SettingsValues.getInstance(getActivity()).getVersion()
                         + " by noname81<br><br>This version of LMT will never expire!<br><br><a"
@@ -59,9 +59,9 @@ public class InfoFragment extends Fragment {
                                 .hasUsageStatsPermission(getActivity(), false)
                         + "<br><br>";
         if (Build.VERSION.SDK_INT >= 24) {
-            spannedFromHtml = Html.fromHtml(str, 0);
+            spannedFromHtml = Html.fromHtml(html, 0);
         } else {
-            spannedFromHtml = Html.fromHtml(str);
+            spannedFromHtml = Html.fromHtml(html);
         }
         textView.setText(spannedFromHtml);
         addGestureListener(textView);
@@ -70,6 +70,10 @@ public class InfoFragment extends Fragment {
         return frameLayout;
     }
 
+    /**
+     * Five double-taps anywhere on the Info tab opens the hidden debug menu, which toggles the
+     * per-component logging that {@code DebugHelper} drives.
+     */
     private void addGestureListener(View view) {
         final GestureDetector gestureDetector =
                 new GestureDetector(
@@ -80,10 +84,10 @@ public class InfoFragment extends Fragment {
 
                             @Override // android.view.GestureDetector.SimpleOnGestureListener,
                             // android.view.GestureDetector.OnDoubleTapListener
-                            public boolean onDoubleTap(MotionEvent motionEvent) {
-                                int i = this.count + 1;
-                                this.count = i;
-                                if (i < 5) {
+                            public boolean onDoubleTap(MotionEvent event) {
+                                int taps = this.count + 1;
+                                this.count = taps;
+                                if (taps < 5) { // five double-taps reveals it
                                     return false;
                                 }
                                 DebugHelper.getInstance()
@@ -94,8 +98,8 @@ public class InfoFragment extends Fragment {
         view.setOnTouchListener(
                 new View.OnTouchListener() { // from class: com.noname81.lmt.InfoFragment.1
                     @Override // android.view.View.OnTouchListener
-                    public boolean onTouch(View view2, MotionEvent motionEvent) {
-                        gestureDetector.onTouchEvent(motionEvent);
+                    public boolean onTouch(View touched, MotionEvent event) {
+                        gestureDetector.onTouchEvent(event);
                         return false;
                     }
                 });

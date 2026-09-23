@@ -1,6 +1,5 @@
 package com.noname81.lmt;
 
-/* JADX INFO: loaded from: classes.dex */
 public class TouchServiceResult {
     static final int Delete = 2;
     static final int Diamond = 1;
@@ -65,13 +64,14 @@ public class TouchServiceResult {
         "Starting point is at the bottom"
     };
 
-    TouchServiceResult(int i, String str, float f, int i2, float f2, float f3) {
-        this.gesture = i;
-        this.name = str;
-        this.score = f;
-        this.overlayID = i2;
-        this.startX = f2;
-        this.startY = f3;
+    TouchServiceResult(
+            int gesture, String name, float score, int overlayID, float startX, float startY) {
+        this.gesture = gesture;
+        this.name = name;
+        this.score = score;
+        this.overlayID = overlayID;
+        this.startX = startX;
+        this.startY = startY;
     }
 
     public String toString() {
@@ -96,47 +96,47 @@ public class TouchServiceResult {
         return this.gesture;
     }
 
-    void setGesture(int i) {
-        this.gesture = i;
+    void setGesture(int gesture) {
+        this.gesture = gesture;
     }
 
     String getName() {
         return this.name;
     }
 
-    void setName(String str) {
-        this.name = str;
+    void setName(String name) {
+        this.name = name;
     }
 
     float getScore() {
         return this.score;
     }
 
-    void setScore(float f) {
-        this.score = f;
+    void setScore(float score) {
+        this.score = score;
     }
 
     int getOverlayID() {
         return this.overlayID;
     }
 
-    void setOverlayID(int i) {
-        this.overlayID = i;
+    void setOverlayID(int overlayID) {
+        this.overlayID = overlayID;
     }
 
     float getStartX() {
         return this.startX;
     }
 
-    void setStartX(float f) {
-        this.startX = f;
+    void setStartX(float startX) {
+        this.startX = startX;
     }
 
     float getStartY() {
         return this.startY;
     }
 
-    void setStartY(float f) {
-        this.startY = f;
+    void setStartY(float startY) {
+        this.startY = startY;
     }
 }
