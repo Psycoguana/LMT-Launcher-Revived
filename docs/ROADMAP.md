@@ -71,22 +71,28 @@ Test dependencies do not reach the release APK; the oracle stays `EQUIVALENT`.
 Do this **before** the Kotlin rewrite, so the rewrite has a safety net that
 survives the bytecode oracle becoming meaningless.
 
-### 1.3 Readability pass  ← **current**
+### 1.3 Readability pass  ✅ done
 
-What actually makes this code hard to read is not the language, it is 602
-decompiler-generated identifiers (347 `int i*`, 122 `String str*`, 69 `boolean z*`,
-64 `float f*`) plus ~50 leftover `JADX` comments across 11k lines. Renaming is
-behaviour-neutral, so **the oracle stays green through the whole pass** — readable
-source and full bytecode verification at the same time.
+**660 decompiler markers → 0**, across all 40 files, with the oracle `EQUIVALENT`
+at every step and 39 tests green. Verified on device afterwards: service starts,
+pie renders, no crashes.
 
-- Rename decompiler identifiers, file by file, smallest first, re-running
-  `tools/verify-equivalence.sh` after each.
-- Check `docs/original-names.json` first: the reference dex preserves the original
-  author's local names wherever a lambda or anonymous class captured one.
-- Strip the `JADX INFO` comments.
-- Replace the magic action ids in `Launcher.fireAction`'s switch with the named
-  constants that already exist in `Action.java` (`Action.Home`, `Action.Back`, …).
-- Add class-level javadoc from the architecture in `reference/plan.md`.
+Beyond renaming, two structural wins that stayed bytecode-identical:
+- `Launcher.fireAction`'s switch dispatched on bare integers; all 38 cases now use
+  the `Action.*` constants that already existed, generated from `Action.java`'s own
+  declarations so the mapping cannot drift.
+- 62 expanded post-increments collapsed in the settings screens: the original was
+  `field = pos++`, which jadx had expanded into chains of `int iN = iM + 1`.
+
+**Lesson worth keeping.** The oracle compares calls, strings and constants as
+*sets*, so it cannot see an off-by-one in a runtime counter — nothing it looks at
+changes. The post-increment collapse was therefore verified separately, by
+reconstructing the assignment order from both the old and new source and comparing
+(37 and 30 assignments, identical). Where a change touches arithmetic rather than
+names, the oracle is not sufficient on its own.
+
+Still outstanding from this area: class-level javadoc drawn from the architecture
+in `reference/plan.md`. Renaming is done; prose is not.
 
 > **Rule for this pass: rename and comment only — do not add fields.** Extracting a
 > magic number into a `private static final` emits a new field, which the oracle
