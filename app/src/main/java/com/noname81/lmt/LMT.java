@@ -14,6 +14,12 @@ import androidx.viewpager.widget.ViewPager;
 
 import java.util.ArrayList;
 
+/**
+ * The settings activity: a ViewPager of tabs whose set depends on the feature mode.
+ *
+ * <p>{@code TSMode} chooses which tabs exist — gestures and ISAs only appear when that feature set
+ * is enabled, and Info is always last.
+ */
 public class LMT extends Activity {
     private static final String TAG = "LMT::LMT";
     TabsAdapter mTabsAdapter;

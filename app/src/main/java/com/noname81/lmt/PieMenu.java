@@ -26,6 +26,19 @@ import android.widget.FrameLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The radial menu itself: layout, drawing and hit-testing.
+ *
+ * <p>Slices are arranged in concentric rings, each {@code mRadiusInc} further out. Every item
+ * carries its own radii and angular sweep, so {@code findItem} can bracket a touch without knowing
+ * how many rings exist — which is why adding the third ring needed no change here.
+ *
+ * <p>One exception: with "expand trigger area" on, the outermost ring ignores its outer radius so a
+ * touch anywhere beyond the pie still selects it. Adding a ring moves that behaviour outwards.
+ *
+ * <p>Extensions implement {@link PieView} to draw inside the pie and receive its geometry — see
+ * {@link PiePointer} and {@link PieStatusInfo}.
+ */
 class PieMenu extends FrameLayout {
     private static boolean DEBUG = false;
     private static final int MAX_LEVELS = 5;

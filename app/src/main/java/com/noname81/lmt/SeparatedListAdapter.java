@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/** Presents several adapters as one list, each under its own header row. */
 class SeparatedListAdapter extends BaseAdapter {
     static final String ITEM_CAPTION = "caption";
     static final String ITEM_TITLE = "title";

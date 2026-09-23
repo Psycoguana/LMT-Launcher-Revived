@@ -13,6 +13,13 @@ import com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter;
 
 import java.util.LinkedList;
 
+/**
+ * The main settings tab.
+ *
+ * <p>Rows are built into sections and each is assigned a position index, which {@link
+ * SettingsViewHelper} switches on to handle taps. The visible set depends on the feature mode, so
+ * the indices are assigned as rows are added rather than fixed.
+ */
 public class SettingsViewFragment extends Fragment {
     SettingsViewHelper mSettingsHelper;
 

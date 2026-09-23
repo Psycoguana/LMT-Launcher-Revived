@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+/** Shared construction of pie items: the image view, its size, and its drawables. */
 abstract class PieControlBase {
     Context mContext;
     private int mItemSize;

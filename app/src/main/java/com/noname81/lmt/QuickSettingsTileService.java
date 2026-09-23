@@ -3,6 +3,7 @@ package com.noname81.lmt;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 
+/** Quick Settings tile that starts and stops the service. */
 public class QuickSettingsTileService extends TileService {
     @Override // android.service.quicksettings.TileService
     public void onStartListening() {

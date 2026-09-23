@@ -17,6 +17,17 @@ import android.widget.Toast;
 
 import java.util.Objects;
 
+/**
+ * Accessibility service, used for two unrelated jobs.
+ *
+ * <p>It performs the global actions an app cannot otherwise reach — back, home, recents,
+ * notification shade, quick settings, power dialog, split screen — and it dispatches synthetic taps
+ * for {@link PiePointer}. Separately, it listens for notification events and feeds {@link
+ * NotificationDataHelper}, which drives the badge in the pie's centre.
+ *
+ * <p>Since root key injection broke on modern Android (see docs/ROADMAP.md 3.1), this is the only
+ * working path for home, back and recents.
+ */
 public class AccessibilityHandler extends AccessibilityService {
     private static boolean DEBUG = false;
     private static final String TAG = "LMT::Accessibility";

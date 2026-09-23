@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/** Settings tab binding each pie slot, across all three rings, to an action. */
 public class PieFragment extends Fragment implements AdapterView.OnItemClickListener {
     public static final int offsetLevel1 = 0;
     public static final int offsetLevel2 = 10;

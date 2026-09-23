@@ -4,6 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.provider.Settings;
 
+/**
+ * Storage for every setting.
+ *
+ * <p>Normally SharedPreferences, but if the {@code LMTExternalConfig} system setting is non-zero it
+ * reads and writes through {@code Settings.System} instead. Anything that walks settings wholesale
+ * — import/export especially — has to handle both.
+ */
 class SettingsSharedPrefsWrapper {
     protected Context mContext;
     private SharedPreferences mSharedPreferences;

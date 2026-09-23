@@ -7,6 +7,7 @@ import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
 
+/** Loads an icon off the main thread and cross-fades it in over a placeholder. */
 abstract class AsyncDrawableTask extends AsyncTask<Void, Void, Drawable> {
     private static final int FADE_IN_TIME = 500;
     private final WeakReference<ImageView> mImageViewReference;

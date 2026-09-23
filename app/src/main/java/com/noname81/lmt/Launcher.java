@@ -20,6 +20,18 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * Turns an {@link Action} into an effect. The single dispatcher for every trigger.
+ *
+ * <p>{@code fireAction} is the switch that all three trigger systems funnel into. Most actions try
+ * paths in order of preference: accessibility first where it can do the job, then root, then a
+ * plain public-API fallback. That ordering is why home, back and recents still work while the
+ * root-only actions do not — see docs/ROADMAP.md 3.1.
+ *
+ * <p>Root arrives by two different routes. {@code runCommandRemote} goes through the long-lived
+ * {@code InputContext} helper; {@code runCommandRoot} runs a one-off command in a plain {@code su}
+ * shell.
+ */
 class Launcher {
     private static boolean DEBUG = false;
     private static final String TAG = "LMT::Launcher";

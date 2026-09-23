@@ -1,5 +1,12 @@
 package com.noname81.lmt;
 
+/**
+ * One recognised gesture handed back from the native recogniser.
+ *
+ * <p>{@link #names} is parallel to {@link #captions} and indexed by the gesture id. The names
+ * double as preference-key prefixes and as drawable identifiers, so they are a storage contract
+ * rather than labels.
+ */
 public class TouchServiceResult {
     static final int Delete = 2;
     static final int Diamond = 1;

@@ -18,6 +18,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Settings tab binding each recognised gesture to an action.
+ *
+ * <p>Only present when the feature set includes gestures ({@code TSMode < 2}), since recognition
+ * needs root and the native library.
+ */
 public class GesturesFragment extends Fragment implements AdapterView.OnItemClickListener {
     public static final int offsetDualTouchGestures = 11;
     public static final int offsetSingleTouchGestures = 0;

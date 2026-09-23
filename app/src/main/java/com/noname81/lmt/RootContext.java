@@ -11,6 +11,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+/**
+ * Owns the two root channels and the helper process.
+ *
+ * <p>{@code runCommandRoot} runs a one-off command in a plain {@code su} shell. {@code
+ * runCommandRemote} talks to the long-lived {@code InputContext} helper, which is copied out of
+ * assets and started once under {@code app_process} — spawning a fresh {@code su} per action would
+ * cost hundreds of milliseconds, which a gesture launcher cannot afford. See inputcontext/ for the
+ * helper itself.
+ */
 public class RootContext {
     private static boolean DEBUG = false;
     private static final String PREFIX = "";

@@ -18,6 +18,13 @@ import android.widget.Toast;
 import java.io.File;
 import java.lang.ref.WeakReference;
 
+/**
+ * The foreground service that runs the whole engine.
+ *
+ * <p>Owns the pie overlay, and — only when the feature set includes gestures ({@code TSMode < 2}) —
+ * the thread that blocks in the native recogniser waiting for a gesture. It must be foreground
+ * because it has to survive in the background indefinitely.
+ */
 public class TouchService extends Service {
     private static final String TAG = "LMT::TouchService";
     private Launcher mLauncher;

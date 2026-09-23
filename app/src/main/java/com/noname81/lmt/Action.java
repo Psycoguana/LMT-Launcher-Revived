@@ -10,6 +10,17 @@ import android.util.Log;
 
 import java.io.File;
 
+/**
+ * One configurable action: a type from the catalogue plus an optional payload.
+ *
+ * <p>This is the app's extension point. {@link #names} and {@link #captions} are parallel arrays
+ * indexed by the type id, and all three trigger systems — pie, gestures, ISAs — read from them, so
+ * adding an entry here surfaces it everywhere with no further wiring. {@code Launcher.fireAction}
+ * switches on the same ids.
+ *
+ * <p>The {@code Offset*} entries are section markers rather than real actions; {@link
+ * CommandSelectActivity} slices the catalogue between them to build its grouped picker.
+ */
 class Action {
     static final int Activity = 27;
     static final int Apex = 41;

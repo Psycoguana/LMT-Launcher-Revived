@@ -18,6 +18,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Settings tab for the Individual Swipe Areas.
+ *
+ * <p>Twelve zones, three along each screen edge, each bound to its own action. See {@code
+ * SettingsValues.getIsaAction} for how a swipe is mapped to a zone.
+ */
 public class IsasFragment extends Fragment implements AdapterView.OnItemClickListener {
     public static final int offsetIsasBottom = 0;
     public static final int offsetIsasLeft = 6;

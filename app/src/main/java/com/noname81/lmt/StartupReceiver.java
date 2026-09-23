@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+/** Restarts the service after boot when autostart is enabled. */
 public class StartupReceiver extends BroadcastReceiver {
     private static final String TAG = "LMT::StartupReceiver";
 

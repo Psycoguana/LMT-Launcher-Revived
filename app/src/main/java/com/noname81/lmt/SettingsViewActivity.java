@@ -10,6 +10,7 @@ import com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter;
 
 import java.util.LinkedList;
 
+/** Host for settings sub-screens that are too large for the main tabs. */
 public class SettingsViewActivity extends Activity {
     SettingsViewHelper mSettingsHelper;
 

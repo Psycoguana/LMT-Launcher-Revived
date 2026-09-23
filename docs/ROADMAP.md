@@ -91,8 +91,11 @@ reconstructing the assignment order from both the old and new source and compari
 (37 and 30 assignments, identical). Where a change touches arithmetic rather than
 names, the oracle is not sufficient on its own.
 
-Still outstanding from this area: class-level javadoc drawn from the architecture
-in `reference/plan.md`. Renaming is done; prose is not.
+Class-level javadoc added to all 40 files, drawn from `reference/plan.md` plus what
+reading each file surfaced. They record the *why* the code cannot: why the trigger
+strips are kept tiny, why `PermissionChecker` takes a `log` flag, why `PieMenu`
+needed no change to gain a third ring, which storage contracts the tests guard, and
+where the two root channels differ.
 
 > **Rule for this pass: rename and comment only — do not add fields.** Extracting a
 > magic number into a `private static final` emits a new field, which the oracle

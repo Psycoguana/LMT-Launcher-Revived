@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/** Picks an installed app, an activity, or a launcher shortcut to bind to a slot. */
 public class MultiSelectActivity extends Activity implements AdapterView.OnItemClickListener {
     public static int AppSelectMode = 0;
     public static final int REQUEST_CREATE_SHORTCUT = 1;

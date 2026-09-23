@@ -3,6 +3,13 @@ package com.noname81.lmt;
 import android.content.Context;
 import android.util.Log;
 
+/**
+ * JNI bridge to libTouchServiceNative.so.
+ *
+ * <p>The native side reads the touchscreen device directly and blocks until it recognises a
+ * gesture. Only used when the feature set includes gestures; the pie does not need it. See
+ * docs/ROADMAP.md 1.9 — this library is a candidate for deletion.
+ */
 class TouchServiceNative {
     private static final String TAG = "LMT::TouchServiceNative";
     private static TouchServiceNative instance;

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+/** About tab, and the hidden entry point to the debug menu. */
 public class InfoFragment extends Fragment {
 
     @Override // android.app.Fragment

@@ -5,6 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.widget.EditText;
 
+/**
+ * Small modal that collects one value — free text, a number, or a single choice.
+ *
+ * <p>Subclasses override {@code onOkClicked} to validate and store; returning true dismisses.
+ */
 abstract class InputDialog extends AlertDialog.Builder implements DialogInterface.OnClickListener {
     Context mContext;
     private final EditText mInput;

@@ -11,6 +11,13 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
+/**
+ * Runtime permission checks and prompts.
+ *
+ * <p>Each permission has a {@code has…} query and a {@code checkAndRequest…} that prompts if
+ * missing. The {@code log} flag on both exists because these are called from hot paths where
+ * logging every check would flood logcat.
+ */
 class PermissionChecker {
     static int DRAW_OVER_APPS_REQUEST_CODE = 5469;
     private static final String TAG = "LMT::PermissionChecker";

@@ -6,6 +6,12 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
 
+/**
+ * One slice: its geometry, its two drawables, and its selected state.
+ *
+ * <p>Geometry is set by {@code PieMenu.layoutPie} and read back during hit-testing, so a slice
+ * knows the ring it is on and the angular range it occupies.
+ */
 class PieItem {
     private float animate;
     private int inner;

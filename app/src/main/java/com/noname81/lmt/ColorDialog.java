@@ -14,6 +14,13 @@ import android.widget.TextView;
 
 import java.util.Arrays;
 
+/**
+ * Dialog for picking the pie's colours: a set of ARGB sliders over a live preview.
+ *
+ * <p>Colours are stored as a comma-separated string rather than an int, so a scheme can specify
+ * only the parts it cares about and leave the rest at their defaults — see {@code PieMenu.init} for
+ * how the string is parsed.
+ */
 abstract class ColorDialog extends AlertDialog.Builder
         implements DialogInterface.OnClickListener,
                 View.OnClickListener,

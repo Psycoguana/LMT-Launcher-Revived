@@ -8,6 +8,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+/**
+ * The app's feedback channel: a toast, a vibration, both, or nothing.
+ *
+ * <p>Which one is the {@code Feedback} setting, so gestures can confirm silently.
+ */
 class Toaster {
     static final int Debug = 1;
     static final int Image = 2;

@@ -5,6 +5,12 @@ import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
 
+/**
+ * The notification list behind the pie's status badge.
+ *
+ * <p>Filled by {@link AccessibilityHandler} as notifications are posted, newest first, deduplicated
+ * by app.
+ */
 class NotificationDataHelper {
     private static NotificationDataHelper instance;
     private ArrayList<NotificationData> mNotificationList = new ArrayList<>();

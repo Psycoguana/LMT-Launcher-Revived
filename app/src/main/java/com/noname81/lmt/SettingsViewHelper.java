@@ -19,6 +19,14 @@ import android.widget.Switch;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Handles a tap on any settings row.
+ *
+ * <p>One large dispatcher keyed by the position indices that {@link SettingsViewFragment} and
+ * {@link SettingsViewActivity} assign as they build their lists. Most rows open an {@link
+ * InputDialog} or {@link ColorDialog} and write the result back, restarting the service when a
+ * setting requires it.
+ */
 class SettingsViewHelper implements AdapterView.OnItemClickListener {
     private Activity mActivity;
     private RootContext mRootContext;

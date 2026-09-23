@@ -10,6 +10,13 @@ import android.os.Build;
 import java.util.ArrayList;
 import java.util.Vector;
 
+/**
+ * Raw settings accessors and the in-memory action slots.
+ *
+ * <p>{@code loadActions} builds the slot vectors: one per recognised gesture, 38 pie slots and 12
+ * ISA zones. Slots are addressed by bare index and {@link PieControl} walks them in hardcoded
+ * ranges, so those counts are a contract — SettingsSlotSchemaTest guards it.
+ */
 class SettingsValuesBase extends SettingsSharedPrefsWrapper {
     static final String path = "/Android/data/com.noname81.lmt/files/";
     ActivityManager mActivityManager;

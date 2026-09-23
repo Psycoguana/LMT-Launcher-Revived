@@ -15,6 +15,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Settings plus the derived state the service needs at runtime.
+ *
+ * <p>Adds screen geometry, orientation and the recent-apps query on top of the raw accessors in
+ * {@link SettingsValuesBase}.
+ */
 class SettingsValues extends SettingsValuesBase {
     private static SettingsValues instance;
     private int mOrientation;

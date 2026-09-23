@@ -18,6 +18,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 
+/**
+ * Icon loading, scaling and the base64 encoding used to store custom icons in prefs.
+ *
+ * <p>Note {@link #getNamePie}: user icons are files named after the slot, looked up in the
+ * configured resource search path.
+ */
 class IconUtils {
     IconUtils() {}
 

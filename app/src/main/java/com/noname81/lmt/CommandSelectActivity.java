@@ -17,6 +17,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Picks which action a slot fires.
+ *
+ * <p>Presents {@link Action}'s catalogue grouped into sections by the {@code Offset*} markers, and
+ * for action types that need one, collects the payload — an app, an activity, a URL, a script, a
+ * key code.
+ */
 public class CommandSelectActivity extends Activity implements AdapterView.OnItemClickListener {
     private int mPos = 0;
 

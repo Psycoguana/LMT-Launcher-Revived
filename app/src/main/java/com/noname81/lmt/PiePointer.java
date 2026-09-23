@@ -11,6 +11,12 @@ import android.graphics.Shader;
 import android.os.Handler;
 import android.widget.FrameLayout;
 
+/**
+ * Pointer-warp extension: drags a cursor from the pie and taps where it lands.
+ *
+ * <p>Prefers the accessibility gesture API and falls back to root input injection, which is the
+ * order the original author settled on once injection stopped working on newer Android.
+ */
 class PiePointer implements PieMenu.PieView {
     private static final float EMPTY_ANGLE = 0.19634955f;
     private static final int STROKE_SIZE = 4;

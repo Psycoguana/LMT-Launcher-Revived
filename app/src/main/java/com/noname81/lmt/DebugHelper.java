@@ -2,6 +2,13 @@ package com.noname81.lmt;
 
 import android.content.Context;
 
+/**
+ * Per-component logging switches, reached through a hidden menu.
+ *
+ * <p>Five double-taps on the Info tab opens it (see {@link InfoFragment}). Each choice toggles
+ * debug output for one subsystem: launcher, touch service, pie, or forces the no-root path for
+ * testing.
+ */
 class DebugHelper {
     private static DebugHelper instance;
     private boolean mDebugLauncherEnabled = false;

@@ -12,6 +12,13 @@ import android.widget.FrameLayout;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Owns the overlay windows the pie lives in.
+ *
+ * <p>Each configured edge gets a thin, invisible trigger strip added to the WindowManager. Touching
+ * one expands that strip to full screen so {@link PieControl} can draw; releasing shrinks it back.
+ * Keeping the strips tiny is what stops LMT swallowing touches meant for the app underneath.
+ */
 public class PieContainer {
     private static boolean DEBUG = false;
     private static final String TAG = "LMT::PieContainer";

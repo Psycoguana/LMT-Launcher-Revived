@@ -34,6 +34,12 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * Clock and notification badge drawn in the pie's centre.
+ *
+ * <p>Also cycles through additional info panels — connectivity, memory, battery — and can advance
+ * them on a shake, which is why it listens to the accelerometer.
+ */
 public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
     private static final int AIContentInvalid = 0;
     private static final int AIContentOverview = 1;

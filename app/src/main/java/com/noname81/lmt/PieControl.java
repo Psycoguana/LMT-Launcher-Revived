@@ -8,6 +8,16 @@ import android.widget.FrameLayout;
 
 import java.util.Vector;
 
+/**
+ * Builds the pie's contents from the stored slots and handles selection.
+ *
+ * <p>{@code populateMenu} walks three hardcoded slot ranges — ring 1, ring 2, ring 3 — stepping by
+ * two because each position stores a short-press and a long-press action. Those ranges are a
+ * contract with {@code SettingsValuesBase.loadActions}; SettingsSlotSchemaTest guards it.
+ *
+ * <p>Two action types replace the pie's contents rather than firing: the pointer extension and the
+ * recent-apps list.
+ */
 class PieControl extends PieControlBase
         implements View.OnClickListener, View.OnLongClickListener, View.OnKeyListener {
     private Launcher mLauncher;
