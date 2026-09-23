@@ -105,13 +105,26 @@ Nova's own drawer — close, not identical.
 
 ### 2.3 De-rooting that needs no accessibility at all
 
-- **32 TaskerTask** is tagged `[Root]` but shells out to `am broadcast` purely as a
-  way to send a broadcast. A plain `sendBroadcast` does the same. Caveat: modern
-  Tasker gates this behind "Allow External Access" and the
-  `net.dinglisch.android.tasker.PERMISSION_RUN_TASKS` permission, which the
-  manifest would need to declare. Note a user-level workaround already exists and
-  is worth documenting in-app rather than only fixing in code: pick the **Shortcut**
-  action and choose Tasker's "Tasker Task" shortcut (motomotomotoG, XDA, Mar 2026).
+- **32 TaskerTask** — the goal is a **first-class, root-free Tasker action**: the
+  user picks a task from a proper picker and it runs. Not a workaround.
+
+  Today the action is tagged `[Root]` and shells out to `am broadcast` purely as a
+  way to send a broadcast, which needs no root at all. The work is:
+  1. **Picking** — replace the free-text task-name field with Tasker's own task
+     picker (`net.dinglisch.android.tasker.ACTION_OPEN_PREFS` / the
+     `TaskerIntent` task-select intent) launched via `startActivityForResult`, so
+     the user chooses from a list instead of typing a name that must match exactly.
+  2. **Running** — `sendBroadcast` of `net.dinglisch.android.tasker.ACTION_TASK`
+     with the task name, declaring
+     `net.dinglisch.android.tasker.PERMISSION_RUN_TASKS` in the manifest. Tasker's
+     "Allow External Access" must be on; detect it and say so plainly rather than
+     failing silently.
+  3. Retag the caption from `[Root]` to `[None]`.
+
+  Note the mechanism is Tasker's own intents, not the accessibility service —
+  accessibility is not involved in this one. There is an existing stopgap (the
+  **Shortcut** action can target Tasker's "Tasker Task" shortcut — motomotomotoG,
+  XDA, Mar 2026) but it is a workaround, not the destination.
 - **30 KillApp** — `killBackgroundProcesses` is already called in the pre-API-21
   branch and `KILL_BACKGROUND_PROCESSES` is already in the manifest. What broke on
   Lollipop was `getRunningTasks` for identifying the foreground app;
