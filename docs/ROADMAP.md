@@ -18,9 +18,18 @@ Equivalence established and recorded. `tools/accepted-deviations.json` holds eve
 intentional divergence with a reason; anything else that differs is reported as
 `UNEXPLAINED` by the oracle.
 
-### 1.2 Write tests
-No test suite exists today; the oracle proves *equivalence*, not *correctness*.
-Highest-value targets, in order:
+### 1.2 Write tests  🟡 started
+**Done:** JUnit + Robolectric wired up (`app/src/test/`), 15 tests green.
+`ActionTest` pins the catalogue invariants — `names[]`/`captions[]` parity, every id
+constant matching its slot, the `Offset*` sentinels staying ordered — plus a
+regression test for the `toString()` off-by-one (verified it fails against the old
+bound, so it is not a tautology). `SettingsSharedPrefsWrapperTest` pins the
+persistence contract import/export will depend on, including the batched-editor
+path where a write is invisible until `apply()`.
+
+Test dependencies do not reach the release APK; the oracle stays `EQUIVALENT`.
+
+**Remaining targets, in order:**
 
 - **`SettingsValuesBase` / `SettingsSharedPrefsWrapper`** — pure pref
   serialisation, trivially unit-testable with Robolectric, and the layer that
@@ -31,6 +40,15 @@ Highest-value targets, in order:
   `start`/`sweep` is pure maths and is where a third-ring regression would surface.
 - **Instrumented smoke test** — service starts, pie opens, three rings render.
   This is currently done by hand via argent; `argent-qa-flows` could record it.
+
+> **Heads-up for 1.5 (import/export): there is a second, hidden storage backend.**
+> `SettingsSharedPrefsWrapper`'s constructor checks
+> `Settings.System.getInt(resolver, "LMTExternalConfig", 0)`. If that is **non-zero**
+> the wrapper never opens SharedPreferences at all and instead reads and writes
+> every setting through `Settings.System`. An exporter that only reads `LMT.xml`
+> will silently produce an empty backup for anyone who has that flag set, and an
+> importer that only writes `LMT.xml` will appear to succeed and change nothing.
+> Handle both paths, or refuse clearly when the flag is set.
 
 Do this **before** the Kotlin rewrite, so the rewrite has a safety net that
 survives the bytecode oracle becoming meaningless.

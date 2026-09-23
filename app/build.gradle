@@ -61,6 +61,16 @@ android {
         jniLibs { useLegacyPackaging = true }
     }
 
+    testOptions {
+        unitTests {
+            // Action and TouchServiceResult reference android.* types in fields but
+            // the logic under test never calls into them; returning defaults keeps
+            // these as fast plain-JVM tests instead of needing an emulator.
+            returnDefaultValues = true
+            includeAndroidResources = true
+        }
+    }
+
     lint {
         abortOnError false
     }
@@ -71,4 +81,8 @@ dependencies {
     // Everything else the decompiler attributed to android.support.* turned out
     // to be jadx substituting library constants for plain integer literals.
     implementation 'androidx.viewpager:viewpager:1.0.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.13'
+    testImplementation 'androidx.test:core:1.6.1'
 }
