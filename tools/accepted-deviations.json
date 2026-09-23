@@ -25,14 +25,29 @@
       "class": "MultiSelectActivity.smali",
       "method": "public onCreate(Landroid/os/Bundle;)V",
       "reason": "ROADMAP 1.4: onCreate no longer builds the list inline. It now gathers candidates once (gatherCandidates) and delegates display to render(), which re-runs on every filter change. Hence the large drop in references from this method - the work moved, it did not disappear."
+    },
+    {
+      "class": "MultiSelectActivity$AppSimpleAdapter$ANON.smali",
+      "method": "protected varargs doInBackground([Ljava/lang/Void;)Landroid/graphics/drawable/Drawable;",
+      "reason": "ROADMAP 1.4: the icon load now calls the adapter's bounds-checked iconAt() instead of switching on AppSelectMode and indexing the activity's list directly. Same icons, but safe when the list is rebuilt under an in-flight task."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
-  "_comment_new_members": "Classes where NEW methods and fields are expected because a feature was added there. Additions in these classes are accepted; anything MISSING is still reported, and every other class is unaffected.",
+  "_comment_new_members": "Classes where NEW members are expected because a feature was added there. Additions are accepted; anything MISSING is still reported, unless the entry sets \"reworked\": true, which means the class was deliberately restructured and removals are expected too. Every other class is unaffected either way.",
   "new_members": [
     {
       "class": "MultiSelectActivity.smali",
-      "reason": "ROADMAP 1.4: app-picker search and a system-app toggle. Adds gatherCandidates/render/matches/isSystem, the options menu, and fields for the query, the toggle and the unfiltered candidate lists. Filtering rebuilds the backing list and the adapter together because onItemClick resolves a tap as mPackageInfos.get(position - 1)."
+      "reason": "ROADMAP 1.4: app-picker search and system-app toggle. Adds gatherCandidates/render/matches/isSystem and the options menu, plus fields for the query, the toggle and the unfiltered candidate lists. Filtering rebuilds the backing list and the adapter together because onItemClick resolves a tap as mPackageInfos.get(position - 1)."
+    },
+    {
+      "class": "MultiSelectActivity$AppSimpleAdapter.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.4: the adapter now carries its own model snapshot (mModel) instead of reaching into the activity's mutable list by position, and its constructor gained that parameter - so the old 3-arg constructor is gone by design. Icon loading moved into iconAt(), which bounds-checks. This fixed an IndexOutOfBoundsException crash: an AsyncTask queued before a filter change indexed past the end of the shorter list."
+    },
+    {
+      "class": "MultiSelectActivity$AppSimpleAdapter$ANON.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.4: the icon-loading AsyncTask now delegates to the adapter's bounds-checked iconAt() rather than indexing the activity's list itself."
     }
   ]
 }

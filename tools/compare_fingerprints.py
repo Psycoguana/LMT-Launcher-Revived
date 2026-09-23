@@ -23,6 +23,7 @@ import os
 _dev_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "accepted-deviations.json")
 ACCEPTED = {}
 NEW_MEMBERS = {}
+REWORKED = set()
 if os.path.exists(_dev_path):
     _dev = json.load(open(_dev_path))
     for d in _dev["deviations"]:
@@ -30,6 +31,8 @@ if os.path.exists(_dev_path):
     # Classes where a feature was added, so NEW members are expected. Missing
     # members are still reported, and other classes are unaffected.
     NEW_MEMBERS = {d["class"]: d["reason"] for d in _dev.get("new_members", [])}
+    # classes deliberately restructured, where removals are expected too
+    REWORKED = {d["class"] for d in _dev.get("new_members", []) if d.get("reworked")}
 verbose = "--verbose" in sys.argv
 
 EXPECTED_NEW = {
@@ -110,7 +113,9 @@ for name in sorted(ref_names & our_names):
     if rf != of:
         only_ref, only_our = rf - of, of - rf
         # synthetic compiler bookkeeping (this$N, val$x, $assertionsDisabled, ...)
-        if base(name) in NEW_MEMBERS:
+        if base(name) in REWORKED:
+            only_ref, only_our = set(), set()
+        elif base(name) in NEW_MEMBERS:
             # only additions are excused; a field going missing still counts
             only_ref = {f for f in only_ref if "synthetic" not in f}
             only_our = set()
@@ -154,6 +159,9 @@ for name in sorted(ref_names & our_names):
                 # lambda (no-arg ctor + static INSTANCE) vs anonymous class
                 # (outer-reference ctor); same behaviour, different shape.
                 anon_shape.append((name, sig))
+                continue
+            if base(name) in REWORKED:
+                feature_additions.append((name, sig))
                 continue
             if base(name) in NEW_MEMBERS and sig in om and sig not in rm:
                 feature_additions.append((name, sig))
