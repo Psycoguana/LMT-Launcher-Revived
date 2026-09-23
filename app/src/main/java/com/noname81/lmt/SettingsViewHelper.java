@@ -19,7 +19,6 @@ import android.widget.Switch;
 import java.util.List;
 import java.util.Map;
 
-/* JADX INFO: loaded from: classes.dex */
 class SettingsViewHelper implements AdapterView.OnItemClickListener {
     private Activity mActivity;
     private RootContext mRootContext;
@@ -91,8 +90,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
     }
 
     @Override // android.widget.AdapterView.OnItemClickListener
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        if (i == this.posActivateTouchService) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (position == this.posActivateTouchService) {
             if (this.mSettings.getServiceState() == 0) {
                 this.mSettings.startService();
                 return;
@@ -101,7 +100,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                 return;
             }
         }
-        if (i == this.posAutostartTouchService) {
+        if (position == this.posAutostartTouchService) {
             new InputDialog(
                     this.mActivity,
                     "Autostart service",
@@ -109,9 +108,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadAutostart())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.1
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.saveAutostart(Integer.parseInt(str));
+                        SettingsViewHelper.this.mSettings.saveAutostart(Integer.parseInt(value));
                         return true;
                     } catch (NumberFormatException unused) {
                         return true;
@@ -120,7 +119,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posSetMode) {
+        if (position == this.posSetMode) {
             new InputDialog(
                     this.mActivity,
                     "Define feature set",
@@ -132,10 +131,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadTouchServiceMode())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.2
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.saveTouchServiceMode(
-                                Integer.parseInt(str));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         SettingsViewHelper.this.mActivity.recreate();
                         return true;
@@ -146,27 +145,29 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posAutoConfiguration) {
+        if (position == this.posAutoConfiguration) {
             int inputDevice = -1;
             int factorX = -1;
             int factorY = -1;
             try {
-                String[] strArrSplit =
+                String[] geteventLines =
                         this.mRootContext
                                 .runCommandResult(
                                         "getevent -p | grep -E '(device|name|0035|0036)'", true)
                                 .split("\n");
-                int i3 = -1;
+                int deviceIndex = -1;
                 factorX = -1;
                 factorY = -1;
-                for (int i4 = 0; i4 < strArrSplit.length - 1; i4++) {
-                    if (strArrSplit[i4].contains("0035")) {
-                        int i5 = i4 + 1;
-                        if (strArrSplit[i5].contains("0036")) {
-                            for (int i6 = i4 - 1; i6 >= 0; i6--) {
-                                if (strArrSplit[i6].contains("/dev/input")) {
-                                    String str = strArrSplit[i6];
-                                    i3 = Integer.parseInt(str.substring(str.length() - 1));
+                for (int line = 0; line < geteventLines.length - 1; line++) {
+                    if (geteventLines[line].contains("0035")) {
+                        int nextLine = line + 1;
+                        if (geteventLines[nextLine].contains("0036")) {
+                            for (int back = line - 1; back >= 0; back--) {
+                                if (geteventLines[back].contains("/dev/input")) {
+                                    String deviceLine = geteventLines[back];
+                                    deviceIndex =
+                                            Integer.parseInt(
+                                                    deviceLine.substring(deviceLine.length() - 1));
                                     break;
                                 }
                             }
@@ -174,33 +175,38 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                                     (WindowManager) this.mActivity.getSystemService("window");
                             DisplayMetrics displayMetrics = new DisplayMetrics();
                             windowManager.getDefaultDisplay().getRealMetrics(displayMetrics);
-                            int i7 = displayMetrics.widthPixels;
-                            int i8 = displayMetrics.heightPixels;
-                            int iIndexOf = strArrSplit[i4].indexOf("max");
+                            int screenWidth = displayMetrics.widthPixels;
+                            int screenHeight = displayMetrics.heightPixels;
+                            int maxAt = geteventLines[line].indexOf("max");
                             factorX =
                                     Math.round(
                                             (Integer.parseInt(
-                                                                    strArrSplit[i4].substring(
-                                                                            iIndexOf + 4,
-                                                                            strArrSplit[i4].indexOf(
-                                                                                    ",", iIndexOf)))
-                                                            / i7)
+                                                                    geteventLines[line].substring(
+                                                                            maxAt + 4,
+                                                                            geteventLines[line]
+                                                                                    .indexOf(
+                                                                                            ",",
+                                                                                            maxAt)))
+                                                            / screenWidth)
                                                     * 100.0f);
-                            int iIndexOf2 = strArrSplit[i5].indexOf("max");
+                            int maxAt2 = geteventLines[nextLine].indexOf("max");
                             factorY =
                                     Math.round(
                                             (Integer.parseInt(
-                                                                    strArrSplit[i5].substring(
-                                                                            iIndexOf2 + 4,
-                                                                            strArrSplit[i5].indexOf(
-                                                                                    ",",
-                                                                                    iIndexOf2)))
-                                                            / i8)
+                                                                    geteventLines[nextLine]
+                                                                            .substring(
+                                                                                    maxAt2 + 4,
+                                                                                    geteventLines[
+                                                                                            nextLine]
+                                                                                            .indexOf(
+                                                                                                    ",",
+                                                                                                    maxAt2)))
+                                                            / screenHeight)
                                                     * 100.0f);
                         }
                     }
                 }
-                inputDevice = i3;
+                inputDevice = deviceIndex;
             } catch (Exception unused) {
                 factorX = -1;
                 factorY = -1;
@@ -227,7 +233,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                             new DialogInterface.OnClickListener() { // from class:
                                 // com.noname81.lmt.SettingsViewHelper.4
                                 @Override // android.content.DialogInterface.OnClickListener
-                                public void onClick(DialogInterface dialogInterface, int i9) {
+                                public void onClick(DialogInterface dialogInterface, int parsed) {
                                     dialogInterface.dismiss();
                                     if (inputDeviceFinal <= -1
                                             || factorXFinal <= -1
@@ -252,7 +258,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                             new DialogInterface.OnClickListener() { // from class:
                                 // com.noname81.lmt.SettingsViewHelper.3
                                 @Override // android.content.DialogInterface.OnClickListener
-                                public void onClick(DialogInterface dialogInterface, int i9) {
+                                public void onClick(DialogInterface dialogInterface, int parsed) {
                                     dialogInterface.dismiss();
                                 }
                             })
@@ -260,7 +266,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     .show();
             return;
         }
-        if (i == this.posSetInput) {
+        if (position == this.posSetInput) {
             new InputDialog(
                     this.mActivity,
                     "Set input device",
@@ -290,9 +296,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadInputDevice())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.5
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.saveInputDevice(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.saveInputDevice(Integer.parseInt(value));
                         SettingsViewHelper.this.mTouchServiceNative.setInputDeviceUnlock(
                                 SettingsViewHelper.this.mSettings.loadInputDeviceString());
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
@@ -304,27 +310,27 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posAddBlacklist) {
+        if (position == this.posAddBlacklist) {
             MultiSelectActivity.AppSelectMode = 3;
             this.mActivity.startActivity(
                     new Intent(this.mActivity, (Class<?>) MultiSelectActivity.class));
             return;
         }
-        if (i == this.posClearBlacklist) {
+        if (position == this.posClearBlacklist) {
             this.mSettings.clearBlacklisted();
             return;
         }
-        if (i == this.posAddBlacklistPie) {
+        if (position == this.posAddBlacklistPie) {
             MultiSelectActivity.AppSelectMode = 4;
             this.mActivity.startActivity(
                     new Intent(this.mActivity, (Class<?>) MultiSelectActivity.class));
             return;
         }
-        if (i == this.posClearBlacklistPie) {
+        if (position == this.posClearBlacklistPie) {
             this.mSettings.clearBlacklistedPie();
             return;
         }
-        if (i == this.posFeedbackStyle) {
+        if (position == this.posFeedbackStyle) {
             new InputDialog(
                     this.mActivity,
                     "Feedback style",
@@ -334,9 +340,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadFeedbackMode())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.6
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        Toaster.getInstance(this.mContext).setMode(Integer.parseInt(str2));
+                        Toaster.getInstance(this.mContext).setMode(Integer.parseInt(value));
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -345,7 +351,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posVibrationTime) {
+        if (position == this.posVibrationTime) {
             new InputDialog(
                     this.mActivity,
                     "Vibration time",
@@ -353,10 +359,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadGestureVibrationTime()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.7
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.saveGestureVibrationTime(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -365,7 +371,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posSingleTouchGestures) {
+        if (position == this.posSingleTouchGestures) {
             new InputDialog(
                     this.mActivity,
                     "Single touch gestures",
@@ -374,12 +380,12 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                             this.mSettings.loadSingleTouchGestureSupport())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.8
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        int i9 = Integer.parseInt(str2);
-                        SettingsViewHelper.this.mSettings.saveSingleTouchGestureSupport(i9);
+                        int parsed = Integer.parseInt(value);
+                        SettingsViewHelper.this.mSettings.saveSingleTouchGestureSupport(parsed);
                         SettingsViewHelper.this.mTouchServiceNative.setSingleTouchGestureSupport(
-                                i9);
+                                parsed);
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -388,7 +394,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posMinScore) {
+        if (position == this.posMinScore) {
             new InputDialog(
                     this.mActivity,
                     "Min gesture score",
@@ -396,11 +402,11 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadMinScore()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.9
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        int i9 = Integer.parseInt(str2);
-                        SettingsViewHelper.this.mSettings.saveMinScore(i9);
-                        SettingsViewHelper.this.mTouchServiceNative.setMinScore(i9);
+                        int parsed = Integer.parseInt(value);
+                        SettingsViewHelper.this.mSettings.saveMinScore(parsed);
+                        SettingsViewHelper.this.mTouchServiceNative.setMinScore(parsed);
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -409,7 +415,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posMinPathLength) {
+        if (position == this.posMinPathLength) {
             new InputDialog(
                     this.mActivity,
                     "Min gesture path length",
@@ -417,11 +423,11 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadMinPathLength()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.10
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        int i9 = Integer.parseInt(str2);
-                        SettingsViewHelper.this.mSettings.saveMinPathLength(i9);
-                        SettingsViewHelper.this.mTouchServiceNative.setMinPathLength(i9);
+                        int parsed = Integer.parseInt(value);
+                        SettingsViewHelper.this.mSettings.saveMinPathLength(parsed);
+                        SettingsViewHelper.this.mTouchServiceNative.setMinPathLength(parsed);
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -430,7 +436,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posSingleSwipesBBox) {
+        if (position == this.posSingleSwipesBBox) {
             new InputDialog(
                     this.mActivity,
                     "Min bbox size",
@@ -438,11 +444,11 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadSingleSwipesBBox()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.11
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        int i9 = Integer.parseInt(str2);
-                        SettingsViewHelper.this.mSettings.saveSingleSwipesBBox(i9);
-                        SettingsViewHelper.this.mTouchServiceNative.setSingleSwipesBBox(i9);
+                        int parsed = Integer.parseInt(value);
+                        SettingsViewHelper.this.mSettings.saveSingleSwipesBBox(parsed);
+                        SettingsViewHelper.this.mTouchServiceNative.setSingleSwipesBBox(parsed);
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -451,7 +457,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posSingleSwipesAArea) {
+        if (position == this.posSingleSwipesAArea) {
             new InputDialog(
                     this.mActivity,
                     "Activation area thickness",
@@ -459,10 +465,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadSingleSwipesAArea()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.12
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.saveSingleSwipesAArea(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -471,7 +477,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posTouchscreenScreenFactorX) {
+        if (position == this.posTouchscreenScreenFactorX) {
             new InputDialog(
                     this.mActivity,
                     "Touchscreen to screen factor X",
@@ -480,10 +486,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                             (int) (this.mSettings.loadTouchscreenScreenFactorX() * 100.0f)),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.13
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.saveTouchscreenScreenFactorX(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -492,7 +498,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posTouchscreenScreenFactorY) {
+        if (position == this.posTouchscreenScreenFactorY) {
             new InputDialog(
                     this.mActivity,
                     "Touchscreen to screen factor Y",
@@ -501,10 +507,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                             (int) (this.mSettings.loadTouchscreenScreenFactorY() * 100.0f)),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.14
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.saveTouchscreenScreenFactorY(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -513,7 +519,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPiePos) {
+        if (position == this.posPiePos) {
             new InputDialog(
                     this.mActivity,
                     "Activation area position",
@@ -531,9 +537,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPiePos())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.15
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePiePos(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePiePos(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.setVisiblePieActivationAread(true);
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                     } catch (NumberFormatException unused2) {
@@ -543,7 +549,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieAreaX) {
+        if (position == this.posPieAreaX) {
             new InputDialog(
                     this.mActivity,
                     "Activation area thickness",
@@ -551,9 +557,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieAreaX()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.16
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePieAreaX(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePieAreaX(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.setVisiblePieActivationAread(true);
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                     } catch (NumberFormatException unused2) {
@@ -563,7 +569,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieAreaY) {
+        if (position == this.posPieAreaY) {
             new InputDialog(
                     this.mActivity,
                     "Activation area length",
@@ -571,9 +577,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieAreaY()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.17
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePieAreaY(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePieAreaY(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.setVisiblePieActivationAread(true);
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                     } catch (NumberFormatException unused2) {
@@ -583,7 +589,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieAreaGravity) {
+        if (position == this.posPieAreaGravity) {
             new InputDialog(
                     this.mActivity,
                     "Activation area gravity",
@@ -591,10 +597,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieAreaGravity())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.18
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieAreaGravity(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.setVisiblePieActivationAread(true);
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                     } catch (NumberFormatException unused2) {
@@ -604,7 +610,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieAreaBehindKeyboard) {
+        if (position == this.posPieAreaBehindKeyboard) {
             new InputDialog(
                     this.mActivity,
                     "Set pie area behind keyboard",
@@ -612,10 +618,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieAreaBehindKeyboard())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.19
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieAreaBehindKeyboard(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -625,7 +631,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieOnLockScreen) {
+        if (position == this.posPieOnLockScreen) {
             new InputDialog(
                     this.mActivity,
                     "Set pie on lockscreen",
@@ -633,10 +639,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieOnLockScreen())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.20
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieOnLockScreen(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -646,7 +652,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieColor) {
+        if (position == this.posPieColor) {
             new ColorDialog(
                     this.mActivity,
                     "Pie colors",
@@ -662,15 +668,15 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mSettings
                             .loadPieColor()) { // from class: com.noname81.lmt.SettingsViewHelper.21
                 @Override // com.noname81.lmt.ColorDialog
-                public boolean onOkClicked(String str2) {
-                    SettingsViewHelper.this.mSettings.savePieColor(str2);
+                public boolean onOkClicked(String value) {
+                    SettingsViewHelper.this.mSettings.savePieColor(value);
                     SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                     return true;
                 }
             }.show();
             return;
         }
-        if (i == this.posPieStatusInfoColor) {
+        if (position == this.posPieStatusInfoColor) {
             new ColorDialog(
                     this.mActivity,
                     "Pie status info colors",
@@ -678,15 +684,15 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mSettings.loadPieStatusInfoColor()) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.22
                 @Override // com.noname81.lmt.ColorDialog
-                public boolean onOkClicked(String str2) {
-                    SettingsViewHelper.this.mSettings.savePieStatusInfoColor(str2);
+                public boolean onOkClicked(String value) {
+                    SettingsViewHelper.this.mSettings.savePieStatusInfoColor(value);
                     SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                     return true;
                 }
             }.show();
             return;
         }
-        if (i == this.posPiePointerColor) {
+        if (position == this.posPiePointerColor) {
             new ColorDialog(
                     this.mActivity,
                     "Pie pointer colors",
@@ -694,15 +700,15 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mSettings.loadPiePointerColor()) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.23
                 @Override // com.noname81.lmt.ColorDialog
-                public boolean onOkClicked(String str2) {
-                    SettingsViewHelper.this.mSettings.savePiePointerColor(str2);
+                public boolean onOkClicked(String value) {
+                    SettingsViewHelper.this.mSettings.savePiePointerColor(value);
                     SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                     return true;
                 }
             }.show();
             return;
         }
-        if (i == this.posPieStatusInfoFont) {
+        if (position == this.posPieStatusInfoFont) {
             new InputDialog(
                     this.mActivity,
                     "Pie font",
@@ -720,9 +726,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieFont())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.24
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePieFont(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePieFont(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -732,7 +738,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieInnerRadius) {
+        if (position == this.posPieInnerRadius) {
             new InputDialog(
                     this.mActivity,
                     "Pie inner radius",
@@ -740,10 +746,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieInnerRadius()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.25
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieInnerRadius(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -753,7 +759,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieOuterRadius) {
+        if (position == this.posPieOuterRadius) {
             new InputDialog(
                     this.mActivity,
                     "Pie outer radius",
@@ -761,10 +767,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieOuterRadius()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.26
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieOuterRadius(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -774,7 +780,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieShiftSize) {
+        if (position == this.posPieShiftSize) {
             new InputDialog(
                     this.mActivity,
                     "Pie shift size",
@@ -782,9 +788,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieShiftSize()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.27
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePieShiftSize(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePieShiftSize(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -794,7 +800,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieOutlineSize) {
+        if (position == this.posPieOutlineSize) {
             new InputDialog(
                     this.mActivity,
                     "Pie outline size",
@@ -802,10 +808,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieOutlineSize()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.28
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieOutlineSize(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -815,7 +821,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieSliceGap) {
+        if (position == this.posPieSliceGap) {
             new InputDialog(
                     this.mActivity,
                     "Pie slice gap",
@@ -823,9 +829,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieSliceGap()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.29
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePieSliceGap(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePieSliceGap(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -835,7 +841,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieStartGap) {
+        if (position == this.posPieStartGap) {
             new InputDialog(
                     this.mActivity,
                     "Pie start gap",
@@ -843,9 +849,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieStartGap()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.30
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePieStartGap(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePieStartGap(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -855,7 +861,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieLongpress) {
+        if (position == this.posPieLongpress) {
             new InputDialog(
                     this.mActivity,
                     "Longpress time",
@@ -863,9 +869,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieLongpress()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.31
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePieLongpress(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePieLongpress(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -875,7 +881,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieAnimation) {
+        if (position == this.posPieAnimation) {
             new InputDialog(
                     this.mActivity,
                     "Animation time",
@@ -883,9 +889,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieAnimation()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.32
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePieAnimation(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePieAnimation(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -895,7 +901,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieVibrate) {
+        if (position == this.posPieVibrate) {
             new InputDialog(
                     this.mActivity,
                     "Feedback type",
@@ -909,9 +915,9 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieVibrate())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.33
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
-                        SettingsViewHelper.this.mSettings.savePieVibrate(Integer.parseInt(str2));
+                        SettingsViewHelper.this.mSettings.savePieVibrate(Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -921,7 +927,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieVibrationTime) {
+        if (position == this.posPieVibrationTime) {
             new InputDialog(
                     this.mActivity,
                     "Pie vibration time",
@@ -929,10 +935,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieVibrationTime()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.34
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieVibrationTime(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         return true;
                     } catch (NumberFormatException unused2) {
                         return true;
@@ -941,7 +947,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieMultiCommand) {
+        if (position == this.posPieMultiCommand) {
             new InputDialog(
                     this.mActivity,
                     "Multi command",
@@ -949,10 +955,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieMultiCommand())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.35
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieMultiCommand(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -962,7 +968,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieExpandTriggerArea) {
+        if (position == this.posPieExpandTriggerArea) {
             new InputDialog(
                     this.mActivity,
                     "Expand trigger area",
@@ -970,10 +976,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieExpandTriggerArea())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.36
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieExpandTriggerArea(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -983,7 +989,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPiePointerFromEdges) {
+        if (position == this.posPiePointerFromEdges) {
             new InputDialog(
                     this.mActivity,
                     "Show pointer",
@@ -991,10 +997,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPiePointerFromEdges())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.37
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePiePointerFromEdges(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -1004,7 +1010,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPiePointerWarpFactor) {
+        if (position == this.posPiePointerWarpFactor) {
             new InputDialog(
                     this.mActivity,
                     "Set pie pointer warp factor",
@@ -1012,10 +1018,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPiePointerWarpFactor()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.38
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePiePointerWarpFactor(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -1025,7 +1031,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieShowStatusInfos) {
+        if (position == this.posPieShowStatusInfos) {
             new InputDialog(
                     this.mActivity,
                     "Show status infos",
@@ -1038,10 +1044,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieShowStatusInfos())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.39
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieShowStatusInfos(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -1051,7 +1057,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieRotateImages) {
+        if (position == this.posPieRotateImages) {
             new InputDialog(
                     this.mActivity,
                     "Set rotate Images",
@@ -1059,10 +1065,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieRotateImages())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.40
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieRotateImages(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -1072,7 +1078,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieNavButtonStyle) {
+        if (position == this.posPieNavButtonStyle) {
             new InputDialog(
                     this.mActivity,
                     "Set nav button style",
@@ -1080,10 +1086,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieNavButtonStyle())) { // from class:
                 // com.noname81.lmt.SettingsViewHelper.41
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieNavButtonsStyle(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -1093,7 +1099,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
             }.show();
             return;
         }
-        if (i == this.posPieShowScaleAppImages) {
+        if (position == this.posPieShowScaleAppImages) {
             new InputDialog(
                     this.mActivity,
                     "Show and scale app images",
@@ -1101,10 +1107,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieShowScaleAppImages()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.42
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieShowScaleAppImages(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -1112,7 +1118,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     }
                 }
             }.show();
-        } else if (i == this.posPieShowScaleUserImages) {
+        } else if (position == this.posPieShowScaleUserImages) {
             new InputDialog(
                     this.mActivity,
                     "Show and scale user images",
@@ -1120,10 +1126,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     Integer.toString(this.mSettings.loadPieShowScaleUserImages()),
                     true) { // from class: com.noname81.lmt.SettingsViewHelper.43
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
+                public boolean onOkClicked(String value) {
                     try {
                         SettingsViewHelper.this.mSettings.savePieShowScaleUserImages(
-                                Integer.parseInt(str2));
+                                Integer.parseInt(value));
                         SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                         return true;
                     } catch (NumberFormatException unused2) {
@@ -1131,7 +1137,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     }
                 }
             }.show();
-        } else if (i == this.posPieUserImageSearchPath) {
+        } else if (position == this.posPieUserImageSearchPath) {
             new InputDialog(
                     this.mActivity,
                     "User image search path",
@@ -1139,8 +1145,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mSettings.loadResourceSearchPath(),
                     false) { // from class: com.noname81.lmt.SettingsViewHelper.44
                 @Override // com.noname81.lmt.InputDialog
-                public boolean onOkClicked(String str2) {
-                    SettingsViewHelper.this.mSettings.saveResourceSearchPath(str2);
+                public boolean onOkClicked(String value) {
+                    SettingsViewHelper.this.mSettings.saveResourceSearchPath(value);
                     SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                     return true;
                 }
@@ -1155,24 +1161,27 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
         private boolean mSimpleUI;
 
         SettingsSimpleAdapter(
-                Context context, List<? extends Map<String, ?>> list, int i, boolean z) {
+                Context context,
+                List<? extends Map<String, ?>> items,
+                int resource,
+                boolean showSwitches) {
             super(
                     context,
-                    list,
+                    items,
                     R.layout.listitem_description,
                     new String[] {"title", "caption"},
                     new int[] {R.id.listitem_description_text, R.id.listitem_description_caption});
             this.mContext = context;
-            this.mSimpleUI = z;
-            this.mOffset = i;
+            this.mSimpleUI = showSwitches;
+            this.mOffset = resource;
         }
 
         @Override // android.widget.SimpleAdapter, android.widget.Adapter
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            View view2 = super.getView(i, view, viewGroup);
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view2 = super.getView(position, convertView, parent);
             LinearLayout linearLayout = (LinearLayout) view2;
-            int i2 = i + this.mOffset + 1;
-            if (i2 == SettingsViewHelper.this.posActivateTouchService) {
+            int settingIndex = position + this.mOffset + 1;
+            if (settingIndex == SettingsViewHelper.this.posActivateTouchService) {
                 addButton(
                         this.mContext,
                         linearLayout,
@@ -1180,11 +1189,11 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         new CompoundButton.OnCheckedChangeListener() { // from class:
                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.1
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                                if (!z
+                            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                                if (!checked
                                         || SettingsViewHelper.this.mSettings.getServiceState()
                                                 != 0) {
-                                    if (z
+                                    if (checked
                                             || SettingsViewHelper.this.mSettings.getServiceState()
                                                     != 1) {
                                         return;
@@ -1195,7 +1204,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                                 SettingsViewHelper.this.mSettings.startService();
                             }
                         });
-            } else if (i2 == SettingsViewHelper.this.posAutostartTouchService) {
+            } else if (settingIndex == SettingsViewHelper.this.posAutostartTouchService) {
                 addButton(
                         this.mContext,
                         linearLayout,
@@ -1203,9 +1212,10 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         new CompoundButton.OnCheckedChangeListener() { // from class:
                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.2
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                                if (!z || SettingsViewHelper.this.mSettings.loadAutostart() != 0) {
-                                    if (z
+                            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                                if (!checked
+                                        || SettingsViewHelper.this.mSettings.loadAutostart() != 0) {
+                                    if (checked
                                             || SettingsViewHelper.this.mSettings.loadAutostart()
                                                     != 1) {
                                         return;
@@ -1216,7 +1226,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                                 SettingsViewHelper.this.mSettings.saveAutostart(1);
                             }
                         });
-            } else if (i2 == SettingsViewHelper.this.posSingleTouchGestures) {
+            } else if (settingIndex == SettingsViewHelper.this.posSingleTouchGestures) {
                 addButton(
                         this.mContext,
                         linearLayout,
@@ -1224,12 +1234,12 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         new CompoundButton.OnCheckedChangeListener() { // from class:
                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.3
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                                if (!z
+                            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                                if (!checked
                                         || SettingsViewHelper.this.mSettings
                                                         .loadSingleTouchGestureSupport()
                                                 != 0) {
-                                    if (z
+                                    if (checked
                                             || SettingsViewHelper.this.mSettings
                                                             .loadSingleTouchGestureSupport()
                                                     != 1) {
@@ -1244,7 +1254,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                                 SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                             }
                         });
-            } else if (i2 == SettingsViewHelper.this.posPieAreaBehindKeyboard) {
+            } else if (settingIndex == SettingsViewHelper.this.posPieAreaBehindKeyboard) {
                 addButton(
                         this.mContext,
                         linearLayout,
@@ -1252,12 +1262,12 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         new CompoundButton.OnCheckedChangeListener() { // from class:
                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.4
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                                if (!z
+                            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                                if (!checked
                                         || SettingsViewHelper.this.mSettings
                                                         .loadPieAreaBehindKeyboard()
                                                 != 0) {
-                                    if (z
+                                    if (checked
                                             || SettingsViewHelper.this.mSettings
                                                             .loadPieAreaBehindKeyboard()
                                                     != 1) {
@@ -1271,7 +1281,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                                 SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                             }
                         });
-            } else if (i2 == SettingsViewHelper.this.posPieOnLockScreen) {
+            } else if (settingIndex == SettingsViewHelper.this.posPieOnLockScreen) {
                 addButton(
                         this.mContext,
                         linearLayout,
@@ -1279,11 +1289,11 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         new CompoundButton.OnCheckedChangeListener() { // from class:
                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.5
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                                if (!z
+                            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                                if (!checked
                                         || SettingsViewHelper.this.mSettings.loadPieOnLockScreen()
                                                 != 0) {
-                                    if (z
+                                    if (checked
                                             || SettingsViewHelper.this.mSettings
                                                             .loadPieOnLockScreen()
                                                     != 1) {
@@ -1297,7 +1307,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                                 SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                             }
                         });
-            } else if (i2 == SettingsViewHelper.this.posPieRotateImages) {
+            } else if (settingIndex == SettingsViewHelper.this.posPieRotateImages) {
                 addButton(
                         this.mContext,
                         linearLayout,
@@ -1305,11 +1315,11 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         new CompoundButton.OnCheckedChangeListener() { // from class:
                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.6
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                                if (!z
+                            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                                if (!checked
                                         || SettingsViewHelper.this.mSettings.loadPieRotateImages()
                                                 != 0) {
-                                    if (z
+                                    if (checked
                                             || SettingsViewHelper.this.mSettings
                                                             .loadPieRotateImages()
                                                     != 1) {
@@ -1323,7 +1333,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                                 SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                             }
                         });
-            } else if (i2 == SettingsViewHelper.this.posPieExpandTriggerArea) {
+            } else if (settingIndex == SettingsViewHelper.this.posPieExpandTriggerArea) {
                 addButton(
                         this.mContext,
                         linearLayout,
@@ -1331,12 +1341,12 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         new CompoundButton.OnCheckedChangeListener() { // from class:
                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.7
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                                if (!z
+                            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                                if (!checked
                                         || SettingsViewHelper.this.mSettings
                                                         .loadPieExpandTriggerArea()
                                                 != 0) {
-                                    if (z
+                                    if (checked
                                             || SettingsViewHelper.this.mSettings
                                                             .loadPieExpandTriggerArea()
                                                     != 1) {
@@ -1349,7 +1359,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                                 SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                             }
                         });
-            } else if (i2 == SettingsViewHelper.this.posPiePointerFromEdges) {
+            } else if (settingIndex == SettingsViewHelper.this.posPiePointerFromEdges) {
                 addButton(
                         this.mContext,
                         linearLayout,
@@ -1357,12 +1367,12 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         new CompoundButton.OnCheckedChangeListener() { // from class:
                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.8
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                                if (!z
+                            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                                if (!checked
                                         || SettingsViewHelper.this.mSettings
                                                         .loadPiePointerFromEdges()
                                                 != 0) {
-                                    if (z
+                                    if (checked
                                             || SettingsViewHelper.this.mSettings
                                                             .loadPiePointerFromEdges()
                                                     != 1) {
@@ -1376,7 +1386,7 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                                 SettingsViewHelper.this.mSettings.restartServiceIfRequired();
                             }
                         });
-            } else if (i2 == SettingsViewHelper.this.posPieMultiCommand) {
+            } else if (settingIndex == SettingsViewHelper.this.posPieMultiCommand) {
                 addButton(
                         this.mContext,
                         linearLayout,
@@ -1384,11 +1394,11 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         new CompoundButton.OnCheckedChangeListener() { // from class:
                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.9
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
-                                if (!z
+                            public void onCheckedChanged(CompoundButton button, boolean checked) {
+                                if (!checked
                                         || SettingsViewHelper.this.mSettings.loadPieMultiCommand()
                                                 != 0) {
-                                    if (z
+                                    if (checked
                                             || SettingsViewHelper.this.mSettings
                                                             .loadPieMultiCommand()
                                                     != 1) {
@@ -1408,20 +1418,20 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
 
         void addButton(
                 Context context,
-                LinearLayout linearLayout,
-                boolean z,
-                CompoundButton.OnCheckedChangeListener onCheckedChangeListener) {
-            if (linearLayout.findViewById(listitem_description_button) == null) {
+                LinearLayout row,
+                boolean checked,
+                CompoundButton.OnCheckedChangeListener listener) {
+            if (row.findViewById(listitem_description_button) == null) {
                 CompoundButton checkBox =
                         this.mSimpleUI ? new CheckBox(context) : new Switch(context);
                 checkBox.setId(listitem_description_button);
                 checkBox.setPadding(0, 0, 30, 0);
-                checkBox.setOnCheckedChangeListener(onCheckedChangeListener);
-                checkBox.setChecked(z);
+                checkBox.setOnCheckedChangeListener(listener);
+                checkBox.setChecked(checked);
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-2, -2);
                 layoutParams.gravity = 8388629;
                 checkBox.setLayoutParams(layoutParams);
-                linearLayout.addView(checkBox);
+                row.addView(checkBox);
             }
         }
     }
