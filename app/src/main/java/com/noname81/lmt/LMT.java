@@ -16,7 +16,6 @@ import java.util.ArrayList;
 
 /* JADX INFO: loaded from: classes.dex */
 public class LMT extends Activity {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     private static final String TAG = "LMT::LMT";
     TabsAdapter mTabsAdapter;
     ViewPager mViewPager;
@@ -31,8 +30,8 @@ public class LMT extends Activity {
         setContentView(this.mViewPager);
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(2);
-        actionBar.setDisplayShowHomeEnabled($assertionsDisabled);
-        actionBar.setDisplayShowTitleEnabled($assertionsDisabled);
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
         createTabs();
         if (bundle != null) {
             actionBar.setSelectedNavigationItem(bundle.getInt("tab", 0));

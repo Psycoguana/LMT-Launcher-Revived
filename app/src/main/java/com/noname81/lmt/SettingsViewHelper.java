@@ -21,7 +21,6 @@ import java.util.Map;
 
 /* JADX INFO: loaded from: classes.dex */
 class SettingsViewHelper implements AdapterView.OnItemClickListener {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     private Activity mActivity;
     private RootContext mRootContext;
     private SettingsValues mSettings;

@@ -14,7 +14,6 @@ import java.util.Map;
 
 /* JADX INFO: loaded from: classes.dex */
 class SeparatedListAdapter extends BaseAdapter {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     static final String ITEM_CAPTION = "caption";
     static final String ITEM_TITLE = "title";
     private static final int TYPE_SECTION_HEADER = 0;
@@ -22,7 +21,7 @@ class SeparatedListAdapter extends BaseAdapter {
     private final Map<String, Adapter> sections = new LinkedHashMap();
 
     public boolean areAllItemsSelectable() {
-        return $assertionsDisabled;
+        return false;
     }
 
     @Override // android.widget.Adapter
@@ -106,7 +105,7 @@ class SeparatedListAdapter extends BaseAdapter {
         if (getItemViewType(i) != 0) {
             return true;
         }
-        return $assertionsDisabled;
+        return false;
     }
 
     @Override // android.widget.Adapter

@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 
 /* JADX INFO: loaded from: classes.dex */
 class SettingsValues extends SettingsValuesBase {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     private static SettingsValues instance;
     private int mOrientation;
     private int mScreenHeight;
@@ -25,7 +24,10 @@ class SettingsValues extends SettingsValuesBase {
     private boolean mVisiblePieActivationAreas;
 
     String getVersion() {
-        return "v3.11";
+        // Upstream hardcoded this and kept it in step with the APK's versionName by
+        // running sed over the smali at build time (see reference/build.sh). Reading
+        // BuildConfig removes the drift permanently.
+        return "v" + BuildConfig.VERSION_NAME;
     }
 
     private SettingsValues(Context context) {

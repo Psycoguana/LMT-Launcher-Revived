@@ -212,7 +212,7 @@ class Action {
         String str2 = "none";
         if (i > 0) {
             String[] strArr = names;
-            if (i <= strArr.length) {
+            if (i < strArr.length) {
                 str = strArr[i];
             } else {
                 str = "none";

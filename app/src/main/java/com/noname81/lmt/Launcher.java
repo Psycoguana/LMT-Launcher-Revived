@@ -22,7 +22,6 @@ import java.util.TimerTask;
 
 /* JADX INFO: loaded from: classes.dex */
 class Launcher {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     private static boolean DEBUG = false;
     private static final String TAG = "LMT::Launcher";
     private static Launcher instance;
@@ -48,7 +47,7 @@ class Launcher {
     }
 
     static void setDebug(int i) {
-        DEBUG = i != 1 ? $assertionsDisabled : true;
+        DEBUG = i != 1 ? false : true;
     }
 
     void fireAction(Action action) {
@@ -175,11 +174,11 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doHomeAction()");
         }
-        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, $assertionsDisabled)) {
+        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, false)) {
             AccessibilityHandler.performAction(2);
             return;
         }
-        if (this.mRootContext.isRootAvailable($assertionsDisabled)) {
+        if (this.mRootContext.isRootAvailable(false)) {
             doKeyAction(3);
             return;
         }
@@ -200,9 +199,9 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doRecentAppsAction()");
         }
-        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, $assertionsDisabled)) {
+        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, false)) {
             AccessibilityHandler.performAction(3);
-        } else if (this.mRootContext.isRootAvailable($assertionsDisabled)) {
+        } else if (this.mRootContext.isRootAvailable(false)) {
             doKeyAction(187);
         } else {
             AccessibilityHandler.isAccessibilityAvailable(this.mContext, true);
@@ -227,9 +226,9 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doBackAction()");
         }
-        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, $assertionsDisabled)) {
+        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, false)) {
             AccessibilityHandler.performAction(1);
-        } else if (this.mRootContext.isRootAvailable($assertionsDisabled)) {
+        } else if (this.mRootContext.isRootAvailable(false)) {
             doKeyAction(4);
         } else {
             AccessibilityHandler.isAccessibilityAvailable(this.mContext, true);
@@ -247,7 +246,7 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doSearchAction()");
         }
-        if (this.mRootContext.isRootAvailable($assertionsDisabled)) {
+        if (this.mRootContext.isRootAvailable(false)) {
             doKeyAction(84);
             return;
         }
@@ -371,7 +370,7 @@ class Launcher {
         }
         int i = 0;
         if (Build.VERSION.SDK_INT >= 21) {
-            if (this.mRootContext.isRootAvailable($assertionsDisabled)) {
+            if (this.mRootContext.isRootAvailable(false)) {
                 this.mRootContext.runCommandRemote("am last-app 0", true);
                 return;
             }
@@ -411,9 +410,9 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doPowerMenuAction()");
         }
-        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, $assertionsDisabled)) {
+        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, false)) {
             AccessibilityHandler.performAction(6);
-        } else if (this.mRootContext.isRootAvailable($assertionsDisabled)) {
+        } else if (this.mRootContext.isRootAvailable(false)) {
             doKeyAction(1026);
         } else {
             AccessibilityHandler.isAccessibilityAvailable(this.mContext, true);
@@ -444,7 +443,7 @@ class Launcher {
                 || (launchIntentForPackage =
                                 this.mContext.getPackageManager().getLaunchIntentForPackage(str))
                         == null) {
-            return $assertionsDisabled;
+            return false;
         }
         doActivityAction(launchIntentForPackage.getComponent().flattenToString());
         return true;
@@ -480,7 +479,7 @@ class Launcher {
         if (str == null || str.length() <= 0) {
             return;
         }
-        if (this.mRootContext.isRootAvailable($assertionsDisabled)) {
+        if (this.mRootContext.isRootAvailable(false)) {
             if (Build.VERSION.SDK_INT >= 21) {
                 this.mRootContext.runCommandRemote("am move-to-front-or-start " + str, true);
                 return;
@@ -588,7 +587,7 @@ class Launcher {
             declaredMethod.setAccessible(true);
             Object[] objArr = new Object[1];
             if (telephonyManager.getDataState() == 2) {
-                z = $assertionsDisabled;
+                z = false;
             }
             objArr[0] = Boolean.valueOf(z);
             declaredMethod.invoke(obj, objArr);
@@ -621,7 +620,7 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doImmersiveModeToggleAction()");
         }
-        boolean zIsRootAvailable = this.mRootContext.isRootAvailable($assertionsDisabled);
+        boolean zIsRootAvailable = this.mRootContext.isRootAvailable(false);
         String strRunCommandResult =
                 this.mRootContext.runCommandResult(
                         "settings get global policy_control", zIsRootAvailable);
@@ -646,7 +645,7 @@ class Launcher {
             Log.d(TAG, "doKillAppAction()");
         }
         if (Build.VERSION.SDK_INT >= 21) {
-            this.mRootContext.runCommandRemote("am kill-app 0", $assertionsDisabled);
+            this.mRootContext.runCommandRemote("am kill-app 0", false);
             return;
         }
         this.mRunningTaskInfo = this.mActivityManager.getRunningTasks(1);
@@ -662,7 +661,7 @@ class Launcher {
                             return;
                         }
                         Launcher.this.mRootContext.runCommandRoot(
-                                "am force-stop " + packageName, Launcher.$assertionsDisabled);
+                                "am force-stop " + packageName, false);
                         if (Launcher.DEBUG) {
                             Log.d(Launcher.TAG, "Kill app " + packageName);
                         }
@@ -677,7 +676,7 @@ class Launcher {
             Log.d(TAG, "doKillAllAppsAction()");
         }
         if (Build.VERSION.SDK_INT >= 21) {
-            this.mRootContext.runCommandRemote("am kill-all-apps 0", $assertionsDisabled);
+            this.mRootContext.runCommandRemote("am kill-all-apps 0", false);
             return;
         }
         this.mRunningTaskInfo = this.mActivityManager.getRunningTasks(100);
@@ -721,7 +720,7 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doOpenNotificationBar()");
         }
-        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, $assertionsDisabled)) {
+        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, false)) {
             AccessibilityHandler.performAction(4);
             return;
         }
@@ -753,7 +752,7 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doOpenQuickSettings()");
         }
-        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, $assertionsDisabled)) {
+        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, false)) {
             AccessibilityHandler.performAction(5);
             return;
         }
@@ -824,7 +823,7 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doSplitScreenAction()");
         }
-        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, $assertionsDisabled)) {
+        if (AccessibilityHandler.isAccessibilityAvailable(this.mContext, false)) {
             AccessibilityHandler.performAction(7);
         } else {
             AccessibilityHandler.isAccessibilityAvailable(this.mContext, true);

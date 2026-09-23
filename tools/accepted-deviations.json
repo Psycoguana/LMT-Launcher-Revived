@@ -4,7 +4,13 @@
     {
       "class": "SettingsValues.smali",
       "method": "getVersion()Ljava/lang/String;",
-      "reason": "Version string bumped v3.10 -> v3.11 to match the APK's versionName. Upstream did this at build time with a sed over the smali (see reference/build.sh); here it lives in the source. Keeping the two in sync by hand is a known wart - see docs/recommendations.md for the BuildConfig fix that would remove it."
+      "reason": "Reads BuildConfig.VERSION_NAME instead of a hardcoded string. Upstream kept the two in step by running sed over the smali at build time (reference/build.sh); this removes that drift permanently. Adds a generated BuildConfig class."
+    },
+    {
+      "class": "Action.smali",
+      "method": "public toString()Ljava/lang/String;",
+      "reason": "Bug fix: the bound was `mType <= names.length`, which indexes one past the end when mType equals the array length (reachable from a corrupted or hand-edited prefs file). Changed to `<`. See docs/ROADMAP.md 3.2."
     }
-  ]
+  ],
+  "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences."
 }

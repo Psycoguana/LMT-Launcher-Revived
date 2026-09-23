@@ -46,6 +46,12 @@ android {
         }
     }
 
+    buildFeatures {
+        // getVersion() reads BuildConfig.VERSION_NAME so the in-app version can
+        // never drift from the APK's versionName.
+        buildConfig true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8

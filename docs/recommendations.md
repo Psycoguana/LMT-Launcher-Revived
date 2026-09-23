@@ -1,3 +1,6 @@
+> **Superseded by [ROADMAP.md](ROADMAP.md).** Items 1-3 below are now done
+> (see `tools/accepted-deviations.json`); the rest moved into the roadmap.
+
 # Recommendations
 
 Things found during the reconstruction that are worth doing, listed with the reason

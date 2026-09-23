@@ -36,7 +36,6 @@ import java.util.TimerTask;
 
 /* JADX INFO: loaded from: classes.dex */
 public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     private static final int AIContentInvalid = 0;
     private static final int AIContentOverview = 1;
     private static final int AINotification1 = 2;
@@ -122,7 +121,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mAnimationActive = true;
         this.mAnimationTime = settingsValues.loadPieAnimation();
         this.mSensorActivated =
-                settingsValues.loadPieShowStatusInfos() == 3 ? true : $assertionsDisabled;
+                settingsValues.loadPieShowStatusInfos() == 3 ? true : false;
         this.mSensorManager = (SensorManager) context.getSystemService("sensor");
         this.mSensorAnimator = new ValueAnimator();
         this.mSensorAnimation = 0.0f;
@@ -172,13 +171,13 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         paint.setTypeface(typefaceCreateFromAsset);
         paint.setTextAlign(Paint.Align.RIGHT);
         this.mClockStrings = new String[2];
-        this.mClockSelected = $assertionsDisabled;
+        this.mClockSelected = false;
         this.mAIPath = new Path();
         this.mAIAnimatorIn = new ValueAnimator();
         this.mAIAnimationIn = 0.0f;
         this.mAIAnimatorOutIn = new ValueAnimator();
         this.mAIAnimationInOut = 0.0f;
-        this.mAIAnimationInOutReversed = $assertionsDisabled;
+        this.mAIAnimationInOutReversed = false;
         int iApplyDimension = (int) TypedValue.applyDimension(1, f, resources.getDisplayMetrics());
         this.mAITextSize = iApplyDimension;
         Paint paint2 = new Paint();
@@ -191,7 +190,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         paint2.setTextSize(iApplyDimension);
         this.mAIStrings = new String[3];
         this.mAIContent = 0;
-        this.mAISelected = $assertionsDisabled;
+        this.mAISelected = false;
         Paint paint3 = new Paint();
         this.mBackgroundPaint = paint3;
         paint3.setColor(i4);
@@ -218,7 +217,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
             this.mAIAnimatorOutIn.cancel();
         }
         this.mAIAnimationInOut = 0.0f;
-        this.mAIAnimationInOutReversed = $assertionsDisabled;
+        this.mAIAnimationInOutReversed = false;
         this.mAITextPaint.setAlpha(0);
         this.mAIContent = 0;
         this.mBackgroundPaint.setAlpha(0);
@@ -320,7 +319,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                                         if (PieStatusInfo.this.mAIAnimationInOut < fMax
                                                 && PieStatusInfo.this.mAIAnimationInOutReversed) {
                                             PieStatusInfo.this.mAIAnimationInOutReversed =
-                                                    PieStatusInfo.$assertionsDisabled;
+                                                    false;
                                         }
                                     } else {
                                         PieStatusInfo.this.fillAdditionalInfoStrings();
@@ -362,7 +361,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
     @Override // com.noname81.lmt.PieMenu.PieView
     public boolean drawBackground(Canvas canvas) {
         canvas.drawPaint(this.mBackgroundPaint);
-        return $assertionsDisabled;
+        return false;
     }
 
     @Override // com.noname81.lmt.PieMenu.PieView
@@ -436,7 +435,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                         this.mPieMenu.invalidate();
                     }
                     this.mClockSelected = true;
-                    this.mAISelected = $assertionsDisabled;
+                    this.mAISelected = false;
                     return true;
                 }
                 Paint paint3 = this.mAITextPaint;
@@ -457,7 +456,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                     this.mPieMenu.invalidate();
                 }
                 this.mAISelected = true;
-                this.mClockSelected = $assertionsDisabled;
+                this.mClockSelected = false;
                 return true;
             }
             if (this.mAnimationActive && !this.mAIAnimatorOutIn.isStarted()) {
@@ -482,8 +481,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
             if (this.mClockSelected || this.mAISelected) {
                 this.mPieMenu.invalidate();
             }
-            this.mClockSelected = $assertionsDisabled;
-            this.mAISelected = $assertionsDisabled;
+            this.mClockSelected = false;
+            this.mAISelected = false;
         } else if (1 == i
                 && pointF.y > this.mRadius + (this.mRadiusInc * this.mLevels)
                 && (this.mClockAnimationIn >= 1.0f || !this.mAnimationActive)) {
@@ -510,7 +509,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
             this.mNotificationDataHelper.removeNotificationData(this.mAIContent - 2);
             return true;
         }
-        return $assertionsDisabled;
+        return false;
     }
 
     private boolean isClockArea(PointF pointF) {
@@ -518,12 +517,12 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
             if (pointF.x > 0.0f) {
                 return true;
             }
-            return $assertionsDisabled;
+            return false;
         }
         if (pointF.x > 1.5707963267948966d) {
             return true;
         }
-        return $assertionsDisabled;
+        return false;
     }
 
     private void makePath(float f) {
@@ -774,14 +773,14 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         String strRunCommandResult =
                 this.mRootContext.runCommandResult(
                         "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq",
-                        $assertionsDisabled);
+                        false);
         if (strRunCommandResult.length() > 4) {
             strRunCommandResult =
                     strRunCommandResult.substring(0, strRunCommandResult.length() - 4) + "MHz | ";
         }
         String strReplace =
                 this.mRootContext
-                        .runCommandResult("cat /sys/devices/system/cpu/online", $assertionsDisabled)
+                        .runCommandResult("cat /sys/devices/system/cpu/online", false)
                         .replace("\n", "");
         if (strRunCommandResult.length() <= 0) {
             return strRunCommandResult;
@@ -843,7 +842,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 this.mAIAnimatorOutIn.end();
                 this.mAIAnimatorOutIn.start();
                 this.mAIAnimationInOut = 0.0f;
-                this.mAIAnimationInOutReversed = $assertionsDisabled;
+                this.mAIAnimationInOutReversed = false;
                 this.mAITextPaint.setAlpha(Color.alpha(this.mColorNotifications));
                 this.mNotificationDataHelper.removeNotificationData(this.mAIContent - 2);
                 this.mSensorLastUpdate = jCurrentTimeMillis;
@@ -880,7 +879,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 this.mAIAnimatorOutIn.start();
                 this.mAIAnimationInOut = 0.0f;
                 this.mAITextPaint.setAlpha(Color.alpha(this.mColorNotifications));
-                this.mAIAnimationInOutReversed = $assertionsDisabled;
+                this.mAIAnimationInOutReversed = false;
                 this.mSensorLastUpdate = jCurrentTimeMillis;
             }
         }

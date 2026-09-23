@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 /* JADX INFO: loaded from: classes.dex */
 class PermissionChecker {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     static int DRAW_OVER_APPS_REQUEST_CODE = 5469;
     private static final String TAG = "LMT::PermissionChecker";
     static int USAGE_STATS_REQUEST_CODE = 5470;
@@ -32,7 +31,7 @@ class PermissionChecker {
         boolean z2 = true;
         if (Build.VERSION.SDK_INT >= 23
                 && context.checkSelfPermission("android.permission.CALL_PHONE") != 0) {
-            z2 = $assertionsDisabled;
+            z2 = false;
         }
         if (z) {
             Log.d(TAG, "hasPhoneCallPermission(" + z2 + ")");
@@ -53,7 +52,7 @@ class PermissionChecker {
         boolean z2 = true;
         if (Build.VERSION.SDK_INT >= 23
                 && context.checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != 0) {
-            z2 = $assertionsDisabled;
+            z2 = false;
         }
         if (z) {
             Log.d(TAG, "hasExternalStorageReadPermission(" + z2 + ")");
@@ -75,7 +74,7 @@ class PermissionChecker {
         boolean z2 = true;
         if (Build.VERSION.SDK_INT >= 23
                 && context.checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != 0) {
-            z2 = $assertionsDisabled;
+            z2 = false;
         }
         if (z) {
             Log.d(TAG, "hasExternalStorageWritePermission(" + z2 + ")");
@@ -97,7 +96,7 @@ class PermissionChecker {
         boolean z2 =
                 (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(context))
                         ? true
-                        : $assertionsDisabled;
+                        : false;
         if (z) {
             Log.d(TAG, "hasDrawOverAppsPermission(" + z2 + ")");
         }
@@ -115,7 +114,7 @@ class PermissionChecker {
                         Uri.parse("package:" + activity.getPackageName()));
         intent.addFlags(268435456);
         activity.startActivityForResult(intent, DRAW_OVER_APPS_REQUEST_CODE);
-        return $assertionsDisabled;
+        return false;
     }
 
     boolean hasUsageStatsPermission(Context context, boolean z) {
@@ -127,7 +126,7 @@ class PermissionChecker {
                                         Process.myUid(),
                                         context.getPackageName())
                         != 0) {
-            z2 = $assertionsDisabled;
+            z2 = false;
         }
         if (z) {
             Log.d(TAG, "hasUsageStatsPermission(" + z2 + ")");
@@ -143,6 +142,6 @@ class PermissionChecker {
         Intent intent = new Intent("android.settings.USAGE_ACCESS_SETTINGS");
         intent.addFlags(268435456);
         activity.startActivityForResult(intent, USAGE_STATS_REQUEST_CODE);
-        return $assertionsDisabled;
+        return false;
     }
 }

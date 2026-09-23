@@ -20,7 +20,6 @@ import java.lang.ref.WeakReference;
 
 /* JADX INFO: loaded from: classes.dex */
 public class TouchService extends Service {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     private static final String TAG = "LMT::TouchService";
     private Launcher mLauncher;
     private PieContainer mPieContainer;
@@ -42,7 +41,7 @@ public class TouchService extends Service {
 
         TouchServiceThread(String str) {
             super(str);
-            this.stopped = TouchService.$assertionsDisabled;
+            this.stopped = false;
         }
 
         @Override // android.os.HandlerThread, java.lang.Thread, java.lang.Runnable
@@ -144,14 +143,14 @@ public class TouchService extends Service {
         }
         if (this.mSettings.loadTouchServiceMode() > 0
                 && PermissionChecker.getInstance()
-                        .hasDrawOverAppsPermission(this, $assertionsDisabled)) {
+                        .hasDrawOverAppsPermission(this, false)) {
             if (this.mPieContainer == null) {
                 this.mPieContainer = new PieContainer(this);
             }
             this.mPieContainer.attachToWindowManager();
             if (this.mSettings.getVisiblePieActivationAreas()) {
                 this.mPieContainer.debug();
-                this.mSettings.setVisiblePieActivationAread($assertionsDisabled);
+                this.mSettings.setVisiblePieActivationAread(false);
             }
         }
         File file = new File(this.mSettings.loadResourceSearchPath());

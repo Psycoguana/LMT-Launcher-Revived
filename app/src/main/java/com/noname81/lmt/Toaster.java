@@ -10,7 +10,6 @@ import android.widget.Toast;
 
 /* JADX INFO: loaded from: classes.dex */
 class Toaster {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     static final int Debug = 1;
     static final int Image = 2;
     static final int None = 0;

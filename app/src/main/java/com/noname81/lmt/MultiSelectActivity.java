@@ -29,7 +29,6 @@ import java.util.Map;
 
 /* JADX INFO: loaded from: classes.dex */
 public class MultiSelectActivity extends Activity implements AdapterView.OnItemClickListener {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     public static int AppSelectMode = 0;
     public static final int REQUEST_CREATE_SHORTCUT = 1;
     public static final int SelectActivity = 2;

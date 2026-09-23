@@ -19,7 +19,6 @@ abstract class ColorDialog extends AlertDialog.Builder
         implements DialogInterface.OnClickListener,
                 View.OnClickListener,
                 SeekBar.OnSeekBarChangeListener {
-    static final /* synthetic */ boolean $assertionsDisabled = false;
     private TextView mAlphaLabel;
     private SeekBar mAlphaSeek;
     private TextView mAlphaValue;
