@@ -90,22 +90,15 @@ public class RootContext {
     }
 
     private void copyRemote() throws Exception {
-        String str;
         if (DEBUG) {
             Log.d(TAG, "copyRemote()");
         }
-        if (Build.VERSION.SDK_INT >= 60) {
-            str = "InputContext34.jar";
-        } else if (Build.VERSION.SDK_INT >= 29) {
-            str = "InputContext29.jar";
-        } else if (Build.VERSION.SDK_INT >= 28) {
-            str = "InputContext28.jar";
-        } else if (Build.VERSION.SDK_INT >= 24) {
-            str = "InputContext24.jar";
-        } else {
-            str = Build.VERSION.SDK_INT >= 20 ? "InputContext21.jar" : "InputContext20.jar";
-        }
-        InputStream inputStreamOpen = this.mContext.getAssets().open(str);
+        // One helper now covers every API level. The five prebuilt
+        // InputContext<sdk>.jar variants existed only because hidden-API signatures
+        // changed between releases; the helper is built from source (see
+        // :inputcontext) and reaches those APIs reflectively, which defers signature
+        // resolution to runtime.
+        InputStream inputStreamOpen = this.mContext.getAssets().open("InputContext.jar");
         FileOutputStream fileOutputStream =
                 new FileOutputStream(new File(this.mAbsolutePath + "/InputContext.jar"));
         byte[] bArr = new byte[4096];

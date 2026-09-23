@@ -1,3 +1,21 @@
 plugins {
     id 'com.android.application' version '8.9.1' apply false
 }
+
+// Shared with :inputcontext, which needs the same platform jar and build-tools.
+ext {
+    compileSdk = 36
+    buildToolsVersion = '36.0.0'
+}
+
+def androidSdkDir() {
+    def local = new File(rootDir, 'local.properties')
+    if (local.exists()) {
+        def props = new Properties()
+        local.withInputStream { props.load(it) }
+        def dir = props.getProperty('sdk.dir')
+        if (dir) return dir
+    }
+    return System.getenv('ANDROID_HOME') ?: System.getenv('ANDROID_SDK_ROOT')
+}
+ext.androidSdkDir = this.&androidSdkDir

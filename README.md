@@ -84,19 +84,23 @@ output was jadx substituting an unrelated library constant for a plain integer �
 `MotionEventCompat.AXIS_LTRIGGER` for `17`, and so on. Those were resolved against
 the smali and replaced with literals, which is why the dependency list is one line.
 
-## Known breakage in the app itself
+## The root helper
 
-**Root key injection does not work on modern Android.** `InputManager.getInstance()`
-NPEs inside `app_process`, so every `input keyevent` / `tap` / `text` command is a
-silent no-op. This is a pre-existing upstream bug, reported on XDA since September
-2024 and never root-caused — the community workaround is to turn root *off*, which
-forces the accessibility path.
+`inputcontext/` builds the program that runs under `su` via `app_process` and does
+what an app is not allowed to do — press Home, force-stop apps, reorder tasks.
+`RootContext` copies it out of assets, starts it once, and feeds it commands on
+stdin.
 
-It kills `Menu`, all three long-press actions, `Key`, `Screenshot`, `NowOnTap` and
-`Assistant` outright. `Home`/`Back`/`RecentApps`/`PiePointer` survive because they
-try accessibility first. The `am` family and plain-`su`-shell actions are
-unaffected. Full analysis, evidence and blast radius in
-[`docs/ROADMAP.md`](docs/ROADMAP.md) §3.1.
+It used to ship as five prebuilt jars, one per SDK level, and carried a bug that
+silently disabled every root key action on modern Android:
+`InputManager.getInstance()` NPEs inside `app_process`. That had been reported on
+XDA since September 2024 and never root-caused — the community workaround was to
+turn root *off*, forcing the accessibility path.
+
+Both are now resolved. The helper is built from source, and the five variants
+collapsed into one: they only ever differed where hidden-API *signatures* changed,
+which reflection defers to runtime. See
+[`tools/inputcontext/README.md`](tools/inputcontext/README.md).
 
 ## Where things are going
 

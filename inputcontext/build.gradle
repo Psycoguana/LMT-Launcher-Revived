@@ -1,0 +1,53 @@
+// Builds the root helper (see inputcontext/src/.../InputContext.java) into a dex jar
+// that ships as an app asset.
+//
+// It cannot be an ordinary Android library module: it is not a library the app links
+// against, it is a standalone program started by `app_process` inside a root shell,
+// so what is needed is a bare classes.dex in a jar — javac, then d8, then zip.
+//
+// Compiles against the PUBLIC android.jar only. Everything hidden goes through
+// reflection, which is also why this one source tree replaces the five prebuilt
+// per-SDK jars it supersedes.
+
+def sdkDir = rootProject.ext.androidSdkDir()
+def platformJar = "${sdkDir}/platforms/android-${rootProject.ext.compileSdk}/android.jar"
+def d8 = "${sdkDir}/build-tools/${rootProject.ext.buildToolsVersion}/d8"
+
+def outDir      = layout.buildDirectory.dir("inputcontext")
+def classesDir  = layout.buildDirectory.dir("inputcontext/classes")
+def dexDir      = layout.buildDirectory.dir("inputcontext/dex")
+def jarDir      = layout.buildDirectory.dir("inputcontext/assets")
+
+tasks.register('compileHelper', JavaCompile) {
+    description = 'Compiles the root helper against the public android.jar'
+    source = fileTree('src/main/java') { include '**/*.java' }
+    destinationDirectory = classesDir
+    classpath = files()
+    options.bootstrapClasspath = files(platformJar)
+    sourceCompatibility = '8'
+    targetCompatibility = '8'
+    // Android's bootclasspath has no LambdaMetafactory, so no lambdas in this tree.
+    options.compilerArgs += ['-Xlint:-options']
+}
+
+tasks.register('dexHelper', Exec) {
+    description = 'Dexes the helper classes'
+    dependsOn 'compileHelper'
+    doFirst { dexDir.get().asFile.mkdirs() }
+    commandLine = [d8, '--min-api', '21', '--lib', platformJar,
+                   '--output', dexDir.get().asFile.absolutePath]
+    argumentProviders.add(new CommandLineArgumentProvider() {
+        @Override Iterable<String> asArguments() {
+            fileTree(classesDir).matching { include '**/*.class' }
+                    .files.collect { it.absolutePath }
+        }
+    })
+}
+
+tasks.register('helperJar', Zip) {
+    description = 'Packages classes.dex as InputContext.jar for the app assets'
+    dependsOn 'dexHelper'
+    from(dexDir) { include 'classes.dex' }
+    archiveFileName = 'InputContext.jar'
+    destinationDirectory = jarDir
+}

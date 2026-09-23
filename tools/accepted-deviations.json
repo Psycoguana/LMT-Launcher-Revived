@@ -10,6 +10,11 @@
       "class": "Action.smali",
       "method": "public toString()Ljava/lang/String;",
       "reason": "Bug fix: the bound was `mType <= names.length`, which indexes one past the end when mType equals the array length (reachable from a corrupted or hand-edited prefs file). Changed to `<`. See docs/ROADMAP.md 3.2."
+    },
+    {
+      "class": "RootContext.smali",
+      "method": "private copyRemote()V",
+      "reason": "The five prebuilt InputContext<sdk>.jar assets are replaced by one jar built from source by the :inputcontext module, so the SDK ladder that selected between them is gone. The variants only ever differed where hidden-API signatures changed between releases (ProfilerInfo, getRecentTasks().getList(), ActivityManager.getService(), moveTaskToFront's extra params); the rebuilt helper reaches those APIs reflectively, which defers signature resolution to runtime and lets one build cover every API level. See tools/inputcontext/README.md and ROADMAP 3.1."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences."

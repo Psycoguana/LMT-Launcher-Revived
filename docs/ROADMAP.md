@@ -187,7 +187,7 @@ picker, so every de-rooting must update its caption or the UI will lie.
 
 ## Part 3 — Bugs and hazards found
 
-### 3.1 🔴 Root key injection is broken on Android 15  (pre-existing, upstream)
+### 3.1 ✅ FIXED — root key injection was broken on Android 15  (was pre-existing, upstream)
 
 **Verified on the test phone (Android 15) with root fully granted.** Root itself works:
 `InputContext.jar` is copied, `su` is spawned, root-owned `app_process` helpers run,
@@ -226,12 +226,21 @@ path), `Menu`, `HomeLongpress`, `BackLongpress`, `MenuLongpress`, `Key`,
 `kill-app`, `kill-all-apps`, `force-stop`, `move-to-front-or-start`) runs without
 error — a different code path through `IActivityManager` reflection.
 
-**Fixing it** is now tractable: jadx decompiles `InputContext29.jar` cleanly, so the
-helper can be rebuilt from source. The fix is to stop using
-`InputManager.getInstance()` and obtain the service the modern way. Doing so means
-adding the helper jar to the build (it is currently a prebuilt asset), which is a
-worthwhile change in its own right — that jar is the last binary blob besides
-`libTouchServiceNative.so`.
+**FIXED** (see `inputcontext/` and `tools/inputcontext/README.md`). The helper is
+now built from source by the `:inputcontext` Gradle module instead of shipping
+prebuilt, and `InputInjector` resolves a working route at runtime —
+`InputManagerGlobal` first, then `IInputManager` via `ServiceManager`, then the
+original `InputManager.getInstance()` so older devices are unaffected.
+
+All five per-SDK jars collapsed into one: they only ever differed where hidden-API
+*signatures* changed, and the rebuilt helper reaches those APIs reflectively, which
+defers signature resolution to runtime. `RootContext.copyRemote()` lost its SDK
+ladder accordingly (recorded in `tools/accepted-deviations.json`).
+
+Verified end to end on the test phone through the real app — pie slot bound to `Key 24`,
+`Fire action type: Key` followed by `injectInputEvent via InputManagerGlobal`, and
+the system volume moved. The last binary blob besides `libTouchServiceNative.so`
+is gone.
 
 **What this costs, action by action.** LMT tries accessibility first for its most
 common actions, so the damage is uneven:

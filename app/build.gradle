@@ -46,6 +46,15 @@ android {
         }
     }
 
+    sourceSets {
+        main {
+            // The root helper is built from source by :inputcontext rather than
+            // shipped prebuilt; its dex jar lands here and is packaged as an asset.
+            assets.srcDirs += files(project(':inputcontext')
+                    .layout.buildDirectory.dir('inputcontext/assets'))
+        }
+    }
+
     buildFeatures {
         // getVersion() reads BuildConfig.VERSION_NAME so the in-app version can
         // never drift from the APK's versionName.
@@ -85,4 +94,13 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.13'
     testImplementation 'androidx.test:core:1.6.1'
+}
+
+// The helper jar is a generated asset, so every task that reads the assets tree has
+// to wait for it - asset merging, packaging, and the lint model writers, which scan
+// source sets too.
+tasks.configureEach { task ->
+    if (task.name ==~ /(?i).*(assets|lint).*/) {
+        task.dependsOn ':inputcontext:helperJar'
+    }
 }
