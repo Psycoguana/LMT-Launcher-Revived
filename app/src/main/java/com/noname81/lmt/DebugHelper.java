@@ -2,7 +2,6 @@ package com.noname81.lmt;
 
 import android.content.Context;
 
-/* JADX INFO: loaded from: classes.dex */
 class DebugHelper {
     private static DebugHelper instance;
     private boolean mDebugLauncherEnabled = false;
@@ -32,29 +31,29 @@ class DebugHelper {
                 },
                 Integer.toString(0)) { // from class: com.noname81.lmt.DebugHelper.1
             @Override // com.noname81.lmt.InputDialog
-            public boolean onOkClicked(String str) {
+            public boolean onOkClicked(String choice) {
                 try {
-                    int i = Integer.parseInt(str);
-                    if (i == 1) {
+                    int selected = Integer.parseInt(choice);
+                    if (selected == 1) {
                         DebugHelper debugHelper = DebugHelper.this;
                         debugHelper.mDebugLauncherEnabled =
                                 debugHelper.mDebugLauncherEnabled ? false : true;
                         DebugHelper debugHelper2 = DebugHelper.this;
                         debugHelper2.setDebugLauncher(context, debugHelper2.mDebugLauncherEnabled);
-                    } else if (i == 2) {
+                    } else if (selected == 2) {
                         DebugHelper debugHelper3 = DebugHelper.this;
                         debugHelper3.mDebugTouchServiceEnabled =
                                 debugHelper3.mDebugTouchServiceEnabled ? false : true;
                         DebugHelper debugHelper4 = DebugHelper.this;
                         debugHelper4.setDebugTouchService(
                                 context, debugHelper4.mDebugTouchServiceEnabled);
-                    } else if (i == 3) {
+                    } else if (selected == 3) {
                         DebugHelper debugHelper5 = DebugHelper.this;
                         debugHelper5.mDebugPieEnabled =
                                 debugHelper5.mDebugPieEnabled ? false : true;
                         DebugHelper debugHelper6 = DebugHelper.this;
                         debugHelper6.setPieDebug(debugHelper6.mDebugPieEnabled);
-                    } else if (i == 4) {
+                    } else if (selected == 4) {
                         DebugHelper debugHelper7 = DebugHelper.this;
                         debugHelper7.mNoRootEnabled = debugHelper7.mNoRootEnabled ? false : true;
                         RootContext.getInstance(context)
@@ -67,12 +66,12 @@ class DebugHelper {
         }.show();
     }
 
-    private void setDebugTouchService(Context context, boolean z) {
-        TouchServiceNative.getInstance(context).setDebug(z ? 1 : 0);
+    private void setDebugTouchService(Context context, boolean enabled) {
+        TouchServiceNative.getInstance(context).setDebug(enabled ? 1 : 0);
     }
 
-    private void setDebugLauncher(Context context, boolean z) {
-        if (z) {
+    private void setDebugLauncher(Context context, boolean enabled) {
+        if (enabled) {
             Launcher.setDebug(1);
             AccessibilityHandler.setDebug(1);
             RootContext.getInstance(context).runCommandRemote("debug 1", false);
@@ -85,9 +84,9 @@ class DebugHelper {
         RootContext.getInstance(context).setDebug(0);
     }
 
-    private void setPieDebug(boolean z) {
-        PieContainer.setDebug(z);
-        PieContainer.setDebug(z);
-        PieMenu.setDebug(z);
+    private void setPieDebug(boolean enabled) {
+        PieContainer.setDebug(enabled);
+        PieContainer.setDebug(enabled);
+        PieMenu.setDebug(enabled);
     }
 }

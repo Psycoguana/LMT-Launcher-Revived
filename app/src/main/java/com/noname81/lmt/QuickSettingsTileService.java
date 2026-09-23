@@ -3,7 +3,6 @@ package com.noname81.lmt;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 
-/* JADX INFO: loaded from: classes.dex */
 public class QuickSettingsTileService extends TileService {
     @Override // android.service.quicksettings.TileService
     public void onStartListening() {
@@ -28,10 +27,13 @@ public class QuickSettingsTileService extends TileService {
         }
     }
 
-    private void updateTileState(int i) {
+    /**
+     * @param state one of {@link Tile#STATE_INACTIVE} / {@link Tile#STATE_ACTIVE}.
+     */
+    private void updateTileState(int state) {
         Tile qsTile = getQsTile();
         if (qsTile != null) {
-            qsTile.setState(i);
+            qsTile.setState(state);
             qsTile.updateTile();
         }
     }

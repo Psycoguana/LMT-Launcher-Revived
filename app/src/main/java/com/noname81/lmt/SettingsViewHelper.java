@@ -106,10 +106,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Autostart service",
                     new String[] {"Disabled", "Enabled"},
-                    Integer.toString(
-                            this.mSettings
-                                    .loadAutostart())) { // from class:
-                                                         // com.noname81.lmt.SettingsViewHelper.1
+                    Integer.toString(this.mSettings.loadAutostart())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.1
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str) {
                     try {
@@ -131,10 +129,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         "Gestures [Root] , ISAS [Root] and Pie",
                         "Pie"
                     },
-                    Integer.toString(
-                            this.mSettings
-                                    .loadTouchServiceMode())) { // from class:
-                                                                // com.noname81.lmt.SettingsViewHelper.2
+                    Integer.toString(this.mSettings.loadTouchServiceMode())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.2
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str) {
                     try {
@@ -228,9 +224,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     .setCancelable(false)
                     .setPositiveButton(
                             "ok",
-                            new DialogInterface
-                                    .OnClickListener() { // from class:
-                                                         // com.noname81.lmt.SettingsViewHelper.4
+                            new DialogInterface.OnClickListener() { // from class:
+                                // com.noname81.lmt.SettingsViewHelper.4
                                 @Override // android.content.DialogInterface.OnClickListener
                                 public void onClick(DialogInterface dialogInterface, int i9) {
                                     dialogInterface.dismiss();
@@ -254,9 +249,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                             })
                     .setNegativeButton(
                             "cancel",
-                            new DialogInterface
-                                    .OnClickListener() { // from class:
-                                                         // com.noname81.lmt.SettingsViewHelper.3
+                            new DialogInterface.OnClickListener() { // from class:
+                                // com.noname81.lmt.SettingsViewHelper.3
                                 @Override // android.content.DialogInterface.OnClickListener
                                 public void onClick(DialogInterface dialogInterface, int i9) {
                                     dialogInterface.dismiss();
@@ -293,10 +287,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         "Input device 19",
                         "Input device 20"
                     },
-                    Integer.toString(
-                            this.mSettings
-                                    .loadInputDevice())) { // from class:
-                                                           // com.noname81.lmt.SettingsViewHelper.5
+                    Integer.toString(this.mSettings.loadInputDevice())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.5
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -339,10 +331,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     new String[] {
                         "No feedback", "Debug overlay", "Image overlay", "Tactile feedback"
                     },
-                    Integer.toString(
-                            this.mSettings
-                                    .loadFeedbackMode())) { // from class:
-                                                            // com.noname81.lmt.SettingsViewHelper.6
+                    Integer.toString(this.mSettings.loadFeedbackMode())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.6
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -381,9 +371,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     "Single touch gestures",
                     new String[] {"Disbaled", "Enabled"},
                     Integer.toString(
-                            this.mSettings
-                                    .loadSingleTouchGestureSupport())) { // from class:
-                                                                         // com.noname81.lmt.SettingsViewHelper.8
+                            this.mSettings.loadSingleTouchGestureSupport())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.8
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -539,10 +528,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         "Left, right and bottom",
                         "Left, right and bottom\n(not centered)"
                     },
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPiePos())) { // from class:
-                                                      // com.noname81.lmt.SettingsViewHelper.15
+                    Integer.toString(this.mSettings.loadPiePos())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.15
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -601,10 +588,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Activation area gravity",
                     new String[] {"Center", "Top", "Bottom"},
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieAreaGravity())) { // from class:
-                                                              // com.noname81.lmt.SettingsViewHelper.18
+                    Integer.toString(this.mSettings.loadPieAreaGravity())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.18
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -624,10 +609,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Set pie area behind keyboard",
                     new String[] {"Disabled", "Enabled"},
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieAreaBehindKeyboard())) { // from class:
-                                                                     // com.noname81.lmt.SettingsViewHelper.19
+                    Integer.toString(this.mSettings.loadPieAreaBehindKeyboard())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.19
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -647,10 +630,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Set pie on lockscreen",
                     new String[] {"Disabled", "Enabled"},
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieOnLockScreen())) { // from class:
-                                                               // com.noname81.lmt.SettingsViewHelper.20
+                    Integer.toString(this.mSettings.loadPieOnLockScreen())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.20
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -694,9 +675,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Pie status info colors",
                     new String[] {"clock color", "notification color", "dim color"},
-                    this.mSettings
-                            .loadPieStatusInfoColor()) { // from class:
-                                                         // com.noname81.lmt.SettingsViewHelper.22
+                    this.mSettings.loadPieStatusInfoColor()) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.22
                 @Override // com.noname81.lmt.ColorDialog
                 public boolean onOkClicked(String str2) {
                     SettingsViewHelper.this.mSettings.savePieStatusInfoColor(str2);
@@ -711,9 +691,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Pie pointer colors",
                     new String[] {"pointer color"},
-                    this.mSettings
-                            .loadPiePointerColor()) { // from class:
-                                                      // com.noname81.lmt.SettingsViewHelper.23
+                    this.mSettings.loadPiePointerColor()) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.23
                 @Override // com.noname81.lmt.ColorDialog
                 public boolean onOkClicked(String str2) {
                     SettingsViewHelper.this.mSettings.savePiePointerColor(str2);
@@ -738,10 +717,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         "System font (normal)",
                         "System font (big)"
                     },
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieFont())) { // from class:
-                                                       // com.noname81.lmt.SettingsViewHelper.24
+                    Integer.toString(this.mSettings.loadPieFont())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.24
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -929,10 +906,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         "Longpress and fire",
                         "Shortpress, longpress and fire"
                     },
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieVibrate())) { // from class:
-                                                          // com.noname81.lmt.SettingsViewHelper.33
+                    Integer.toString(this.mSettings.loadPieVibrate())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.33
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -971,10 +946,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Multi command",
                     new String[] {"Disabled", "Enabled"},
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieMultiCommand())) { // from class:
-                                                               // com.noname81.lmt.SettingsViewHelper.35
+                    Integer.toString(this.mSettings.loadPieMultiCommand())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.35
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -994,10 +967,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Expand trigger area",
                     new String[] {"Disabled", "Enabled"},
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieExpandTriggerArea())) { // from class:
-                                                                    // com.noname81.lmt.SettingsViewHelper.36
+                    Integer.toString(this.mSettings.loadPieExpandTriggerArea())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.36
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -1017,10 +988,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Show pointer",
                     new String[] {"Disabled", "Enabled"},
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPiePointerFromEdges())) { // from class:
-                                                                   // com.noname81.lmt.SettingsViewHelper.37
+                    Integer.toString(this.mSettings.loadPiePointerFromEdges())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.37
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -1066,10 +1035,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         "Enabled horizontal",
                         "Enabled with sensor control"
                     },
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieShowStatusInfos())) { // from class:
-                                                                  // com.noname81.lmt.SettingsViewHelper.39
+                    Integer.toString(this.mSettings.loadPieShowStatusInfos())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.39
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -1089,10 +1056,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Set rotate Images",
                     new String[] {"Disabled", "Enabled"},
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieRotateImages())) { // from class:
-                                                               // com.noname81.lmt.SettingsViewHelper.40
+                    Integer.toString(this.mSettings.loadPieRotateImages())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.40
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -1112,10 +1077,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     this.mActivity,
                     "Set nav button style",
                     new String[] {"Android Lollipop", "Android KitKat", "Google Pixel"},
-                    Integer.toString(
-                            this.mSettings
-                                    .loadPieNavButtonStyle())) { // from class:
-                                                                 // com.noname81.lmt.SettingsViewHelper.41
+                    Integer.toString(this.mSettings.loadPieNavButtonStyle())) { // from class:
+                // com.noname81.lmt.SettingsViewHelper.41
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String str2) {
                     try {
@@ -1214,9 +1177,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         this.mContext,
                         linearLayout,
                         SettingsViewHelper.this.mSettings.getServiceState() > 0,
-                        new CompoundButton
-                                .OnCheckedChangeListener() { // from class:
-                                                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.1
+                        new CompoundButton.OnCheckedChangeListener() { // from class:
+                            // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.1
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
                             public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
                                 if (!z
@@ -1238,9 +1200,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         this.mContext,
                         linearLayout,
                         SettingsViewHelper.this.mSettings.loadAutostart() > 0,
-                        new CompoundButton
-                                .OnCheckedChangeListener() { // from class:
-                                                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.2
+                        new CompoundButton.OnCheckedChangeListener() { // from class:
+                            // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.2
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
                             public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
                                 if (!z || SettingsViewHelper.this.mSettings.loadAutostart() != 0) {
@@ -1260,9 +1221,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         this.mContext,
                         linearLayout,
                         SettingsViewHelper.this.mSettings.loadSingleTouchGestureSupport() > 0,
-                        new CompoundButton
-                                .OnCheckedChangeListener() { // from class:
-                                                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.3
+                        new CompoundButton.OnCheckedChangeListener() { // from class:
+                            // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.3
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
                             public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
                                 if (!z
@@ -1289,9 +1249,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         this.mContext,
                         linearLayout,
                         SettingsViewHelper.this.mSettings.loadPieAreaBehindKeyboard() > 0,
-                        new CompoundButton
-                                .OnCheckedChangeListener() { // from class:
-                                                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.4
+                        new CompoundButton.OnCheckedChangeListener() { // from class:
+                            // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.4
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
                             public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
                                 if (!z
@@ -1317,9 +1276,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         this.mContext,
                         linearLayout,
                         SettingsViewHelper.this.mSettings.loadPieOnLockScreen() > 0,
-                        new CompoundButton
-                                .OnCheckedChangeListener() { // from class:
-                                                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.5
+                        new CompoundButton.OnCheckedChangeListener() { // from class:
+                            // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.5
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
                             public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
                                 if (!z
@@ -1344,9 +1302,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         this.mContext,
                         linearLayout,
                         SettingsViewHelper.this.mSettings.loadPieRotateImages() > 0,
-                        new CompoundButton
-                                .OnCheckedChangeListener() { // from class:
-                                                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.6
+                        new CompoundButton.OnCheckedChangeListener() { // from class:
+                            // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.6
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
                             public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
                                 if (!z
@@ -1371,9 +1328,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         this.mContext,
                         linearLayout,
                         SettingsViewHelper.this.mSettings.loadPieExpandTriggerArea() > 0,
-                        new CompoundButton
-                                .OnCheckedChangeListener() { // from class:
-                                                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.7
+                        new CompoundButton.OnCheckedChangeListener() { // from class:
+                            // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.7
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
                             public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
                                 if (!z
@@ -1398,9 +1354,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         this.mContext,
                         linearLayout,
                         SettingsViewHelper.this.mSettings.loadPiePointerFromEdges() > 0,
-                        new CompoundButton
-                                .OnCheckedChangeListener() { // from class:
-                                                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.8
+                        new CompoundButton.OnCheckedChangeListener() { // from class:
+                            // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.8
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
                             public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
                                 if (!z
@@ -1426,9 +1381,8 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                         this.mContext,
                         linearLayout,
                         SettingsViewHelper.this.mSettings.loadPieMultiCommand() > 0,
-                        new CompoundButton
-                                .OnCheckedChangeListener() { // from class:
-                                                             // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.9
+                        new CompoundButton.OnCheckedChangeListener() { // from class:
+                            // com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter.9
                             @Override // android.widget.CompoundButton.OnCheckedChangeListener
                             public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
                                 if (!z

@@ -7,38 +7,40 @@ import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
 
-/* JADX INFO: loaded from: classes.dex */
 abstract class AsyncDrawableTask extends AsyncTask<Void, Void, Drawable> {
     private static final int FADE_IN_TIME = 500;
     private final WeakReference<ImageView> mImageViewReference;
 
     @Override // android.os.AsyncTask
-    protected abstract Drawable doInBackground(Void... voidArr);
+    protected abstract Drawable doInBackground(Void... unused);
 
-    AsyncDrawableTask(ImageView imageView, int i) {
+    /**
+     * @param placeholderResId shown until {@link #doInBackground} produces the real icon.
+     */
+    AsyncDrawableTask(ImageView imageView, int placeholderResId) {
         this.mImageViewReference = new WeakReference<>(imageView);
-        imageView.setImageDrawable(IconUtils.getDrawable(imageView.getContext(), i));
+        imageView.setImageDrawable(IconUtils.getDrawable(imageView.getContext(), placeholderResId));
     }
 
     @Override // android.os.AsyncTask
-    protected void onPostExecute(Drawable drawable) {
+    protected void onPostExecute(Drawable loaded) {
         ImageView imageView;
         if (isCancelled()) {
-            drawable = null;
+            loaded = null;
         }
         WeakReference<ImageView> weakReference = this.mImageViewReference;
         if (weakReference == null || (imageView = weakReference.get()) == null) {
             return;
         }
-        Drawable drawable2 = imageView.getDrawable();
-        if (drawable != null) {
+        Drawable placeholder = imageView.getDrawable();
+        if (loaded != null) {
             TransitionDrawable transitionDrawable =
-                    new TransitionDrawable(new Drawable[] {drawable2, drawable});
+                    new TransitionDrawable(new Drawable[] {placeholder, loaded});
             imageView.setImageDrawable(transitionDrawable);
             transitionDrawable.setCrossFadeEnabled(true);
             transitionDrawable.startTransition(FADE_IN_TIME);
             return;
         }
-        imageView.setImageDrawable(drawable2);
+        imageView.setImageDrawable(placeholder);
     }
 }

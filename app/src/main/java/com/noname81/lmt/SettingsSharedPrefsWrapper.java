@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.provider.Settings;
 
-/* JADX INFO: loaded from: classes.dex */
 class SettingsSharedPrefsWrapper {
     protected Context mContext;
     private SharedPreferences mSharedPreferences;
@@ -17,54 +16,54 @@ class SettingsSharedPrefsWrapper {
         }
     }
 
-    String loadString(String str, String str2) {
+    String loadString(String key, String fallback) {
         SharedPreferences sharedPreferences = this.mSharedPreferences;
         if (sharedPreferences != null) {
-            return sharedPreferences.getString(str, str2);
+            return sharedPreferences.getString(key, fallback);
         }
-        String string = Settings.System.getString(this.mContext.getContentResolver(), str);
-        return string == null ? str2 : string;
+        String string = Settings.System.getString(this.mContext.getContentResolver(), key);
+        return string == null ? fallback : string;
     }
 
-    void saveString(String str, String str2, SharedPreferences.Editor editor) {
+    void saveString(String key, String value, SharedPreferences.Editor editor) {
         SharedPreferences sharedPreferences = this.mSharedPreferences;
         if (sharedPreferences == null) {
-            Settings.System.putString(this.mContext.getContentResolver(), str, str2);
+            Settings.System.putString(this.mContext.getContentResolver(), key, value);
         } else {
             if (editor == null) {
                 SharedPreferences.Editor editorEdit = sharedPreferences.edit();
-                editorEdit.putString(str, str2);
+                editorEdit.putString(key, value);
                 editorEdit.apply();
                 return;
             }
-            editor.putString(str, str2);
+            editor.putString(key, value);
         }
     }
 
-    int loadInt(String str, int i) {
+    int loadInt(String key, int fallback) {
         SharedPreferences sharedPreferences = this.mSharedPreferences;
         if (sharedPreferences != null) {
-            return sharedPreferences.getInt(str, i);
+            return sharedPreferences.getInt(key, fallback);
         }
         try {
-            return Settings.System.getInt(this.mContext.getContentResolver(), str);
+            return Settings.System.getInt(this.mContext.getContentResolver(), key);
         } catch (Exception unused) {
-            return i;
+            return fallback;
         }
     }
 
-    void saveInt(String str, int i, SharedPreferences.Editor editor) {
+    void saveInt(String key, int value, SharedPreferences.Editor editor) {
         SharedPreferences sharedPreferences = this.mSharedPreferences;
         if (sharedPreferences == null) {
-            Settings.System.putInt(this.mContext.getContentResolver(), str, i);
+            Settings.System.putInt(this.mContext.getContentResolver(), key, value);
         } else {
             if (editor == null) {
                 SharedPreferences.Editor editorEdit = sharedPreferences.edit();
-                editorEdit.putInt(str, i);
+                editorEdit.putInt(key, value);
                 editorEdit.apply();
                 return;
             }
-            editor.putInt(str, i);
+            editor.putInt(key, value);
         }
     }
 

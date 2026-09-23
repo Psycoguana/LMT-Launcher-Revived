@@ -3,7 +3,6 @@ package com.noname81.lmt;
 import android.content.Context;
 import android.util.Log;
 
-/* JADX INFO: loaded from: classes.dex */
 class TouchServiceNative {
     private static final String TAG = "LMT::TouchServiceNative";
     private static TouchServiceNative instance;
@@ -15,19 +14,19 @@ class TouchServiceNative {
 
     native TouchServiceResult run();
 
-    native int setDebug(int i);
+    native int setDebug(int enabled);
 
-    native int setInputDevice(String str);
+    native int setInputDevice(String devicePath);
 
-    native int setMinPathLength(int i);
+    native int setMinPathLength(int pixels);
 
-    native int setMinScore(int i);
+    native int setMinScore(int score);
 
-    native int setOrientation(int i, int i2, int i3);
+    native int setOrientation(int rotation, int width, int height);
 
-    native int setSingleSwipesBBox(int i);
+    native int setSingleSwipesBBox(int pixels);
 
-    native int setSingleTouchGestureSupport(int i);
+    native int setSingleTouchGestureSupport(int enabled);
 
     static {
         System.loadLibrary("TouchServiceNative");
@@ -44,10 +43,10 @@ class TouchServiceNative {
         return instance;
     }
 
-    int setInputDeviceUnlock(String str) {
+    int setInputDeviceUnlock(String devicePath) {
         this.mRootContext.runCommandRemote("version", false);
         Log.d(TAG, "Lib version " + getServiceVersion());
         Log.d(TAG, "Set input device");
-        return setInputDevice(str);
+        return setInputDevice(devicePath);
     }
 }

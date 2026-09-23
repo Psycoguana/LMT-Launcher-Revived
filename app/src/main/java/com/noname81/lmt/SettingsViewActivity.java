@@ -58,13 +58,13 @@ public class SettingsViewActivity extends Activity {
                 SeparatedListAdapter.createItem(
                         "Activation area behind keyboard",
                         "Configure if the activation area should be placed behind the keyboard,"
-                            + " default = deactivated"));
+                                + " default = deactivated"));
         if (Build.VERSION.SDK_INT < 26) {
             linkedList2.add(
                     SeparatedListAdapter.createItem(
                             "Activation area on lockscreen",
                             "Configure if pie should be active on lockscreen, default ="
-                                + " deactivated"));
+                                    + " deactivated"));
         }
         linkedList2.add(
                 SeparatedListAdapter.createItem("Add to pie blacklist", "Exclude an app from pie"));
@@ -97,7 +97,7 @@ public class SettingsViewActivity extends Activity {
                 SeparatedListAdapter.createItem(
                         "Pie colors",
                         "0 = blue, 1 = red, 2 = grey, 3 = none, 4 = white, 5 = magenta/yellow, 6 ="
-                            + " green/outline, 7 = red/outline, default = 0"));
+                                + " green/outline, 7 = red/outline, default = 0"));
         linkedList3.add(
                 SeparatedListAdapter.createItem("Pie inner radius", "Radius in dip, default = 60"));
         linkedList3.add(
@@ -155,12 +155,12 @@ public class SettingsViewActivity extends Activity {
                 SeparatedListAdapter.createItem(
                         "Multi command",
                         "Configure if actions should be fired multiple times when swiping on item,"
-                            + " default = disabled"));
+                                + " default = disabled"));
         linkedList4.add(
                 SeparatedListAdapter.createItem(
                         "Expand trigger area",
                         "Configure if the action trigger area should be expanded to the full screen"
-                            + " for the outer pie ring, default = enabled"));
+                                + " for the outer pie ring, default = enabled"));
         int i12 = i11 + 1;
         this.mSettingsHelper.posOffsetPieBehavior = i11;
         int i13 = i12 + 1;
@@ -194,17 +194,17 @@ public class SettingsViewActivity extends Activity {
                 SeparatedListAdapter.createItem(
                         "Show and scale app images",
                         "0 = disabled, 1 = enabled (no filter), 2 = enabled, >2 = image size in"
-                            + " pixel, default = enabled"));
+                                + " pixel, default = enabled"));
         linkedList5.add(
                 SeparatedListAdapter.createItem(
                         "Show and scale user images",
                         "0 = disabled, 1 = enabled (no filter), 2 = enabled, >2 = image size in"
-                            + " pixel, default = disabled"));
+                                + " pixel, default = disabled"));
         linkedList5.add(
                 SeparatedListAdapter.createItem(
                         "Set user image search path",
                         "default = /storage/emulated/0/Android/data/com.noname81.lmt/files/ (Leave"
-                            + " blank to set default)"));
+                                + " blank to set default)"));
         int i19 = i18 + 1;
         this.mSettingsHelper.posOffsetPieIcons = i18;
         int i20 = i19 + 1;
@@ -229,12 +229,12 @@ public class SettingsViewActivity extends Activity {
                 SeparatedListAdapter.createItem(
                         "Pie pointer edge activation",
                         "Configure if the pie pointer feature can be activated from the edges,"
-                            + " default = disabled"));
+                                + " default = disabled"));
         linkedList6.add(
                 SeparatedListAdapter.createItem(
                         "Pie pointer warp factor",
                         "Configure the warp factor for the pie pointer feature,\n"
-                            + "default = 300%, min = 200%, max = 1000%"));
+                                + "default = 300%, min = 200%, max = 1000%"));
         linkedList6.add(
                 SeparatedListAdapter.createItem("Pie pointer color", "0 = blue, default = 0"));
         linkedList6.add(

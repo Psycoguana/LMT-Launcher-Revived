@@ -627,12 +627,12 @@ class Launcher {
         if (strRunCommandResult.contains("null")) {
             this.mRootContext.runCommandResult(
                     "settings put global policy_control"
-                        + " immersive.navigation=*,-com.android.systemui,-com.whatsapp",
+                            + " immersive.navigation=*,-com.android.systemui,-com.whatsapp",
                     zIsRootAvailable);
         } else if (strRunCommandResult.contains("navigation")) {
             this.mRootContext.runCommandResult(
                     "settings put global policy_control"
-                        + " immersive.full=*,-com.android.systemui,-com.whatsapp",
+                            + " immersive.full=*,-com.android.systemui,-com.whatsapp",
                     zIsRootAvailable);
         } else {
             this.mRootContext.runCommandResult(
@@ -836,7 +836,7 @@ class Launcher {
         }
         this.mRootContext.runCommandRoot(
                 "am start -a com.teslacoilsw.launcher.ACTION -n"
-                    + " com.teslacoilsw.launcher/.NovaShortcutHandler",
+                        + " com.teslacoilsw.launcher/.NovaShortcutHandler",
                 true);
     }
 
@@ -846,7 +846,7 @@ class Launcher {
         }
         this.mRootContext.runCommandRoot(
                 "am start -a com.anddoes.launcher.ACTION -n com.anddoes.launcher/.Launcher -e"
-                    + " LAUNCHER_ACTION 'APP_DRAWER'",
+                        + " LAUNCHER_ACTION 'APP_DRAWER'",
                 true);
     }
 
@@ -856,7 +856,7 @@ class Launcher {
         }
         this.mRootContext.runCommandRoot(
                 "am start -a com.mobint.hololauncher.ACTION -n com.mobint.hololauncher/.Launcher -e"
-                    + " ACTION 'DRAWER'",
+                        + " ACTION 'DRAWER'",
                 true);
     }
 }

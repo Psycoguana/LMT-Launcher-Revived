@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-/* JADX INFO: loaded from: classes.dex */
 public class StartupReceiver extends BroadcastReceiver {
     private static final String TAG = "LMT::StartupReceiver";
 

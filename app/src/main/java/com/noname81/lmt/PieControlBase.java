@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-/* JADX INFO: loaded from: classes.dex */
 abstract class PieControlBase {
     Context mContext;
     private int mItemSize;
@@ -51,22 +50,22 @@ abstract class PieControlBase {
         }
     }
 
-    PieItem makeItem(Drawable drawable, Drawable drawable2, int i) {
+    PieItem makeItem(Drawable shortPress, Drawable longPress, int level) {
         ImageView imageView = new ImageView(this.mContext);
-        if (drawable != null) {
-            drawable.mutate();
+        if (shortPress != null) {
+            shortPress.mutate();
         }
-        if (drawable2 != null) {
-            drawable2.mutate();
+        if (longPress != null) {
+            longPress.mutate();
         }
-        imageView.setImageDrawable(drawable);
+        imageView.setImageDrawable(shortPress);
         imageView.setMinimumWidth(this.mItemSize);
         imageView.setMinimumHeight(this.mItemSize);
         imageView.setScaleType(ImageView.ScaleType.CENTER);
-        int i2 = this.mItemSize;
-        imageView.setLayoutParams(new ViewGroup.LayoutParams(i2, i2));
-        PieItem pieItem = new PieItem(imageView, i);
-        pieItem.setDrawables(drawable, drawable2);
+        int itemSize = this.mItemSize;
+        imageView.setLayoutParams(new ViewGroup.LayoutParams(itemSize, itemSize));
+        PieItem pieItem = new PieItem(imageView, level);
+        pieItem.setDrawables(shortPress, longPress);
         return pieItem;
     }
 }

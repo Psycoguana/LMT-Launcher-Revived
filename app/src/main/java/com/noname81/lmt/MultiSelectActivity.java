@@ -37,9 +37,8 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
     public static final int SelectPackage = 0;
     public static final int SelectPackageActivity = 1;
     public static final int SelectShortcut = 5;
-    public static final Comparator<PackageInfo> comparator =
-            new Comparator() { // from class:
-                               // com.noname81.lmt.MultiSelectActivity$$ExternalSyntheticLambda1
+    public static final Comparator<PackageInfo> comparator = new Comparator() { // from class:
+                // com.noname81.lmt.MultiSelectActivity$$ExternalSyntheticLambda1
                 @Override // java.util.Comparator
                 public final int compare(Object obj, Object obj2) {
                     return ((PackageInfo) obj)
@@ -245,11 +244,8 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
                     (ImageView) view2.findViewById(R.id.listitem_icondescription_icon);
             IconUtils.setMaxSizeForImageView(
                     MultiSelectActivity.this.getApplicationContext(), imageView);
-            new AsyncDrawableTask(
-                    imageView,
-                    R.drawable
-                            .none) { // from class:
-                                     // com.noname81.lmt.MultiSelectActivity.AppSimpleAdapter.1
+            new AsyncDrawableTask(imageView, R.drawable.none) { // from class:
+                // com.noname81.lmt.MultiSelectActivity.AppSimpleAdapter.1
                 /* JADX WARN: Can't rename method to resolve collision */
                 @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
                 protected Drawable doInBackground(Void... voidArr) {

@@ -2,19 +2,20 @@ package com.noname81.lmt;
 
 import java.io.File;
 
-/* JADX INFO: loaded from: classes.dex */
+/** Small helpers for the custom-icon files under the user's resource search path. */
 class FileUtils {
+
     FileUtils() {}
 
-    static boolean isFileAvailable(String str, String str2) {
-        return new File(str, str2).exists();
+    static boolean isFileAvailable(String directory, String fileName) {
+        return new File(directory, fileName).exists();
     }
 
-    static void deleteFile(String str, String str2) {
-        new File(str, str2).delete();
+    static void deleteFile(String directory, String fileName) {
+        new File(directory, fileName).delete();
     }
 
-    static void createFolder(String str) {
-        new File(str).mkdirs();
+    static void createFolder(String path) {
+        new File(path).mkdirs();
     }
 }

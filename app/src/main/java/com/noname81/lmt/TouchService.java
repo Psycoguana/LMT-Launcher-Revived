@@ -142,8 +142,7 @@ public class TouchService extends Service {
             }
         }
         if (this.mSettings.loadTouchServiceMode() > 0
-                && PermissionChecker.getInstance()
-                        .hasDrawOverAppsPermission(this, false)) {
+                && PermissionChecker.getInstance().hasDrawOverAppsPermission(this, false)) {
             if (this.mPieContainer == null) {
                 this.mPieContainer = new PieContainer(this);
             }

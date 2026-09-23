@@ -71,14 +71,22 @@ Test dependencies do not reach the release APK; the oracle stays `EQUIVALENT`.
 Do this **before** the Kotlin rewrite, so the rewrite has a safety net that
 survives the bytecode oracle becoming meaningless.
 
-### 1.3 Rewrite in Kotlin
-Note the ordering hazard: the equivalence oracle compares our dex against the
-reference smali, and Kotlin changes codegen wholesale (null checks, `$i$f$...`
-inlining, synthetic accessors). **The oracle stops being useful the moment a file
-becomes Kotlin.** So per file: tests first (1.2), convert, then rely on tests.
-Suggested order — leaves first, `Launcher`/`PieMenu` last:
-`FileUtils` → `Toaster` → `IconUtils` → `Action` → `SettingsValues*` → fragments →
-`PieMenu`/`Launcher`.
+### 1.3 Readability pass  ← **current**
+
+What actually makes this code hard to read is not the language, it is 602
+decompiler-generated identifiers (347 `int i*`, 122 `String str*`, 69 `boolean z*`,
+64 `float f*`) plus ~50 leftover `JADX` comments across 11k lines. Renaming is
+behaviour-neutral, so **the oracle stays green through the whole pass** — readable
+source and full bytecode verification at the same time.
+
+- Rename decompiler identifiers, file by file, smallest first, re-running
+  `tools/verify-equivalence.sh` after each.
+- Check `docs/original-names.json` first: the reference dex preserves the original
+  author's local names wherever a lambda or anonymous class captured one.
+- Strip the `JADX INFO` comments.
+- Replace the magic action ids in `Launcher.fireAction`'s switch with the named
+  constants that already exist in `Action.java` (`Action.Home`, `Action.Back`, …).
+- Add class-level javadoc from the architecture in `reference/plan.md`.
 
 ### 1.4 App search + "show system apps" toggle in the app picker
 `MultiSelectActivity` currently builds one flat list from `getInstalledPackages`.
@@ -106,10 +114,32 @@ drawing and is unaffected.
 
 Do this **after** Kotlin and tests — it touches every screen at once.
 
-### 1.7 Accessibility fallbacks
+### 1.7 ~~Rewrite in Kotlin~~ — deferred, probably cancelled
+
+**Decision (2026-09-23): not doing this, at least not as a migration.**
+
+It costs the oracle — Kotlin changes codegen wholesale, so per-method comparison
+against the reference smali becomes meaningless. That trades verification of all 40
+classes for a test suite covering 5, and buys nothing functional.
+
+It also does not solve the readability problem: converting `int i2` yields
+`var i2: Int`. Renaming does, and keeps the oracle (see 1.3).
+
+And every genuine modernisation need here is language-independent — `AsyncTask`
+(deprecated API 30, 6 files) → `Executor`; `ActionBar.Tab` (deprecated API 21,
+`LMT.java`) → `TabLayout` + `ViewPager2`; `android.app.Fragment` (deprecated API 28,
+7 files) → AndroidX fragments. All are part of the Material 3 overhaul (1.6) and all
+doable in Java.
+
+**What we are doing instead:** new code (import/export, app-picker search) may be
+written in Kotlin from the start — the benefits are free there and there is no
+migration risk. Revisit a wider migration only if it still appeals once features
+land and coverage is real.
+
+### 1.8 Accessibility fallbacks
 Deferred by request. Full analysis in Part 2.
 
-### 1.8 `libTouchServiceNative.so` — research, then probably delete
+### 1.9 `libTouchServiceNative.so` — research, then probably delete
 
 The last binary blob. 387 KB of C++ per ABI (four ABIs), stripped of `.symtab` and
 debug info — but as a shared library it still exports **608 dynamic symbols, 565 of

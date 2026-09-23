@@ -74,13 +74,12 @@ public class InfoFragment extends Fragment {
         final GestureDetector gestureDetector =
                 new GestureDetector(
                         getActivity(),
-                        new GestureDetector
-                                .SimpleOnGestureListener() { // from class:
-                                                             // com.noname81.lmt.InfoFragment.1GestureListener
+                        new GestureDetector.SimpleOnGestureListener() { // from class:
+                            // com.noname81.lmt.InfoFragment.1GestureListener
                             private int count = 0;
 
                             @Override // android.view.GestureDetector.SimpleOnGestureListener,
-                                      // android.view.GestureDetector.OnDoubleTapListener
+                            // android.view.GestureDetector.OnDoubleTapListener
                             public boolean onDoubleTap(MotionEvent motionEvent) {
                                 int i = this.count + 1;
                                 this.count = i;

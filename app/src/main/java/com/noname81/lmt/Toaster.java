@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-/* JADX INFO: loaded from: classes.dex */
 class Toaster {
     static final int Debug = 1;
     static final int Image = 2;
@@ -38,19 +37,19 @@ class Toaster {
         return this.mMode;
     }
 
-    void setMode(int i) {
-        this.mMode = i;
-        this.mSettings.saveFeedbackMode(i);
+    void setMode(int mode) {
+        this.mMode = mode;
+        this.mSettings.saveFeedbackMode(mode);
     }
 
     void show(TouchServiceResult touchServiceResult) {
-        int i = this.mMode;
-        if (i == 1) {
+        int mode = this.mMode;
+        if (mode == 1) {
             showDebug(touchServiceResult);
-        } else if (i == 2) {
+        } else if (mode == 2) {
             showImage(touchServiceResult);
         } else {
-            if (i != 3) {
+            if (mode != 3) {
                 return;
             }
             vibrateGestures();

@@ -143,11 +143,8 @@ public class IsasFragment extends Fragment implements AdapterView.OnItemClickLis
             ImageView imageView2 =
                     (ImageView) view2.findViewById(R.id.listitem_icondescriptionicon_icon2);
             IconUtils.setMaxSizeForImageView(IsasFragment.this.getActivity(), imageView);
-            new AsyncDrawableTask(
-                    imageView,
-                    R.drawable
-                            .none) { // from class:
-                                     // com.noname81.lmt.IsasFragment.CommandSimpleAdapterIsas.1
+            new AsyncDrawableTask(imageView, R.drawable.none) { // from class:
+                // com.noname81.lmt.IsasFragment.CommandSimpleAdapterIsas.1
                 /* JADX WARN: Can't rename method to resolve collision */
                 @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
                 protected Drawable doInBackground(Void... voidArr) {
@@ -155,11 +152,8 @@ public class IsasFragment extends Fragment implements AdapterView.OnItemClickLis
                 }
             }.execute(new Void[0]);
             IconUtils.setMaxSizeForImageView(IsasFragment.this.getActivity(), imageView2);
-            new AsyncDrawableTask(
-                    imageView2,
-                    R.drawable
-                            .none) { // from class:
-                                     // com.noname81.lmt.IsasFragment.CommandSimpleAdapterIsas.2
+            new AsyncDrawableTask(imageView2, R.drawable.none) { // from class:
+                // com.noname81.lmt.IsasFragment.CommandSimpleAdapterIsas.2
                 /* JADX WARN: Can't rename method to resolve collision */
                 @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
                 protected Drawable doInBackground(Void... voidArr) {

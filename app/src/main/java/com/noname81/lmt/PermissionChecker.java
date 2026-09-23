@@ -94,9 +94,7 @@ class PermissionChecker {
 
     boolean hasDrawOverAppsPermission(Context context, boolean z) {
         boolean z2 =
-                (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(context))
-                        ? true
-                        : false;
+                (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(context)) ? true : false;
         if (z) {
             Log.d(TAG, "hasDrawOverAppsPermission(" + z2 + ")");
         }

@@ -120,8 +120,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mColorSelected = i3;
         this.mAnimationActive = true;
         this.mAnimationTime = settingsValues.loadPieAnimation();
-        this.mSensorActivated =
-                settingsValues.loadPieShowStatusInfos() == 3 ? true : false;
+        this.mSensorActivated = settingsValues.loadPieShowStatusInfos() == 3 ? true : false;
         this.mSensorManager = (SensorManager) context.getSystemService("sensor");
         this.mSensorAnimator = new ValueAnimator();
         this.mSensorAnimation = 0.0f;
@@ -239,9 +238,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 ValueAnimator valueAnimatorOfFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.mClockAnimatorIn = valueAnimatorOfFloat;
                 valueAnimatorOfFloat.addUpdateListener(
-                        new ValueAnimator
-                                .AnimatorUpdateListener() { // from class:
-                                                            // com.noname81.lmt.PieStatusInfo.1
+                        new ValueAnimator.AnimatorUpdateListener() { // from class:
+                            // com.noname81.lmt.PieStatusInfo.1
                             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                 PieStatusInfo.this.mClockAnimationIn =
@@ -265,9 +263,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 ValueAnimator valueAnimatorOfFloat2 = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.mAIAnimatorIn = valueAnimatorOfFloat2;
                 valueAnimatorOfFloat2.addUpdateListener(
-                        new ValueAnimator
-                                .AnimatorUpdateListener() { // from class:
-                                                            // com.noname81.lmt.PieStatusInfo.2
+                        new ValueAnimator.AnimatorUpdateListener() { // from class:
+                            // com.noname81.lmt.PieStatusInfo.2
                             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                 PieStatusInfo.this.mAIAnimationIn =
@@ -287,9 +284,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 ValueAnimator valueAnimatorOfFloat3 = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.mAIAnimatorOutIn = valueAnimatorOfFloat3;
                 valueAnimatorOfFloat3.addUpdateListener(
-                        new ValueAnimator
-                                .AnimatorUpdateListener() { // from class:
-                                                            // com.noname81.lmt.PieStatusInfo.3
+                        new ValueAnimator.AnimatorUpdateListener() { // from class:
+                            // com.noname81.lmt.PieStatusInfo.3
                             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                 float fMax;
@@ -318,8 +314,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                                             || PieStatusInfo.this.mAIAnimationInOutReversed) {
                                         if (PieStatusInfo.this.mAIAnimationInOut < fMax
                                                 && PieStatusInfo.this.mAIAnimationInOutReversed) {
-                                            PieStatusInfo.this.mAIAnimationInOutReversed =
-                                                    false;
+                                            PieStatusInfo.this.mAIAnimationInOutReversed = false;
                                         }
                                     } else {
                                         PieStatusInfo.this.fillAdditionalInfoStrings();
@@ -772,8 +767,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
     private String getCPUInfo() {
         String strRunCommandResult =
                 this.mRootContext.runCommandResult(
-                        "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq",
-                        false);
+                        "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq", false);
         if (strRunCommandResult.length() > 4) {
             strRunCommandResult =
                     strRunCommandResult.substring(0, strRunCommandResult.length() - 4) + "MHz | ";
@@ -852,9 +846,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 ValueAnimator valueAnimatorOfFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.mSensorAnimator = valueAnimatorOfFloat;
                 valueAnimatorOfFloat.addUpdateListener(
-                        new ValueAnimator
-                                .AnimatorUpdateListener() { // from class:
-                                                            // com.noname81.lmt.PieStatusInfo.5
+                        new ValueAnimator.AnimatorUpdateListener() { // from class:
+                            // com.noname81.lmt.PieStatusInfo.5
                             @Override // android.animation.ValueAnimator.AnimatorUpdateListener
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                 float animatedFraction = valueAnimator.getAnimatedFraction();

@@ -146,9 +146,8 @@ public class AccessibilityHandler extends AccessibilityService {
         boolean zDispatchGesture =
                 accessibilityHandler.dispatchGesture(
                         createClick(f, f2),
-                        new AccessibilityService
-                                .GestureResultCallback() { // from class:
-                                                           // com.noname81.lmt.AccessibilityHandler.1
+                        new AccessibilityService.GestureResultCallback() { // from class:
+                            // com.noname81.lmt.AccessibilityHandler.1
                             @Override // android.accessibilityservice.AccessibilityService.GestureResultCallback
                             public void onCompleted(GestureDescription gestureDescription) {
                                 super.onCompleted(gestureDescription);
