@@ -314,26 +314,56 @@ Nova's own drawer — close, not identical.
 
 ### 2.3 De-rooting that needs no accessibility at all
 
-- **32 TaskerTask** — the goal is a **first-class, root-free Tasker action**: the
-  user picks a task from a proper picker and it runs. Not a workaround.
+- **32 TaskerTask — ✅ done (root-free), picker still typed by hand.**
 
-  Today the action is tagged `[Root]` and shells out to `am broadcast` purely as a
-  way to send a broadcast, which needs no root at all. The work is:
-  1. **Picking** — replace the free-text task-name field with Tasker's own task
-     picker (`net.dinglisch.android.tasker.ACTION_OPEN_PREFS` / the
-     `TaskerIntent` task-select intent) launched via `startActivityForResult`, so
-     the user chooses from a list instead of typing a name that must match exactly.
-  2. **Running** — `sendBroadcast` of `net.dinglisch.android.tasker.ACTION_TASK`
-     with the task name, declaring
-     `net.dinglisch.android.tasker.PERMISSION_RUN_TASKS` in the manifest. Tasker's
-     "Allow External Access" must be on; detect it and say so plainly rather than
-     failing silently.
-  3. Retag the caption from `[Root]` to `[None]`.
+  `Launcher.doTaskerAction` now `sendBroadcast`s
+  `net.dinglisch.android.tasker.ACTION_TASK` (via the new `TaskerIntents` helper)
+  instead of shelling `am broadcast` through root; `PERMISSION_RUN_TASKS` is
+  declared in the manifest. Caption retagged `[Root]` → `[None]`. Neither root nor
+  the accessibility service is involved — confirmed by inspecting Tasker's real
+  installed receiver rather than trusting the reference source alone.
 
-  Note the mechanism is Tasker's own intents, not the accessibility service —
-  accessibility is not involved in this one. There is an existing stopgap (the
-  **Shortcut** action can target Tasker's "Tasker Task" shortcut — motomotomotoG,
-  XDA, Mar 2026) but it is a workaround, not the destination.
+  **A real bug caught by testing against the real receiver, not just the docs.**
+  `dumpsys package net.dinglisch.android.taskerm` shows the actual registered
+  filter:
+  ```
+  net.dinglisch.android.taskerm/.ReceiverStaticRunTasks
+    Action: "net.dinglisch.android.tasker.ACTION_TASK"
+    Scheme: "id"
+  ```
+  A bare `ACTION_TASK` broadcast with no data never matches this filter and is
+  dropped before it reaches Tasker at all — the reference `TaskerIntent` source
+  sets this via `setRandomData()` but nothing documents *why* it's required.
+  `TaskerIntents.runTask()` now sets `data = Uri.parse("id:" + random long)` to
+  match, pinned by `TaskerIntentsTest.runTaskSetsAnIdSchemeDataUri`. Found by
+  installing free-trial Tasker (`tasker.joaoapps.com/releases/playstore/`, no
+  Google account needed on the test device) and checking why nothing happened.
+
+  **Verified:** the intent shape matches Tasker's real filter (`dumpsys`), the
+  manifest permission is granted to LMT (confirmed in Android's own permission
+  UI, which names it by the exact string `PERMISSION_RUN_TASKS`), and Tasker's
+  "Allow External Access" + per-app grant are on. **Not verified:** a live
+  trigger through LMT's own UI. `adb shell am broadcast` cannot stand in for
+  this — `PERMISSION_RUN_TASKS` is `prot=dangerous`, and shell isn't granted
+  app-scoped dangerous permissions, so every such broadcast was silently dropped
+  by the OS regardless of the fix (confirmed by testing before *and* after,
+  same silent drop both times). The real path is pie/gesture/ISA touch capture,
+  and every synthetic swipe tried here (argent, uiautomator-level) failed to
+  summon the pie at all — consistent with 1.9's note that the app's touch
+  detection is a *native* layer, not the ordinary Android input stack synthetic
+  gestures inject into. Confirm on a real finger before shipping.
+
+  **Task picker still not built.** `ACTION_TASK_SELECT` was tried and shelved -
+  see `TaskerIntents`'s class javadoc. Verified on-device (Tasker 6.6.20): it
+  does a literal name-match against an empty query and immediately toasts "no
+  tasks found" instead of opening a list. Not the general external picker the
+  reference source implies, at least not in this Tasker version. The task name
+  is still typed by hand in a free-text `InputDialog`, same as before this
+  change.
+
+  There is an existing stopgap (the **Shortcut** action can target Tasker's
+  "Tasker Task" shortcut — motomotomotoG, XDA, Mar 2026) but it is a workaround,
+  not the destination.
 - **30 KillApp** — `killBackgroundProcesses` is already called in the pre-API-21
   branch and `KILL_BACKGROUND_PROCESSES` is already in the manifest. What broke on
   Lollipop was `getRunningTasks` for identifying the foreground app;

@@ -153,7 +153,7 @@ class Action {
         "Trigger an arbitrary script [Root]",
         "Kill the current app and switch to homescreen [Root]",
         "Kill all apps and switch to homescreen [Root]",
-        "Trigger a tasker task [Root]",
+        "Trigger a tasker task [None]",
         "Trigger a shortcut [None]",
         "Trigger a screenshot [Root]",
         "Unpin pinned app [Root]",

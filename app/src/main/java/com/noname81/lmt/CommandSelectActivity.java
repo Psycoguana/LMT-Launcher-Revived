@@ -136,7 +136,7 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
                             + " "
                             + getString(R.string.dialog_to_be_executed),
                     string,
-                    false) { // from class: com.noname81.lmt.CommandSelectActivity.1
+                    false) {
                 @Override // com.noname81.lmt.InputDialog
                 public boolean onOkClicked(String value) {
                     SettingsValues.getInstance(CommandSelectActivity.this.getApplicationContext())

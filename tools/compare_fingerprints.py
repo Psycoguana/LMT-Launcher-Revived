@@ -49,6 +49,8 @@ EXPECTED_NEW = {
     # own numbered backport class in EXPECTED_GONE_PREFIX below - just attached
     # to a different "first" class since the class set changed.
     "SettingsBackup$$ExternalSyntheticBackport0.smali",
+    # ROADMAP 2.3: TaskerTask, de-rooted. Has no upstream counterpart at all.
+    "TaskerIntents.smali",
 }
 EXPECTED_GONE_PREFIX = ("AccessibilityHandler$$ExternalSynthetic",
                         "Launcher$$ExternalSyntheticApiModelOutline")

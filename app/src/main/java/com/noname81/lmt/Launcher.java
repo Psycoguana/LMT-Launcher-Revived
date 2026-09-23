@@ -729,11 +729,9 @@ class Launcher {
         if (taskName == null || taskName.length() <= 0) {
             return;
         }
-        this.mRootContext.runCommandRoot(
-                "am broadcast -a net.dinglisch.android.tasker.ACTION_TASK -e task_name '"
-                        + taskName
-                        + "'",
-                true);
+        // Tasker's own external-access broadcast, needing PERMISSION_RUN_TASKS - neither
+        // root nor the accessibility service is involved. See docs/ROADMAP.md 2.3.
+        this.mContext.sendBroadcast(TaskerIntents.runTask(taskName));
     }
 
     void doOpenNotificationBar() {

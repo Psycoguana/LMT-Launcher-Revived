@@ -50,6 +50,16 @@
       "class": "SettingsViewHelper$ANON.smali",
       "method": "public onOkClicked(Ljava/lang/String;)Z",
       "reason": "ROADMAP 1.5: two new InputDialog subclasses (Export settings, Import settings) join this class's merged anonymous-subclass bucket - the pre-API-19 / no-fragment fallback for SettingsBackup.exportZip/importZip, reporting the result with a Toast."
+    },
+    {
+      "class": "Action.smali",
+      "method": "constructor static <clinit>()V",
+      "reason": "ROADMAP 2.3: TaskerTask no longer needs root (see the Launcher.smali::doTaskerAction entry below), so its caption tag changes from [Root] to [None]."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doTaskerAction(Ljava/lang/String;)V",
+      "reason": "ROADMAP 2.3: runs the task via a plain sendBroadcast(TaskerIntents.runTask(...)) instead of shelling `am broadcast` through root. Same broadcast action and extra (net.dinglisch.android.tasker.ACTION_TASK / task_name) - only the delivery mechanism changes, now declaring the PERMISSION_RUN_TASKS manifest permission instead of needing a rooted device."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
