@@ -30,6 +30,26 @@
       "class": "MultiSelectActivity$AppSimpleAdapter$ANON.smali",
       "method": "protected varargs doInBackground([Ljava/lang/Void;)Landroid/graphics/drawable/Drawable;",
       "reason": "ROADMAP 1.4: the icon load now calls the adapter's bounds-checked iconAt() instead of switching on AppSelectMode and indexing the activity's list directly. Same icons, but safe when the list is rebuilt under an in-flight task."
+    },
+    {
+      "class": "SettingsViewFragment.smali",
+      "method": "public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;",
+      "reason": "ROADMAP 1.5: adds a Backup section (Export settings / Import settings) with its own posOffsetBackup/posExportSettings/posImportSettings positions, shown regardless of feature mode; constructs SettingsViewHelper with the new (activity, fragment) constructor so it can route Storage Access Framework results back here. See the new_members entries for SettingsViewHelper.smali and SettingsViewFragment.smali."
+    },
+    {
+      "class": "SettingsViewHelper.smali",
+      "method": "constructor <init>(Landroid/app/Activity;)V",
+      "reason": "ROADMAP 1.5: now delegates to the new (Activity, Fragment) constructor with a null fragment - SettingsViewActivity (dead code, never started) is the only caller that still uses this one-arg form."
+    },
+    {
+      "class": "SettingsViewHelper.smali",
+      "method": "public onItemClick(Landroid/widget/AdapterView;Landroid/view/View;IJ)V",
+      "reason": "ROADMAP 1.5: the Export settings / Import settings rows launch a Storage Access Framework picker (ACTION_CREATE_DOCUMENT / ACTION_OPEN_DOCUMENT) on API 19+ with a fragment to route the result to, falling back to the original InputDialog path-entry flow otherwise. The reference-only ColorDialog/InputDialog show() refs are the same devirtualization noise seen elsewhere in this method (show() resolves to the merged SettingsViewHelper$ANON receiver type instead of the builder base type) - not new behaviour."
+    },
+    {
+      "class": "SettingsViewHelper$ANON.smali",
+      "method": "public onOkClicked(Ljava/lang/String;)Z",
+      "reason": "ROADMAP 1.5: two new InputDialog subclasses (Export settings, Import settings) join this class's merged anonymous-subclass bucket - the pre-API-19 / no-fragment fallback for SettingsBackup.exportZip/importZip, reporting the result with a Toast."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -48,6 +68,14 @@
       "class": "MultiSelectActivity$AppSimpleAdapter$ANON.smali",
       "reworked": true,
       "reason": "ROADMAP 1.4: the icon-loading AsyncTask now delegates to the adapter's bounds-checked iconAt() rather than indexing the activity's list itself."
+    },
+    {
+      "class": "SettingsViewHelper.smali",
+      "reason": "ROADMAP 1.5: adds posOffsetBackup/posExportSettings/posImportSettings fields for the new Backup section's rows, a mFragment field and REQUEST_EXPORT_SETTINGS/REQUEST_IMPORT_SETTINGS request codes for the Storage Access Framework flow, the (Activity, Fragment) constructor overload, and canUseFilePicker/handleExportSettingsPicked/handleImportSettingsPicked/exportSettings/importSettings/toastFailure to drive it."
+    },
+    {
+      "class": "SettingsViewFragment.smali",
+      "reason": "ROADMAP 1.5: adds onActivityResult, which routes a Storage Access Framework pick back to SettingsViewHelper.handleExportSettingsPicked/handleImportSettingsPicked. Mirrors the existing pattern in PieFragment.onActivityResult for its icon picker."
     }
   ]
 }

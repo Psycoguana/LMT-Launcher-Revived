@@ -121,10 +121,74 @@ before a filter change indexed past the end of the shorter list and crashed with
 it, since nothing it compares changed. `AppSimpleAdapter` now carries its own model
 snapshot and never looks outside it.
 
-### 1.5 Import / export settings
-All state is SharedPreferences (`LMT.xml`) plus the PNG icons under
-`ResourceSearchPath`. Export = serialise prefs to JSON + zip the icons; import =
-validate, write, then `restartServiceIfRequired()`.
+### 1.5 Import / export settings  ✅ done
+`SettingsBackup` exports every setting to `settings.json` plus any `pieN.png`
+icons under the resource search path, zipped together; import validates the zip
+has a `settings.json` entry, writes every key back, then
+`restartServiceIfRequired()`. Reachable from Settings → Backup (bottom of the
+tab). On API 19+ this opens the real Storage Access Framework picker
+(`ACTION_CREATE_DOCUMENT` for export, `ACTION_OPEN_DOCUMENT` filtered to
+`application/zip` for import) so the user picks the destination/source from
+Downloads, Drive, or wherever — not a typed path. Below API 19 (minSdk is
+still 15), or if there is no owning fragment to route the SAF result back to
+(`SettingsViewActivity`'s dead-code path), it falls back to the original
+`InputDialog` path-entry flow. 7 tests in `SettingsBackupTest`; verified
+on-device both ways — pushing a hand-edited backup through the path-entry
+fallback, and separately exporting/importing through the real Downloads
+picker UI.
+
+**`SettingsBackup` takes a stream, not a `File`.** SAF only ever hands back a
+`content://` `Uri` — there is no filesystem path to open a `FileOutputStream`
+on. `exportZip`/`importZip` take an `OutputStream`/`InputStream` instead, so
+the same code serves both `ContentResolver.openOutputStream(uri)` (SAF) and
+`new FileOutputStream(file)` (the path-entry fallback, and the tests).
+
+**The SAF result has to come back through the fragment, not the activity.**
+`LMT.onActivityResult` doesn't call `super`, and doesn't know about
+`SettingsViewHelper` (each fragment builds its own instance) — so routing the
+picker result through the `Activity` would need new plumbing there.
+`android.app.Fragment.startActivityForResult` dispatches results through the
+framework's own fragment-result path independently of the hosting
+`Activity.onActivityResult` override, which is exactly how `PieFragment`'s
+existing gallery-icon picker already works. `SettingsViewFragment` now owns
+`onActivityResult` the same way, and delegates to two new
+`SettingsViewHelper` methods.
+
+**Goes through the existing wrapper, not raw SharedPreferences.** `SettingsBackup`
+reads and writes every key via `SettingsSharedPrefsWrapper`'s loadInt/loadString/
+saveInt/saveString — the same layer every setting already uses — so it handles
+the `LMTExternalConfig` second backend (see 1.2's heads-up) automatically,
+without ever checking which one is active.
+
+**Scalar defaults are copied from the real getters, not reinvented.** An
+untouched setting has no key in storage at all; its effective value comes only
+from the fallback each `load*()` method passes. `SettingsBackup` keeps its own
+`{key, default}` table copied verbatim from `SettingsValuesBase`, rather than
+calling those getters, because two of them (`TouchscreenScreenFactorX/Y`)
+convert to a derived float and back would risk a rounding-truncation bug.
+Confirmed on the device that a stock install's `LMT.xml` holds only 3 of the
+~240 keys the export produces — everything else is a getter-supplied default,
+so getting these right is what makes a backup from an untouched install
+non-destructive to restore.
+
+**Wrong screen, caught before shipping.** The first pass added the Backup
+section to `SettingsViewActivity` — which matches `SettingsViewHelper`'s own
+javadoc ("host for settings sub-screens too large for the main tabs") but turns
+out to be dead code: nothing in the app ever starts it by `Intent`. The live
+screen is `SettingsViewFragment`, whose section list is built dynamically per
+feature mode rather than with `SettingsViewActivity`'s fixed positions. Caught
+by driving the actual screen with argent before calling this done, not by the
+oracle or the unit tests — neither can see that an `Activity` is unreachable.
+
+**I/O correctness bugs the oracle and the type system don't see:**
+- The first `exportZip` closed the shared `ZipOutputStream` after copying the
+  first icon file's `FileInputStream` in a `try`/`finally` that closed both
+  streams, so a second icon or the trailing `closeEntry()` threw. Caught by a
+  test, not by inspection.
+- Zip-slip: an icon entry named e.g. `icons/../../evil.png` would write outside
+  the resource search directory on import. Guarded by a canonical-path check
+  before any entry is extracted; pinned by
+  `importZipCannotEscapeTheIconDirectory`.
 
 This also solves a real distribution problem: these builds are signed with a local
 key, so they cannot upgrade an installed upstream APK in place — switching requires
@@ -446,6 +510,24 @@ v3.11 was released to address a suspected cause and the reporter has not seen it
 since, but at least one user still reported it afterwards. This matters more now,
 because 3.1 means accessibility is the *only* working path for Home/Back/Recents —
 when it unbinds, those actions die with no root fallback.
+
+### 3.6 🟡 `compare_fingerprints.py`'s own `issues` counter is dead — a second, silent oracle blind spot
+
+Found while adding 1.5: `SettingsValuesBase.smali` has printed
+`!! method on one side only: loadShowSystemApps()I` /
+`saveShowSystemApps(I)V` since ROADMAP 1.4 added the `ShowSystemApps` toggle —
+and the run still reported `RESULT: EQUIVALENT`. The `issues` variable that
+print statement increments (`tools/compare_fingerprints.py`, search `issues +=`)
+is never read; `RESULT` is computed from `unexplained`/`missing`/`added`/
+`hard_field_diffs` alone. So **any method that lands on the "one side only,
+not excused by NEW_MEMBERS/REWORKED/synthetic/anon-shape" path prints a
+warning but does not fail the build.** `SettingsValuesBase.smali` was never
+added to a `new_members` entry when 1.4 landed — a gap distinct from the
+documented arithmetic blind spot in 1.3 (see there for the print-vs-fail
+distinction that one describes). Not fixed here to keep this change scoped;
+either wire `issues` into `ok` in `compare_fingerprints.py`, or backfill the
+missing `new_members` entry for `SettingsValuesBase.smali` — check the two
+outstanding warnings are still there before doing either.
 
 ---
 

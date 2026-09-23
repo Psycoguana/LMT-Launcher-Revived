@@ -2,9 +2,12 @@ package com.noname81.lmt;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +18,13 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.SimpleAdapter;
 import android.widget.Switch;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +37,13 @@ import java.util.Map;
  * setting requires it.
  */
 class SettingsViewHelper implements AdapterView.OnItemClickListener {
+    // Routed to SettingsViewFragment#onActivityResult, which owns the fragment-scoped
+    // startActivityForResult call the Storage Access Framework picker needs.
+    static final int REQUEST_EXPORT_SETTINGS = 9001;
+    static final int REQUEST_IMPORT_SETTINGS = 9002;
+
     private Activity mActivity;
+    private Fragment mFragment;
     private RootContext mRootContext;
     private SettingsValues mSettings;
     private TouchServiceNative mTouchServiceNative;
@@ -89,9 +104,19 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
     int posPieShowStatusInfos = 255;
     int posPieStatusInfoColor = 255;
     int posPieStatusInfoFont = 255;
+    int posOffsetBackup = 255;
+    int posExportSettings = 255;
+    int posImportSettings = 255;
 
     SettingsViewHelper(Activity activity) {
+        this(activity, null);
+    }
+
+    // The file-picker flow needs the owning fragment to route its startActivityForResult
+    // result back (see canUseFilePicker()); SettingsViewActivity has none to give.
+    SettingsViewHelper(Activity activity, Fragment fragment) {
         this.mActivity = activity;
+        this.mFragment = fragment;
         this.mSettings = SettingsValues.getInstance(activity);
         this.mRootContext = RootContext.getInstance(activity);
         this.mTouchServiceNative = TouchServiceNative.getInstance(activity);
@@ -1159,7 +1184,108 @@ class SettingsViewHelper implements AdapterView.OnItemClickListener {
                     return true;
                 }
             }.show();
+        } else if (position == this.posExportSettings) {
+            if (canUseFilePicker()) {
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("application/zip");
+                intent.putExtra(Intent.EXTRA_TITLE, "lmt_backup.zip");
+                this.mFragment.startActivityForResult(intent, REQUEST_EXPORT_SETTINGS);
+            } else {
+                new InputDialog(
+                        this.mActivity,
+                        "Export settings",
+                        "Zip file to write",
+                        this.mSettings.loadResourceSearchPath() + "lmt_backup.zip",
+                        false) {
+                    @Override // com.noname81.lmt.InputDialog
+                    public boolean onOkClicked(String value) {
+                        try {
+                            exportSettings(
+                                    new FileOutputStream(new File(value)),
+                                    SettingsViewHelper.this.mSettings.loadResourceSearchPath()
+                                            + value);
+                        } catch (Exception e) {
+                            toastFailure("Export failed: ", e);
+                        }
+                        return true;
+                    }
+                }.show();
+            }
+        } else if (position == this.posImportSettings) {
+            if (canUseFilePicker()) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("application/zip");
+                this.mFragment.startActivityForResult(intent, REQUEST_IMPORT_SETTINGS);
+            } else {
+                new InputDialog(
+                        this.mActivity,
+                        "Import settings",
+                        "Zip file to read",
+                        this.mSettings.loadResourceSearchPath() + "lmt_backup.zip",
+                        false) {
+                    @Override // com.noname81.lmt.InputDialog
+                    public boolean onOkClicked(String value) {
+                        try {
+                            importSettings(new FileInputStream(new File(value)), value);
+                        } catch (Exception e) {
+                            toastFailure("Import failed: ", e);
+                        }
+                        return true;
+                    }
+                }.show();
+            }
         }
+    }
+
+    // The file picker (Storage Access Framework) needs API 19 and a fragment to route the
+    // result back to - both true for every live caller (SettingsViewFragment), but
+    // SettingsViewActivity's dead code path only ever supplies an Activity.
+    private boolean canUseFilePicker() {
+        return Build.VERSION.SDK_INT >= 19 && this.mFragment != null;
+    }
+
+    /** Called by {@link SettingsViewFragment#onActivityResult} once the user picked a zip to write. */
+    void handleExportSettingsPicked(Uri uri) {
+        try {
+            exportSettings(this.mActivity.getContentResolver().openOutputStream(uri), "" + uri);
+        } catch (Exception e) {
+            toastFailure("Export failed: ", e);
+        }
+    }
+
+    /** Called by {@link SettingsViewFragment#onActivityResult} once the user picked a zip to read. */
+    void handleImportSettingsPicked(Uri uri) {
+        try {
+            importSettings(this.mActivity.getContentResolver().openInputStream(uri), "" + uri);
+        } catch (Exception e) {
+            toastFailure("Import failed: ", e);
+        }
+    }
+
+    private void exportSettings(OutputStream destStream, String label) throws Exception {
+        SettingsBackup.exportZip(
+                this.mSettings, this.mSettings.loadResourceSearchPath(), destStream);
+        Toast.makeText(this.mActivity, "Exported settings to " + label, Toast.LENGTH_LONG).show();
+    }
+
+    private void importSettings(InputStream srcStream, String label) throws Exception {
+        boolean restored =
+                SettingsBackup.importZip(
+                        this.mSettings, this.mSettings.loadResourceSearchPath(), srcStream);
+        if (restored) {
+            this.mSettings.restartServiceIfRequired();
+            Toast.makeText(this.mActivity, "Imported settings from " + label, Toast.LENGTH_LONG)
+                    .show();
+        } else {
+            Toast.makeText(this.mActivity, "Not a valid LMT backup: " + label, Toast.LENGTH_LONG)
+                    .show();
+        }
+    }
+
+    private void toastFailure(String prefix, Exception e) {
+        Toast.makeText(this.mActivity, prefix + e.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     public class SettingsSimpleAdapter extends SimpleAdapter {

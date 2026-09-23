@@ -1,6 +1,8 @@
 package com.noname81.lmt;
 
+import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -32,7 +34,7 @@ public class SettingsViewFragment extends Fragment {
     @Override // android.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         super.onCreateView(layoutInflater, viewGroup, bundle);
-        this.mSettingsHelper = new SettingsViewHelper(getActivity());
+        this.mSettingsHelper = new SettingsViewHelper(getActivity(), this);
         SeparatedListAdapter separatedListAdapter = new SeparatedListAdapter(getActivity());
         int iLoadTouchServiceMode =
                 SettingsValues.getInstance(getActivity()).loadTouchServiceMode();
@@ -377,10 +379,43 @@ public class SettingsViewFragment extends Fragment {
                             this.mSettingsHelper.posOffsetPieExtensions,
                             false));
         }
+        LinkedList linkedList10 = new LinkedList();
+        linkedList10.add(
+                SeparatedListAdapter.createItem(
+                        "Export settings", "Save every setting and pie icon to a zip file"));
+        linkedList10.add(
+                SeparatedListAdapter.createItem(
+                        "Import settings", "Restore every setting and pie icon from a zip file"));
+        this.mSettingsHelper.posOffsetBackup = pos++;
+        this.mSettingsHelper.posExportSettings = pos++;
+        this.mSettingsHelper.posImportSettings = pos++;
+        SettingsViewHelper settingsViewHelper10 = this.mSettingsHelper;
+        settingsViewHelper10.getClass();
+        separatedListAdapter.addSection(
+                "Backup",
+                settingsViewHelper10
+                .new SettingsSimpleAdapter(
+                        getActivity(),
+                        linkedList10,
+                        this.mSettingsHelper.posOffsetBackup,
+                        false));
         ListView listView = new ListView(getActivity());
         listView.setAdapter((ListAdapter) separatedListAdapter);
         listView.setOnItemClickListener(this.mSettingsHelper);
         listView.setDividerHeight(0);
         return listView;
+    }
+
+    @Override // android.app.Fragment
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != Activity.RESULT_OK || data == null) {
+            return;
+        }
+        if (requestCode == SettingsViewHelper.REQUEST_EXPORT_SETTINGS) {
+            this.mSettingsHelper.handleExportSettingsPicked(data.getData());
+        } else if (requestCode == SettingsViewHelper.REQUEST_IMPORT_SETTINGS) {
+            this.mSettingsHelper.handleImportSettingsPicked(data.getData());
+        }
     }
 }
