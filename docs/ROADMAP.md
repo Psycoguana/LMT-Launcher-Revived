@@ -19,7 +19,7 @@ intentional divergence with a reason; anything else that differs is reported as
 `UNEXPLAINED` by the oracle.
 
 ### 1.2 Write tests  🟡 started
-**Done:** JUnit + Robolectric wired up (`app/src/test/`), 28 tests green.
+**Done:** JUnit + Robolectric wired up (`app/src/test/`), 39 tests green.
 `ActionTest` pins the catalogue invariants — `names[]`/`captions[]` parity, every id
 constant matching its slot, the `Offset*` sentinels staying ordered — plus a
 regression test for the `toString()` off-by-one (verified it fails against the old
@@ -31,11 +31,16 @@ Test dependencies do not reach the release APK; the oracle stays `EQUIVALENT`.
 
 **Remaining targets, in order:**
 
-- **`SettingsValuesBase` / `SettingsSharedPrefsWrapper`** — pure pref
-  serialisation, trivially unit-testable with Robolectric, and the layer that
-  import/export (1.4) will depend on.
-- **`Action`** — the id ↔ name ↔ caption tables, `toString()`, and the
-  `Offset*` sentinel grouping that `CommandSelectActivity` relies on. Pure data.
+- ~~**`SettingsValuesBase` / `SettingsSharedPrefsWrapper`**~~ — **done**, 14 tests
+  across `SettingsSharedPrefsWrapperTest` and `SettingsSlotSchemaTest`. The schema
+  test is the important one: slots are addressed by bare integer index and
+  `PieControl` walks hardcoded ranges (ring 1 = 0..9, ring 2 = 10..23, ring
+  3 = 24..37), with nothing relating those ranges to the total — so an off-by-one
+  would bind the wrong action to the wrong slice without failing to compile.
+  Mutation-verified: reverting the pie count 38 → 24, i.e. silently losing the
+  third-ring patch, fails two tests.
+- ~~**`Action`**~~ — **done**, 8 tests. `TouchServiceResult` covered too (4 tests):
+  its names are preference-key prefixes and drawable identifiers, not just labels.
 - ~~**`PieMenu.findItem()` geometry**~~ — **done**, 13 tests. `getPolar` and
   `findItem` are private methods on a `FrameLayout` subclass, so they are driven by
   reflection against a real `PieMenu` and the scenario is installed by writing the
@@ -48,6 +53,11 @@ Test dependencies do not reach the release APK; the oracle stays `EQUIVALENT`.
   `getLevel() == mLevels` to `!=` and `<` to `<=` each fail the intended tests.
 - **Instrumented smoke test** — service starts, pie opens, three rings render.
   This is currently done by hand via argent; `argent-qa-flows` could record it.
+- **`inputcontext/` has no automated coverage at all** (865 lines) and, being an
+  asset rather than part of `classes.dex`, no oracle coverage either. Its reflective
+  routes can only really be validated against a real Android runtime — the probe in
+  `tools/inputcontext/probe/` is the pattern; making it an on-device harness that
+  asserts rather than prints is the next step.
 
 > **Heads-up for 1.5 (import/export): there is a second, hidden storage backend.**
 > `SettingsSharedPrefsWrapper`'s constructor checks
