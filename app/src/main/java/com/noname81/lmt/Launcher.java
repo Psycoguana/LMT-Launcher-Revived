@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/* JADX INFO: loaded from: classes.dex */
 class Launcher {
     private static boolean DEBUG = false;
     private static final String TAG = "LMT::Launcher";
@@ -46,125 +45,125 @@ class Launcher {
         return instance;
     }
 
-    static void setDebug(int i) {
-        DEBUG = i != 1 ? false : true;
+    static void setDebug(int mode) {
+        DEBUG = mode != 1 ? false : true;
     }
 
     void fireAction(Action action) {
         Log.d(TAG, "Fire action " + action.toString());
         switch (action.getType()) {
-            case 2:
+            case Action.App:
                 doAppAction(action.getString());
                 break;
-            case 3:
+            case Action.Home:
                 doHomeAction();
                 break;
-            case 4:
+            case Action.HomeLongpress:
                 doHomeLongpressAction();
                 break;
-            case 5:
+            case Action.Menu:
                 doMenuAction();
                 break;
-            case 6:
+            case Action.MenuLongpress:
                 doMenuLongpressAction();
                 break;
-            case 7:
+            case Action.Back:
                 doBackAction();
                 break;
-            case 8:
+            case Action.BackLongpress:
                 doBackLongpressAction();
                 break;
-            case 9:
+            case Action.RecentApps:
                 doRecentAppsAction();
                 break;
-            case 10:
+            case Action.Search:
                 doSearchAction();
                 break;
-            case 11:
+            case Action.SearchLongpress:
                 doSearchLongpressAction();
                 break;
-            case 12:
+            case Action.NextApp:
                 doNextApp();
                 break;
-            case 13:
+            case Action.PrevApp:
                 doPrevApp();
                 break;
-            case 14:
+            case Action.LastApp:
                 doLastApp();
                 break;
-            case 15:
+            case Action.OpenNotificationBar:
                 doOpenNotificationBar();
                 break;
-            case 16:
+            case Action.OpenQuickSettings:
                 doOpenQuickSettings();
                 break;
-            case 17:
+            case Action.OpenKeyboard:
                 doOpenKeyboard();
                 break;
-            case 18:
+            case Action.OpenPowerMenu:
                 doPowerMenuAction();
                 break;
-            case 20:
+            case Action.WifiToggle:
                 doWifiToggleAction();
                 break;
-            case 21:
+            case Action.DataToggle:
                 doDataToggleAction();
                 break;
-            case 22:
+            case Action.BluetoothToggle:
                 doBluetoothToggleAction();
                 break;
-            case 23:
+            case Action.GPSToggle:
                 doGPSToggleAction();
                 break;
-            case 24:
+            case Action.ImmersiveModeToggle:
                 doImmersiveModeToggleAction();
                 break;
-            case 26:
+            case Action.Key:
                 doKeyAction(action.getString());
                 break;
-            case 27:
+            case Action.Activity:
                 doActivityAction(action.getString());
                 break;
-            case 28:
+            case Action.WebPage:
                 doWebPageAction(action.getString());
                 break;
-            case 29:
+            case Action.Script:
                 doScriptAction(action.getString());
                 break;
-            case 30:
+            case Action.KillApp:
                 doKillAppAction();
                 break;
-            case 31:
+            case Action.KillAllApps:
                 doKillAllAppsAction();
                 break;
-            case 32:
+            case Action.TaskerTask:
                 doTaskerAction(action.getString());
                 break;
-            case 33:
+            case Action.Shortcut:
                 doShortcutAction(action.getString());
                 break;
-            case 34:
+            case Action.Screenshot:
                 doScreenshotAction();
                 break;
-            case 35:
+            case Action.UnpinApp:
                 doUnpinAppAction();
                 break;
-            case 36:
+            case Action.NowOnTap:
                 doNowOnTapAction();
                 break;
-            case 37:
+            case Action.Assistant:
                 doAssistantAction();
                 break;
-            case 38:
+            case Action.SplitScreen:
                 doSplitScreenAction();
                 break;
-            case 40:
+            case Action.Nova:
                 doOpenNova();
                 break;
-            case 41:
+            case Action.Apex:
                 doOpenApex();
                 break;
-            case 42:
+            case Action.Holo:
                 doOpenHolo();
                 break;
         }
@@ -281,41 +280,41 @@ class Launcher {
             return;
         }
         this.mRecentTaskInfo = this.mActivityManager.getRecentTasks(20, 0);
-        int i = Integer.MAX_VALUE;
-        int i2 = Integer.MAX_VALUE;
-        int i3 = 0;
-        int i4 = 0;
-        for (int i5 = 1; i5 < this.mRecentTaskInfo.size(); i5++) {
-            if (this.mRecentTaskInfo.get(i5).id < i
-                    && this.mRecentTaskInfo.get(i5).id > this.mRecentTaskInfo.get(0).id
+        int nextID = Integer.MAX_VALUE;
+        int firstID = Integer.MAX_VALUE;
+        int nextPos = 0;
+        int firstPos = 0;
+        for (int index = 1; index < this.mRecentTaskInfo.size(); index++) {
+            if (this.mRecentTaskInfo.get(index).id < nextID
+                    && this.mRecentTaskInfo.get(index).id > this.mRecentTaskInfo.get(0).id
                     && !this.mRecentTaskInfo
-                            .get(i5)
+                            .get(index)
                             .baseIntent
                             .hasCategory("android.intent.category.HOME")) {
-                i = this.mRecentTaskInfo.get(i5).id;
-                i3 = i5;
+                nextID = this.mRecentTaskInfo.get(index).id;
+                nextPos = index;
             }
-            if (this.mRecentTaskInfo.get(i5).id < i2
+            if (this.mRecentTaskInfo.get(index).id < firstID
                     && !this.mRecentTaskInfo
-                            .get(i5)
+                            .get(index)
                             .baseIntent
                             .hasCategory("android.intent.category.HOME")
-                    && this.mRecentTaskInfo.get(i5).id > -1) {
-                i2 = this.mRecentTaskInfo.get(i5).id;
-                i4 = i5;
+                    && this.mRecentTaskInfo.get(index).id > -1) {
+                firstID = this.mRecentTaskInfo.get(index).id;
+                firstPos = index;
             }
         }
         List<ActivityManager.RecentTaskInfo> list = this.mRecentTaskInfo;
-        if (i3 > 0) {
-            i4 = i3;
+        if (nextPos > 0) {
+            firstPos = nextPos;
         }
-        ComponentName component = list.get(i4).baseIntent.getComponent();
+        ComponentName component = list.get(firstPos).baseIntent.getComponent();
         component.getClass();
         String strFlattenToString = component.flattenToString();
-        if (i3 <= 0) {
-            i = i2;
+        if (nextPos <= 0) {
+            nextID = firstID;
         }
-        moveTaskToFront(strFlattenToString, i);
+        moveTaskToFront(strFlattenToString, nextID);
     }
 
     private void doPrevApp() {
@@ -327,48 +326,48 @@ class Launcher {
             return;
         }
         this.mRecentTaskInfo = this.mActivityManager.getRecentTasks(20, 0);
-        int i = 0;
-        int i2 = 0;
-        int i3 = 0;
-        int i4 = 0;
-        for (int i5 = 1; i5 < this.mRecentTaskInfo.size(); i5++) {
-            if (this.mRecentTaskInfo.get(i5).id > i2
-                    && this.mRecentTaskInfo.get(i5).id < this.mRecentTaskInfo.get(0).id
+        int prevID = 0;
+        int lastID = 0;
+        int prevPos = 0;
+        int lastPos = 0;
+        for (int index = 1; index < this.mRecentTaskInfo.size(); index++) {
+            if (this.mRecentTaskInfo.get(index).id > lastID
+                    && this.mRecentTaskInfo.get(index).id < this.mRecentTaskInfo.get(0).id
                     && !this.mRecentTaskInfo
-                            .get(i5)
+                            .get(index)
                             .baseIntent
                             .hasCategory("android.intent.category.HOME")) {
-                i2 = this.mRecentTaskInfo.get(i5).id;
-                i = i5;
+                lastID = this.mRecentTaskInfo.get(index).id;
+                prevID = index;
             }
-            if (this.mRecentTaskInfo.get(i5).id > i4
+            if (this.mRecentTaskInfo.get(index).id > lastPos
                     && !this.mRecentTaskInfo
-                            .get(i5)
+                            .get(index)
                             .baseIntent
                             .hasCategory("android.intent.category.HOME")
-                    && this.mRecentTaskInfo.get(i5).id > -1) {
-                i4 = this.mRecentTaskInfo.get(i5).id;
-                i3 = i5;
+                    && this.mRecentTaskInfo.get(index).id > -1) {
+                lastPos = this.mRecentTaskInfo.get(index).id;
+                prevPos = index;
             }
         }
         List<ActivityManager.RecentTaskInfo> list = this.mRecentTaskInfo;
-        if (i > 0) {
-            i3 = i;
+        if (prevID > 0) {
+            prevPos = prevID;
         }
-        ComponentName component = list.get(i3).baseIntent.getComponent();
+        ComponentName component = list.get(prevPos).baseIntent.getComponent();
         component.getClass();
         String strFlattenToString = component.flattenToString();
-        if (i <= 0) {
-            i2 = i4;
+        if (prevID <= 0) {
+            lastID = lastPos;
         }
-        moveTaskToFront(strFlattenToString, i2);
+        moveTaskToFront(strFlattenToString, lastID);
     }
 
     private void doLastApp() {
         if (DEBUG) {
             Log.d(TAG, "doLastApp()");
         }
-        int i = 0;
+        int index = 0;
         if (Build.VERSION.SDK_INT >= 21) {
             if (this.mRootContext.isRootAvailable(false)) {
                 this.mRootContext.runCommandRemote("am last-app 0", true);
@@ -393,17 +392,17 @@ class Launcher {
                         .get(1)
                         .baseIntent
                         .hasCategory("android.intent.category.HOME")) {
-            i = 1;
+            index = 1;
         } else if (this.mRecentTaskInfo.size() > 2
                 && !this.mRecentTaskInfo
                         .get(2)
                         .baseIntent
                         .hasCategory("android.intent.category.HOME")) {
-            i = 2;
+            index = 2;
         }
-        ComponentName component = this.mRecentTaskInfo.get(i).baseIntent.getComponent();
+        ComponentName component = this.mRecentTaskInfo.get(index).baseIntent.getComponent();
         component.getClass();
-        moveTaskToFront(component.flattenToString(), this.mRecentTaskInfo.get(i).id);
+        moveTaskToFront(component.flattenToString(), this.mRecentTaskInfo.get(index).id);
     }
 
     private void doPowerMenuAction() {
@@ -419,29 +418,31 @@ class Launcher {
         }
     }
 
-    private void doKeyAction(String str) {
+    private void doKeyAction(String keycodes) {
         if (DEBUG) {
-            Log.d(TAG, "doKeyAction(" + str + ")");
+            Log.d(TAG, "doKeyAction(" + keycodes + ")");
         }
-        this.mRootContext.runCommandRemote("input keyevent " + str, true);
+        this.mRootContext.runCommandRemote("input keyevent " + keycodes, true);
     }
 
-    private void doKeyAction(int i) {
+    private void doKeyAction(int keycode) {
         if (DEBUG) {
             Log.d(TAG, "doKeyAction()");
         }
-        this.mRootContext.runCommandRemote("input keyevent " + i, true);
+        this.mRootContext.runCommandRemote("input keyevent " + keycode, true);
     }
 
-    private boolean doAppAction(String str) {
+    private boolean doAppAction(String packageName) {
         Intent launchIntentForPackage;
         if (DEBUG) {
-            Log.d(TAG, "doAppAction(" + str + ")");
+            Log.d(TAG, "doAppAction(" + packageName + ")");
         }
-        if (str == null
-                || str.length() <= 0
+        if (packageName == null
+                || packageName.length() <= 0
                 || (launchIntentForPackage =
-                                this.mContext.getPackageManager().getLaunchIntentForPackage(str))
+                                this.mContext
+                                        .getPackageManager()
+                                        .getLaunchIntentForPackage(packageName))
                         == null) {
             return false;
         }
@@ -449,93 +450,98 @@ class Launcher {
         return true;
     }
 
-    private void moveTaskToFront(String str, int i) {
+    private void moveTaskToFront(String component, int taskId) {
         if (DEBUG) {
-            Log.d(TAG, "moveTaskToFront(" + str + ", " + i + ")");
+            Log.d(TAG, "moveTaskToFront(" + component + ", " + taskId + ")");
         }
         if (Build.VERSION.SDK_INT >= 16) {
-            this.mRootContext.runCommandRemote("am move-to-front " + i, true);
+            this.mRootContext.runCommandRemote("am move-to-front " + taskId, true);
             return;
         }
-        this.mActivityManager.moveTaskToFront(i, 0);
+        this.mActivityManager.moveTaskToFront(taskId, 0);
     }
 
-    private void startActivity(String str) {
+    private void startActivity(String component) {
         if (DEBUG) {
-            Log.d(TAG, "startActivity(" + str + ")");
+            Log.d(TAG, "startActivity(" + component + ")");
         }
         if (Build.VERSION.SDK_INT >= 18) {
             this.mRootContext.runCommandRemote(
-                    "am start -a android.intent.action.MAIN -n " + str, true);
+                    "am start -a android.intent.action.MAIN -n " + component, true);
             return;
         }
-        this.mRootContext.runCommandRoot("am start -a android.intent.action.MAIN -n " + str, true);
+        this.mRootContext.runCommandRoot(
+                "am start -a android.intent.action.MAIN -n " + component, true);
     }
 
-    private void doActivityAction(String str) {
+    private void doActivityAction(String component) {
         if (DEBUG) {
-            Log.d(TAG, "doActivityAction(" + str + ")");
+            Log.d(TAG, "doActivityAction(" + component + ")");
         }
-        if (str == null || str.length() <= 0) {
+        if (component == null || component.length() <= 0) {
             return;
         }
         if (this.mRootContext.isRootAvailable(false)) {
             if (Build.VERSION.SDK_INT >= 21) {
-                this.mRootContext.runCommandRemote("am move-to-front-or-start " + str, true);
+                this.mRootContext.runCommandRemote("am move-to-front-or-start " + component, true);
                 return;
             }
             if (Build.VERSION.SDK_INT >= 16) {
                 this.mRunningTaskInfo = this.mActivityManager.getRunningTasks(20);
-                for (int i = 1; i < this.mRunningTaskInfo.size(); i++) {
-                    if (this.mRunningTaskInfo.get(i).baseActivity.flattenToString().equals(str)) {
-                        moveTaskToFront(str, this.mRunningTaskInfo.get(i).id);
+                for (int index = 1; index < this.mRunningTaskInfo.size(); index++) {
+                    if (this.mRunningTaskInfo
+                            .get(index)
+                            .baseActivity
+                            .flattenToString()
+                            .equals(component)) {
+                        moveTaskToFront(component, this.mRunningTaskInfo.get(index).id);
                         return;
                     }
                 }
-                startActivity(str);
+                startActivity(component);
                 return;
             }
-            startActivity(str);
+            startActivity(component);
             return;
         }
         Intent intent = new Intent("android.intent.action.MAIN", (Uri) null);
-        intent.setComponent(ComponentName.unflattenFromString(str));
+        intent.setComponent(ComponentName.unflattenFromString(component));
         intent.setFlags(268435456);
         this.mContext.startActivity(intent);
     }
 
-    private void doWebPageAction(String str) {
+    private void doWebPageAction(String url) {
         if (DEBUG) {
-            Log.d(TAG, "doWebPageAction(" + str + ")");
+            Log.d(TAG, "doWebPageAction(" + url + ")");
         }
-        if (!str.contains("http")) {
-            if (!str.contains("www")) {
-                str = "http://www." + str;
+        if (!url.contains("http")) {
+            if (!url.contains("www")) {
+                url = "http://www." + url;
             } else {
-                str = "http://" + str;
+                url = "http://" + url;
             }
         }
         Intent intent = new Intent("android.intent.action.VIEW");
         intent.addFlags(268435456);
-        intent.setData(Uri.parse(str));
+        intent.setData(Uri.parse(url));
         try {
             this.mContext.startActivity(intent);
         } catch (ActivityNotFoundException unused) {
         }
     }
 
-    private void doScriptAction(String str) {
+    private void doScriptAction(String script) {
         if (DEBUG) {
-            Log.d(TAG, "doScriptAction(" + str + ")");
+            Log.d(TAG, "doScriptAction(" + script + ")");
         }
-        if (str == null || str.length() <= 0) {
+        if (script == null || script.length() <= 0) {
             return;
         }
-        if (str.contains(".sh")) {
-            this.mRootContext.runCommandRoot("sh " + str, true);
+        if (script.contains(".sh")) {
+            this.mRootContext.runCommandRoot("sh " + script, true);
             return;
         }
-        this.mRootContext.runCommandRoot(str, true);
+        this.mRootContext.runCommandRoot(script, true);
     }
 
     private void doWifiToggleAction() {
@@ -561,7 +567,7 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doDataToggleAction()");
         }
-        boolean z = true;
+        boolean enable = true;
         if (Build.VERSION.SDK_INT >= 20) {
             if (((TelephonyManager) this.mContext.getSystemService("phone")).getDataState() == 2) {
                 this.mRootContext.runCommandRoot("svc data disable", true);
@@ -587,9 +593,9 @@ class Launcher {
             declaredMethod.setAccessible(true);
             Object[] objArr = new Object[1];
             if (telephonyManager.getDataState() == 2) {
-                z = false;
+                enable = false;
             }
-            objArr[0] = Boolean.valueOf(z);
+            objArr[0] = Boolean.valueOf(enable);
             declaredMethod.invoke(obj, objArr);
         } catch (Exception unused) {
         }
@@ -683,10 +689,12 @@ class Launcher {
         TimerTask timerTask = new TimerTask() { // from class: com.noname81.lmt.Launcher.2
                     @Override // java.util.TimerTask, java.lang.Runnable
                     public void run() {
-                        for (int i = 0; i < Launcher.this.mRunningTaskInfo.size(); i++) {
+                        for (int index = 0;
+                                index < Launcher.this.mRunningTaskInfo.size();
+                                index++) {
                             String packageName =
                                     ((ActivityManager.RunningTaskInfo)
-                                                    Launcher.this.mRunningTaskInfo.get(i))
+                                                    Launcher.this.mRunningTaskInfo.get(index))
                                             .baseActivity.getPackageName();
                             if (!packageName.contains("com.noname81.lmt")
                                     && !packageName.contains("com.android.systemui")) {
@@ -702,16 +710,16 @@ class Launcher {
         new Timer().schedule(timerTask, 1000L);
     }
 
-    private void doTaskerAction(String str) {
+    private void doTaskerAction(String taskName) {
         if (DEBUG) {
             Log.d(TAG, "doTaskerAction()");
         }
-        if (str == null || str.length() <= 0) {
+        if (taskName == null || taskName.length() <= 0) {
             return;
         }
         this.mRootContext.runCommandRoot(
                 "am broadcast -a net.dinglisch.android.tasker.ACTION_TASK -e task_name '"
-                        + str
+                        + taskName
                         + "'",
                 true);
     }
@@ -779,12 +787,12 @@ class Launcher {
         ((InputMethodManager) this.mContext.getSystemService("input_method")).toggleSoftInput(2, 1);
     }
 
-    private void doShortcutAction(String str) {
+    private void doShortcutAction(String shortcutUri) {
         if (DEBUG) {
             Log.d(TAG, "doShortcutAction()");
         }
         try {
-            Intent uri = Intent.parseUri(str, 0);
+            Intent uri = Intent.parseUri(shortcutUri, 0);
             uri.addFlags(268435456);
             this.mContext.startActivity(uri);
         } catch (Exception unused) {
