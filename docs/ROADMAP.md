@@ -109,7 +109,9 @@ Nova's own drawer — close, not identical.
   way to send a broadcast. A plain `sendBroadcast` does the same. Caveat: modern
   Tasker gates this behind "Allow External Access" and the
   `net.dinglisch.android.tasker.PERMISSION_RUN_TASKS` permission, which the
-  manifest would need to declare.
+  manifest would need to declare. Note a user-level workaround already exists and
+  is worth documenting in-app rather than only fixing in code: pick the **Shortcut**
+  action and choose Tasker's "Tasker Task" shortcut (motomotomotoG, XDA, Mar 2026).
 - **30 KillApp** — `killBackgroundProcesses` is already called in the pre-API-21
   branch and `KILL_BACKGROUND_PROCESSES` is already in the manifest. What broke on
   Lollipop was `getRunningTasks` for identifying the foreground app;
@@ -163,8 +165,13 @@ E/LMT::InputContext: java.lang.NullPointerException
 
 `InputManager.getInstance()` — a hidden API — now NPEs inside a bare `app_process`.
 
-**Version boundary is untested.** This was verified on Android 15 (SDK 35) only.
-Which release first broke it is unknown; do not claim "14+" without testing 12/13/14.
+**Independently reported on XDA since September 2024**, and never fixed. See
+"Corroboration" below — this is a long-standing, widely-hit bug, not an edge case.
+
+**Version boundary.** Verified here on Android 15 (SDK 35). A user posted the
+identical trace in Sept 2024 with `InputManager.java:277` where ours reads `:405`,
+so it was already broken at least one Android release earlier. The exact first
+broken release is still untested.
 
 **This is not a regression from the reconstruction.** Proven by invoking the
 verbatim shipped `InputContext29.jar` standalone under `su`, entirely outside LMT:
@@ -202,6 +209,36 @@ common actions, so the damage is uneven:
   reflection, a different code path that runs without error: `NextApp`, `PrevApp`,
   `LastApp`, `KillApp`, `KillAllApps`, `move-to-front`.
 
+**Corroboration from the XDA thread** (`xdaforums.com/t/...1330150`, pages 736-745).
+Users hit this for two years without it being root-caused:
+
+- **Kyonex**, Oct 2024, Samsung Flip 6 + KernelSU — "in root mode many features in
+  LMT stop working (pie pointer draws fine but **won't simulate touch**, actions
+  like **back**, **key 26**, **longpress home** won't work at all), **so I disable**
+  [root]". Turning root *off* is the community workaround, because that forces the
+  accessibility path.
+- **NullCode**, Oct 2024 — posted the **identical stack trace**: same NPE, same
+  `InputManager.getInstance`, same `InputContext.injectKeyEvent:367` /
+  `sendKeyEvent:350` / `runInput:156` line numbers. Added: "I checked google docs
+  and apparently the API this app uses is deprecated". Then: "I know absolutely
+  nothing about decompiling apks and SMALI so it's pretty much impossible to try
+  fix it for me." Nobody picked it up.
+- **hugozo**, Dec 2025, OnePlus 12 rooted stock — "pie pointer works fine **without
+  root**; **with root**, the 'pointed app' dont start, nothing append". Exactly the
+  root-preferred-and-broken path.
+- **93fuelslut**, Sept 2025, Pixel 10 Pro XL / Android 16 — "recent, home and back
+  doesn't work ... the soft nav keys don't."
+- **noname81** (the original author), Dec 2025 — "I think I fixed the first issue
+  with **using accessibility instead root for pointer by default**." That is the
+  accessibility-first fix, but applied only to `PiePointer`. The rest of the
+  key-injection actions were left on the broken path, which matches what we measured.
+- Still open per hugozo: a gesture bound to keycode **1026** (long-press power) is
+  "broken since android 15 **with or without root**" — that one is not explained by
+  this bug and needs separate investigation.
+
+So the fix direction is already endorsed by the original author; it just was never
+finished beyond the pointer.
+
 This also makes 2.1's `GLOBAL_ACTION_TAKE_SCREENSHOT` more valuable than it first
 appeared: it is not a convenience, it is the only way Screenshot works at all on Android 15.
 
@@ -231,6 +268,17 @@ hand-edited prefs file, or from adding an id to `names[]` carelessly. `<` is cor
   first number in `dumpsys audio` is a different stream and does not move.
 - **Reinstalling clears the accessibility service binding.** Re-enable it after
   every install, or accessibility-backed actions silently do nothing.
+
+### 3.5 🟡 Accessibility service silently unbinds (separate, still live)
+
+Distinct from 3.1 and reported repeatedly on XDA: Android drops LMT's accessibility
+binding while still *showing* it as enabled. motomotomotoG, Mar 2026 — "Android
+disables Accessibility for the app ... Android will show that the app has
+accessibility enabled, but it's not actually", fixed by toggling it off and on.
+v3.11 was released to address a suspected cause and the reporter has not seen it
+since, but at least one user still reported it afterwards. This matters more now,
+because 3.1 means accessibility is the *only* working path for Home/Back/Recents —
+when it unbinds, those actions die with no root fallback.
 
 ---
 
