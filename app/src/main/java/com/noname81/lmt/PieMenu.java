@@ -26,7 +26,6 @@ import android.widget.FrameLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-/* JADX INFO: loaded from: classes.dex */
 class PieMenu extends FrameLayout {
     private static boolean DEBUG = false;
     private static final int MAX_LEVELS = 5;
@@ -73,19 +72,27 @@ class PieMenu extends FrameLayout {
         boolean drawForeground(Canvas canvas);
 
         void layout(
-                boolean z, Point point, int i, int i2, int i3, boolean z2, boolean z3, boolean z4);
+                boolean visible,
+                Point center,
+                int radius,
+                int radiusInc,
+                int levels,
+                boolean onTheLeft,
+                boolean onTheBottom,
+                boolean onTheRight);
 
         void onShrink();
 
-        boolean onTouchEvent(int i, float f, float f2, float f3, float f4, PointF pointF);
+        boolean onTouchEvent(
+                int action, float x, float y, float deltaX, float deltaY, PointF polar);
     }
 
     private float getDegrees(double d) {
         return (float) (270.0d - ((d * 180.0d) / 3.141592653589793d));
     }
 
-    public PieMenu(Context context, AttributeSet attributeSet, int i) {
-        super(context, attributeSet, i);
+    public PieMenu(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         init(context);
     }
 
@@ -99,12 +106,10 @@ class PieMenu extends FrameLayout {
         init(context);
     }
 
-    static void setDebug(boolean z) {
-        DEBUG = z;
+    static void setDebug(boolean enabled) {
+        DEBUG = enabled;
     }
 
-    /* JADX WARN: Can't fix incorrect switch cases order, some code will duplicate */
-    /* JADX WARN: Code duplicated, block: B:12:0x00ff  */
     private void init(Context context) {
         this.mSettings = SettingsValues.getInstance(context);
         this.mToaster = Toaster.getInstance(context);
@@ -380,8 +385,8 @@ class PieMenu extends FrameLayout {
     public void clearItems() {
         this.mItems.clear();
         this.mLevels = 0;
-        for (int i = 0; i < 5; i++) {
-            this.mCounts[i] = 0;
+        for (int level = 0; level < 5; level++) {
+            this.mCounts[level] = 0;
         }
     }
 
@@ -405,12 +410,12 @@ class PieMenu extends FrameLayout {
                 : true;
     }
 
-    private boolean isValidPosition(int i, int i2) {
+    private boolean isValidPosition(int x, int y) {
         return onTheLeft() || onTheRight() || onTheBottom();
     }
 
-    public void show(boolean z, boolean z2) {
-        if (z) {
+    public void show(boolean show, boolean animate) {
+        if (show) {
             animateOpen();
             layoutPie();
             PieView pieView = this.mPiePointer;
@@ -423,7 +428,7 @@ class PieMenu extends FrameLayout {
                         this.mLevels,
                         onTheLeft(),
                         onTheBottom(),
-                        z2);
+                        animate);
             }
             PieView pieView2 = this.mStatusInfo;
             if (pieView2 != null) {
@@ -435,7 +440,7 @@ class PieMenu extends FrameLayout {
                         this.mLevels,
                         onTheLeft(),
                         onTheBottom(),
-                        z2);
+                        animate);
             }
         } else {
             this.mCurrentItem = null;
@@ -450,7 +455,7 @@ class PieMenu extends FrameLayout {
                         this.mLevels,
                         onTheLeft(),
                         onTheBottom(),
-                        z2);
+                        animate);
             }
             PieView pieView4 = this.mStatusInfo;
             if (pieView4 != null) {
@@ -462,10 +467,10 @@ class PieMenu extends FrameLayout {
                         this.mLevels,
                         onTheLeft(),
                         onTheBottom(),
-                        z2);
+                        animate);
             }
         }
-        this.mOpen = z;
+        this.mOpen = show;
         invalidate();
     }
 
@@ -489,9 +494,9 @@ class PieMenu extends FrameLayout {
         valueAnimatorOfFloat.start();
     }
 
-    private void setCenter(int i, int i2) {
-        this.mCenter.x = i;
-        this.mCenter.y = i2;
+    private void setCenter(int x, int y) {
+        this.mCenter.x = x;
+        this.mCenter.y = y;
         if (onTheLeft()) {
             this.mCenter.x = 0;
         } else if (onTheRight()) {
@@ -510,15 +515,16 @@ class PieMenu extends FrameLayout {
                             + ","
                             + this.mCenter.y
                             + " inx:"
-                            + i
+                            + x
                             + " iny:"
-                            + i2);
+                            + y);
         }
     }
 
-    private void selectImages(int i) {
-        for (int i2 = 0; i2 < this.mItems.size(); i2++) {
-            this.mItems.get(i2).selectImage(i);
+    /** Swaps every slice to its short-press (0) or long-press (1) drawable. */
+    private void selectImages(int which) {
+        for (int index = 0; index < this.mItems.size(); index++) {
+            this.mItems.get(index).selectImage(which);
         }
     }
 
@@ -580,81 +586,90 @@ class PieMenu extends FrameLayout {
         }
     }
 
+    /**
+     * Places every slice: each ring sits {@code mRadiusInc} further out than the last, and the
+     * items on it share the half-circle evenly, minus the start and slice gaps.
+     */
     private void layoutPie() {
-        int i;
-        int i2;
-        int i3;
-        float fLoadPieStartGap = this.mSettings.loadPieStartGap() / 100.0f;
-        float f = onTheBottom() ? (-1.5707964f) + fLoadPieStartGap : fLoadPieStartGap;
-        float fLoadPieSliceGap = this.mSettings.loadPieSliceGap() / 10.0f;
-        int i4 = (int) (5.0f * fLoadPieSliceGap);
-        int i5 = this.mRadius;
-        int i6 = i5 + i4;
-        int i7 = (i5 + this.mRadiusInc) - i4;
-        int i8 = i7;
-        int i9 = i6;
-        for (int i10 = 0; i10 < this.mLevels; i10 = i) {
-            i = i10 + 1;
-            double d = fLoadPieStartGap * 2.0f;
+        int nextLevel;
+        int iconX;
+        int halfWidth;
+        float startGap = this.mSettings.loadPieStartGap() / 100.0f;
+        float startAngle = onTheBottom() ? (-1.5707964f) + startGap : startGap;
+        float sliceGap = this.mSettings.loadPieSliceGap() / 10.0f;
+        int sliceGapPx = (int) (5.0f * sliceGap);
+        int radius = this.mRadius;
+        int firstInner = radius + sliceGapPx;
+        int firstOuter = (radius + this.mRadiusInc) - sliceGapPx;
+        int outerRadius = firstOuter;
+        int innerRadius = firstInner;
+        for (int level = 0; level < this.mLevels; level = nextLevel) {
+            nextLevel = level + 1;
+            double d = startGap * 2.0f;
             Double.isNaN(d);
-            float f2 = ((float) (3.141592653589793d - d)) / this.mCounts[i];
-            float f3 = f2 / 2.0f;
+            float sweep = ((float) (3.141592653589793d - d)) / this.mCounts[nextLevel];
+            float halfSweep = sweep / 2.0f;
             Path pathMakeSlice =
                     makeSlice(
                             getDegrees(0.0d),
-                            getDegrees(f2),
-                            i8,
-                            i9,
+                            getDegrees(sweep),
+                            outerRadius,
+                            innerRadius,
                             this.mCenter,
-                            fLoadPieSliceGap);
-            float f4 = f + f3;
+                            sliceGap);
+            float angle = startAngle + halfSweep;
             for (PieItem pieItem : this.mItems) {
-                if (pieItem.getLevel() == i) {
+                if (pieItem.getLevel() == nextLevel) {
                     View view = pieItem.getView();
                     if (view != null) {
                         view.measure(view.getLayoutParams().width, view.getLayoutParams().height);
                         int measuredWidth = view.getMeasuredWidth();
                         int measuredHeight = view.getMeasuredHeight();
-                        double d2 = (((i8 - i9) * 2) / 3) + i9;
-                        double d3 = f4;
+                        double d2 = (((outerRadius - innerRadius) * 2) / 3) + innerRadius;
+                        double d3 = angle;
                         double dSin = Math.sin(d3);
                         Double.isNaN(d2);
-                        int i11 = (int) (d2 * dSin);
-                        int i12 = this.mCenter.y;
+                        int iconOffset = (int) (d2 * dSin);
+                        int centerY = this.mCenter.y;
                         double dCos = Math.cos(d3);
                         Double.isNaN(d2);
-                        int i13 = (i12 - ((int) (d2 * dCos))) - (measuredHeight / 2);
+                        int iconTop = (centerY - ((int) (d2 * dCos))) - (measuredHeight / 2);
                         if (onTheLeft()) {
-                            i2 = this.mCenter.x + i11;
-                            i3 = measuredWidth / 2;
+                            iconX = this.mCenter.x + iconOffset;
+                            halfWidth = measuredWidth / 2;
                         } else {
-                            i2 = this.mCenter.x - i11;
-                            i3 = measuredWidth / 2;
+                            iconX = this.mCenter.x - iconOffset;
+                            halfWidth = measuredWidth / 2;
                         }
-                        int i14 = i2 - i3;
-                        view.layout(i14, i13, measuredWidth + i14, measuredHeight + i13);
+                        int iconLeft = iconX - halfWidth;
+                        view.layout(
+                                iconLeft,
+                                iconTop,
+                                measuredWidth + iconLeft,
+                                measuredHeight + iconTop);
                     }
-                    pieItem.setGeometry(f4 - f3, f2, i9, i8, pathMakeSlice);
+                    pieItem.setGeometry(
+                            angle - halfSweep, sweep, innerRadius, outerRadius, pathMakeSlice);
                     pieItem.setColor(this.mIconColor);
-                    f4 += f2;
+                    angle += sweep;
                 } else {
-                    fLoadPieStartGap = fLoadPieStartGap;
-                    f = f;
-                    fLoadPieSliceGap = fLoadPieSliceGap;
-                    i8 = i8;
-                    i9 = i9;
-                    i = i;
+                    startGap = startGap;
+                    startAngle = startAngle;
+                    sliceGap = sliceGap;
+                    outerRadius = outerRadius;
+                    innerRadius = innerRadius;
+                    nextLevel = nextLevel;
                 }
-                fLoadPieStartGap = fLoadPieStartGap;
-                f = f;
-                fLoadPieSliceGap = fLoadPieSliceGap;
-                i8 = i8;
-                i9 = i9;
-                i = i;
+                startGap = startGap;
+                startAngle = startAngle;
+                sliceGap = sliceGap;
+                outerRadius = outerRadius;
+                innerRadius = innerRadius;
+                nextLevel = nextLevel;
             }
-            int i15 = this.mRadiusInc;
-            i9 += i15;
-            i8 += i15;
+            int radiusInc = this.mRadiusInc;
+            innerRadius += radiusInc;
+            outerRadius += radiusInc;
         }
         if (this.mNormalGradient != -2) {
             this.mNormalPaint.setShader(
@@ -733,27 +748,31 @@ class PieMenu extends FrameLayout {
         canvas.restoreToCount(iSave);
     }
 
-    private void drawPath(Canvas canvas, Path path, boolean z) {
+    private void drawPath(Canvas canvas, Path path, boolean selected) {
         float strokeWidth = this.mShiftPaint.getStrokeWidth();
         if (strokeWidth > 0.0f) {
             canvas.drawPath(path, this.mShiftPaint);
-            float f = (-strokeWidth) / 2.0f;
-            canvas.translate(f, f);
+            float half = (-strokeWidth) / 2.0f;
+            canvas.translate(half, half);
         }
-        canvas.drawPath(path, z ? this.mSelectedPaint : this.mNormalPaint);
+        canvas.drawPath(path, selected ? this.mSelectedPaint : this.mNormalPaint);
         if (this.mOutlinePaint.getAlpha() > 0) {
             canvas.drawPath(path, this.mOutlinePaint);
         }
     }
 
-    private Path makeSlice(float f, float f2, int i, int i2, Point point, float f3) {
-        RectF rectF = new RectF(point.x - i, point.y - i, point.x + i, point.y + i);
-        RectF rectF2 = new RectF(point.x - i2, point.y - i2, point.x + i2, point.y + i2);
+    /** One pie slice: an annulus segment from {@code start} sweeping {@code sweep}. */
+    private Path makeSlice(
+            float start, float sweep, int inner, int outer, Point center, float gap) {
+        RectF rectF =
+                new RectF(center.x - inner, center.y - inner, center.x + inner, center.y + inner);
+        RectF rectF2 =
+                new RectF(center.x - outer, center.y - outer, center.x + outer, center.y + outer);
         Path path = new Path();
-        float f4 = f - f3;
-        float f5 = f2 + f3;
-        path.arcTo(rectF, f4, f5 - f4, true);
-        path.arcTo(rectF2, f5, f4 - f5);
+        float sweepStart = start - gap;
+        float sweepEnd = sweep + gap;
+        path.arcTo(rectF, sweepStart, sweepEnd - sweepStart, true);
+        path.arcTo(rectF2, sweepEnd, sweepStart - sweepEnd);
         path.close();
         return path;
     }
@@ -789,10 +808,10 @@ class PieMenu extends FrameLayout {
         }
         int actionMasked = motionEvent.getActionMasked();
         if (actionMasked == 0) {
-            int i = (int) rawX;
-            int i2 = (int) rawY;
-            setCenter(i, i2);
-            if (isValidPosition(i, i2)) {
+            int x = (int) rawX;
+            int y = (int) rawY;
+            setCenter(x, y);
+            if (isValidPosition(x, y)) {
                 show(true, false);
                 return true;
             }
@@ -908,46 +927,47 @@ class PieMenu extends FrameLayout {
         this.mCurrentItem = null;
     }
 
-    private PointF getPolar(float f, float f2) {
+    /** Touch point in polar form relative to the pie centre: x is the angle, y the radius. */
+    private PointF getPolar(float x, float y) {
         PointF pointF = new PointF();
         pointF.x = 1.5707964f;
-        float f3 = this.mCenter.x - f;
+        float dx = this.mCenter.x - x;
         if (this.mCenter.x < this.mSlop) {
-            f3 = -f3;
+            dx = -dx;
         }
-        float f4 = this.mCenter.y - f2;
-        pointF.y = (float) Math.sqrt((f3 * f3) + (f4 * f4));
-        if (f4 > 0.0f) {
-            pointF.x = (float) Math.asin(f3 / pointF.y);
-        } else if (f4 < 0.0f) {
-            pointF.x = (float) (3.141592653589793d - Math.asin(f3 / pointF.y));
+        float dy = this.mCenter.y - y;
+        pointF.y = (float) Math.sqrt((dx * dx) + (dy * dy));
+        if (dy > 0.0f) {
+            pointF.x = (float) Math.asin(dx / pointF.y);
+        } else if (dy < 0.0f) {
+            pointF.x = (float) (3.141592653589793d - Math.asin(dx / pointF.y));
         }
         return pointF;
     }
 
-    private PieItem findItem(PointF pointF, boolean z) {
+    private PieItem findItem(PointF polar, boolean expandTriggerArea) {
         for (PieItem pieItem : this.mItems) {
-            if (pieItem.getLevel() == this.mLevels && z) {
-                if (pieItem.getInnerRadius() - this.mTouchOffset < pointF.y
-                        && pieItem.getStartAngle() < pointF.x
-                        && pieItem.getStartAngle() + pieItem.getSweep() > pointF.x) {
+            if (pieItem.getLevel() == this.mLevels && expandTriggerArea) {
+                if (pieItem.getInnerRadius() - this.mTouchOffset < polar.y
+                        && pieItem.getStartAngle() < polar.x
+                        && pieItem.getStartAngle() + pieItem.getSweep() > polar.x) {
                     return pieItem;
                 }
-            } else if (pieItem.getInnerRadius() - this.mTouchOffset < pointF.y
-                    && pieItem.getOuterRadius() - this.mTouchOffset > pointF.y
-                    && pieItem.getStartAngle() < pointF.x
-                    && pieItem.getStartAngle() + pieItem.getSweep() > pointF.x) {
+            } else if (pieItem.getInnerRadius() - this.mTouchOffset < polar.y
+                    && pieItem.getOuterRadius() - this.mTouchOffset > polar.y
+                    && pieItem.getStartAngle() < polar.x
+                    && pieItem.getStartAngle() + pieItem.getSweep() > polar.x) {
                 return pieItem;
             }
         }
         return null;
     }
 
-    public static int manipulateColor(int i, float f) {
+    public static int manipulateColor(int color, float factor) {
         return Color.argb(
-                Color.alpha(i),
-                Math.min(Math.round(Color.red(i) * f), 255),
-                Math.min(Math.round(Color.green(i) * f), 255),
-                Math.min(Math.round(Color.blue(i) * f), 255));
+                Color.alpha(color),
+                Math.min(Math.round(Color.red(color) * factor), 255),
+                Math.min(Math.round(Color.green(color) * factor), 255),
+                Math.min(Math.round(Color.blue(color) * factor), 255));
     }
 }

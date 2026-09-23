@@ -34,7 +34,6 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/* JADX INFO: loaded from: classes.dex */
 public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
     private static final int AIContentInvalid = 0;
     private static final int AIContentOverview = 1;
@@ -99,14 +98,20 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
     public void activate() {}
 
     @Override // android.hardware.SensorEventListener
-    public void onAccuracyChanged(Sensor sensor, int i) {}
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
     @Override // com.noname81.lmt.PieMenu.PieView
     public void onShrink() {}
 
-    PieStatusInfo(FrameLayout frameLayout, Context context, int i, int i2, int i3, int i4) {
-        int i5;
-        int i6;
+    PieStatusInfo(
+            FrameLayout frameLayout,
+            Context context,
+            int colorClock,
+            int colorNotifications,
+            int colorSelected,
+            int colorDim) {
+        int textSizeBig;
+        int textSizeSmall;
         Typeface typefaceCreateFromAsset;
         this.mPieMenu = frameLayout;
         this.mContext = context;
@@ -115,9 +120,9 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mNotificationDataHelper = NotificationDataHelper.getInstance();
         this.mLauncher = Launcher.getInstance(context);
         this.mRootContext = RootContext.getInstance(context);
-        this.mColorClock = i;
-        this.mColorNotifications = i2;
-        this.mColorSelected = i3;
+        this.mColorClock = colorClock;
+        this.mColorNotifications = colorNotifications;
+        this.mColorSelected = colorSelected;
         this.mAnimationActive = true;
         this.mAnimationTime = settingsValues.loadPieAnimation();
         this.mSensorActivated = settingsValues.loadPieShowStatusInfos() == 3 ? true : false;
@@ -134,37 +139,37 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 (int) TypedValue.applyDimension(1, 5.0f, resources.getDisplayMetrics());
         int iLoadPieFont = settingsValues.loadPieFont();
         if (iLoadPieFont < 3) {
-            i5 = iLoadPieFont != 0 ? 65 : 45;
-            i6 = iLoadPieFont != 0 ? 13 : 8;
-            i5 = iLoadPieFont == 2 ? i5 + 15 : i5;
-            i6 = iLoadPieFont == 2 ? i6 + 4 : i6;
+            textSizeBig = iLoadPieFont != 0 ? 65 : 45;
+            textSizeSmall = iLoadPieFont != 0 ? 13 : 8;
+            textSizeBig = iLoadPieFont == 2 ? textSizeBig + 15 : textSizeBig;
+            textSizeSmall = iLoadPieFont == 2 ? textSizeSmall + 4 : textSizeSmall;
             typefaceCreateFromAsset =
                     Typeface.createFromAsset(context.getAssets(), "Roboto-Thin.ttf");
         } else if (iLoadPieFont < 6) {
-            i5 = iLoadPieFont != 3 ? 65 : 45;
-            i6 = iLoadPieFont != 3 ? 13 : 8;
-            i5 = iLoadPieFont == 5 ? i5 + 15 : i5;
-            i6 = iLoadPieFont == 5 ? i6 + 4 : i6;
+            textSizeBig = iLoadPieFont != 3 ? 65 : 45;
+            textSizeSmall = iLoadPieFont != 3 ? 13 : 8;
+            textSizeBig = iLoadPieFont == 5 ? textSizeBig + 15 : textSizeBig;
+            textSizeSmall = iLoadPieFont == 5 ? textSizeSmall + 4 : textSizeSmall;
             typefaceCreateFromAsset =
                     Typeface.createFromAsset(context.getAssets(), "Roboto-Light.ttf");
         } else {
-            i5 = iLoadPieFont != 6 ? 65 : 45;
-            int i7 = iLoadPieFont == 6 ? 8 : 13;
-            i5 = iLoadPieFont == 8 ? i5 + 15 : i5;
-            i6 = iLoadPieFont == 8 ? i7 + 4 : i7;
+            textSizeBig = iLoadPieFont != 6 ? 65 : 45;
+            int smallSize = iLoadPieFont == 6 ? 8 : 13;
+            textSizeBig = iLoadPieFont == 8 ? textSizeBig + 15 : textSizeBig;
+            textSizeSmall = iLoadPieFont == 8 ? smallSize + 4 : smallSize;
             typefaceCreateFromAsset = Typeface.DEFAULT;
         }
         this.mClockPath = new Path();
         this.mClockAnimatorIn = new ValueAnimator();
         this.mClockAnimationIn = 0.0f;
         this.mClockTextSizeBig =
-                (int) TypedValue.applyDimension(1, i5, resources.getDisplayMetrics());
-        float f = i6;
+                (int) TypedValue.applyDimension(1, textSizeBig, resources.getDisplayMetrics());
+        float smallTextSize = textSizeSmall;
         this.mClockTextSizeSmall =
-                (int) TypedValue.applyDimension(1, f, resources.getDisplayMetrics());
+                (int) TypedValue.applyDimension(1, smallTextSize, resources.getDisplayMetrics());
         Paint paint = new Paint();
         this.mClockTextPaint = paint;
-        paint.setColor(i);
+        paint.setColor(colorClock);
         paint.setAlpha(0);
         paint.setAntiAlias(true);
         paint.setTypeface(typefaceCreateFromAsset);
@@ -177,11 +182,12 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mAIAnimatorOutIn = new ValueAnimator();
         this.mAIAnimationInOut = 0.0f;
         this.mAIAnimationInOutReversed = false;
-        int iApplyDimension = (int) TypedValue.applyDimension(1, f, resources.getDisplayMetrics());
+        int iApplyDimension =
+                (int) TypedValue.applyDimension(1, smallTextSize, resources.getDisplayMetrics());
         this.mAITextSize = iApplyDimension;
         Paint paint2 = new Paint();
         this.mAITextPaint = paint2;
-        paint2.setColor(i2);
+        paint2.setColor(colorNotifications);
         paint2.setAlpha(0);
         paint2.setAntiAlias(true);
         paint2.setTypeface(typefaceCreateFromAsset);
@@ -192,16 +198,23 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mAISelected = false;
         Paint paint3 = new Paint();
         this.mBackgroundPaint = paint3;
-        paint3.setColor(i4);
+        paint3.setColor(colorDim);
         paint3.setAlpha(0);
-        this.mBackroundAlpha = Color.alpha(i4);
+        this.mBackroundAlpha = Color.alpha(colorDim);
         this.mTwentyFour = DateFormat.is24HourFormat(context) ? 24 : 12;
         this.mDateFormat = new String(DateFormat.getDateFormatOrder(context));
     }
 
     @Override // com.noname81.lmt.PieMenu.PieView
     public void layout(
-            boolean z, Point point, int i, int i2, int i3, boolean z2, boolean z3, boolean z4) {
+            boolean visible,
+            Point center,
+            int radius,
+            int radiusInc,
+            int levels,
+            boolean onTheLeft,
+            boolean onTheBottom,
+            boolean onTheRight) {
         Timer timer;
         if (this.mAnimationActive) {
             this.mClockAnimatorIn.cancel();
@@ -223,18 +236,18 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         if (!this.mAnimationActive && (timer = this.mAnimationTimer) != null) {
             timer.cancel();
         }
-        handleSensorListener(z);
-        if (z) {
-            this.mCenter = point;
-            this.mRadius = i;
-            this.mRadiusInc = i2;
-            this.mLevels = i3;
-            this.mOnTheLeft = z2;
-            this.mOnTheBottom = z3;
+        handleSensorListener(visible);
+        if (visible) {
+            this.mCenter = center;
+            this.mRadius = radius;
+            this.mRadiusInc = radiusInc;
+            this.mLevels = levels;
+            this.mOnTheLeft = onTheLeft;
+            this.mOnTheBottom = onTheBottom;
             makePath(this.mSettings.loadPieShowStatusInfos() == 2 ? 1.0f : 0.0f);
             fillClockStrings();
             fillAdditionalInfoStrings();
-            if (this.mAnimationActive && !z4) {
+            if (this.mAnimationActive && !onTheRight) {
                 ValueAnimator valueAnimatorOfFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.mClockAnimatorIn = valueAnimatorOfFloat;
                 valueAnimatorOfFloat.addUpdateListener(
@@ -337,7 +350,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
             this.mAIAnimationIn = 1.0f;
             this.mAITextPaint.setAlpha(Color.alpha(this.mColorNotifications));
             this.mBackgroundPaint.setAlpha(200);
-            if (z4) {
+            if (onTheRight) {
                 return;
             }
             TimerTask timerTask = new TimerTask() { // from class: com.noname81.lmt.PieStatusInfo.4
@@ -361,47 +374,53 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
 
     @Override // com.noname81.lmt.PieMenu.PieView
     public boolean drawForeground(Canvas canvas) {
-        float f = this.mOnTheLeft ? -1.0f : 1.0f;
+        float direction = this.mOnTheLeft ? -1.0f : 1.0f;
         this.mClockTextPaint.setTextSize(this.mClockTextSizeBig);
         canvas.drawTextOnPath(
                 this.mClockStrings[0],
                 this.mClockPath,
-                (this.mClockAnimationIn - 1.0f) * f * this.mClockTextSizeBig,
+                (this.mClockAnimationIn - 1.0f) * direction * this.mClockTextSizeBig,
                 -this.mRadiusOffset,
                 this.mClockTextPaint);
         this.mClockTextPaint.setTextSize(this.mClockTextSizeSmall);
-        String str = this.mClockStrings[1];
+        String clockText = this.mClockStrings[1];
         Path path = this.mClockPath;
-        float f2 = f * (-this.mPositionOffset);
-        float f3 = this.mClockAnimationIn - 1.0f;
-        int i = this.mClockTextSizeBig;
-        canvas.drawTextOnPath(str, path, f2, (f3 * i) - i, this.mClockTextPaint);
-        float f4 = (this.mAnimationTime > 80 ? this.mAIAnimationInOut : 0.0f) * 400.0f;
+        float offset = direction * (-this.mPositionOffset);
+        float clockAnimation = this.mClockAnimationIn - 1.0f;
+        int clockTextSize = this.mClockTextSizeBig;
+        canvas.drawTextOnPath(
+                clockText,
+                path,
+                offset,
+                (clockAnimation * clockTextSize) - clockTextSize,
+                this.mClockTextPaint);
+        float aiAnimation = (this.mAnimationTime > 80 ? this.mAIAnimationInOut : 0.0f) * 400.0f;
         canvas.drawTextOnPath(
                 this.mAIStrings[0],
                 this.mAIPath,
-                f * (this.mPositionOffset + f4),
+                direction * (this.mPositionOffset + aiAnimation),
                 ((-this.mAITextSize) * 2.4f) - this.mRadiusOffset,
                 this.mAITextPaint);
         canvas.drawTextOnPath(
                 this.mAIStrings[1],
                 this.mAIPath,
-                f * (this.mPositionOffset + f4),
+                direction * (this.mPositionOffset + aiAnimation),
                 ((-this.mAITextSize) * 1.2f) - this.mRadiusOffset,
                 this.mAITextPaint);
         canvas.drawTextOnPath(
                 this.mAIStrings[2],
                 this.mAIPath,
-                f * (this.mPositionOffset + f4),
+                direction * (this.mPositionOffset + aiAnimation),
                 -this.mRadiusOffset,
                 this.mAITextPaint);
         return true;
     }
 
     @Override // com.noname81.lmt.PieMenu.PieView
-    public boolean onTouchEvent(int i, float f, float f2, float f3, float f4, PointF pointF) {
-        if (2 == i) {
-            if (pointF.y > this.mRadius + (this.mRadiusInc * this.mLevels)
+    public boolean onTouchEvent(
+            int action, float x, float y, float deltaX, float deltaY, PointF polar) {
+        if (2 == action) {
+            if (polar.y > this.mRadius + (this.mRadiusInc * this.mLevels)
                     && (this.mClockAnimationIn >= 1.0f || !this.mAnimationActive)) {
                 if (this.mAnimationActive && this.mAIAnimatorOutIn.getRepeatCount() == -1) {
                     if (this.mAIAnimationIn < 1.0f && this.mAIAnimatorOutIn.isStarted()) {
@@ -411,7 +430,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                         this.mAIAnimatorOutIn.setRepeatCount(0);
                     }
                 }
-                if (isClockArea(pointF)) {
+                if (isClockArea(polar)) {
                     Paint paint = this.mClockTextPaint;
                     paint.setColor(
                             Color.argb(
@@ -478,23 +497,23 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
             }
             this.mClockSelected = false;
             this.mAISelected = false;
-        } else if (1 == i
-                && pointF.y > this.mRadius + (this.mRadiusInc * this.mLevels)
+        } else if (1 == action
+                && polar.y > this.mRadius + (this.mRadiusInc * this.mLevels)
                 && (this.mClockAnimationIn >= 1.0f || !this.mAnimationActive)) {
-            if (isClockArea(pointF)) {
+            if (isClockArea(polar)) {
                 this.mLauncher.doOpenNotificationBar();
                 return true;
             }
-            int i2 = this.mAIContent;
-            if (i2 == 1) {
+            int content = this.mAIContent;
+            if (content == 1) {
                 this.mLauncher.doOpenQuickSettings();
                 return true;
             }
-            if (i2 <= 1) {
+            if (content <= 1) {
                 return true;
             }
             PendingIntent notificationDataStartIntent =
-                    this.mNotificationDataHelper.getNotificationDataStartIntent(i2 - 2);
+                    this.mNotificationDataHelper.getNotificationDataStartIntent(content - 2);
             if (notificationDataStartIntent != null) {
                 try {
                     notificationDataStartIntent.send();
@@ -520,26 +539,30 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         return false;
     }
 
-    private void makePath(float f) {
-        int i = this.mRadius;
-        int i2 = this.mRadiusInc;
-        float f2 = (this.mLevels * i2) + i;
-        float f3 = i + i2;
+    /** Rebuilds the clock and info arcs for the current ring geometry. */
+    private void makePath(float sweep) {
+        int radius = this.mRadius;
+        int radiusInc = this.mRadiusInc;
+        float outerRadius = (this.mLevels * radiusInc) + radius;
+        float innerRadius = radius + radiusInc;
         this.mClockPath.reset();
         this.mAIPath.reset();
         if (this.mOnTheLeft) {
             RectF rectF =
                     new RectF(
-                            this.mCenter.x - f2,
-                            this.mCenter.y - f2,
-                            this.mCenter.x + f2,
-                            this.mCenter.y + f2);
+                            this.mCenter.x - outerRadius,
+                            this.mCenter.y - outerRadius,
+                            this.mCenter.x + outerRadius,
+                            this.mCenter.y + outerRadius);
             RectF rectF2 =
                     new RectF(
-                            this.mCenter.x - f2,
-                            this.mCenter.y - f2,
-                            mix(this.mCenter.x + f2, this.mCenter.x + (f3 * 2.0f), f),
-                            mix(this.mCenter.y + f2, this.mCenter.y - f2, f));
+                            this.mCenter.x - outerRadius,
+                            this.mCenter.y - outerRadius,
+                            mix(
+                                    this.mCenter.x + outerRadius,
+                                    this.mCenter.x + (innerRadius * 2.0f),
+                                    sweep),
+                            mix(this.mCenter.y + outerRadius, this.mCenter.y - outerRadius, sweep));
             this.mClockPath.arcTo(rectF, 0.0f, 180.0f);
             this.mAIPath.arcTo(rectF2, 180.0f, 180.0f);
             this.mClockTextPaint.setTextAlign(Paint.Align.LEFT);
@@ -549,18 +572,21 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         if (this.mOnTheBottom) {
             RectF rectF3 =
                     new RectF(
-                            this.mCenter.x - f2,
-                            this.mCenter.y - f2,
-                            this.mCenter.x + f2,
-                            this.mCenter.y + f2);
-            float f4 = 2.0f * f2;
+                            this.mCenter.x - outerRadius,
+                            this.mCenter.y - outerRadius,
+                            this.mCenter.x + outerRadius,
+                            this.mCenter.y + outerRadius);
+            float doubleOuter = 2.0f * outerRadius;
             RectF rectF4 =
                     new RectF(
-                            this.mCenter.x - f2,
-                            mix(this.mCenter.y - f2, this.mCenter.y - f4, f),
-                            mix(this.mCenter.x + f2, this.mCenter.x + (3.0f * f2), f),
-                            mix(this.mCenter.y + f2, this.mCenter.y - f4, f));
-            float fMix = mix(270.0f, 225.0f, f);
+                            this.mCenter.x - outerRadius,
+                            mix(this.mCenter.y - outerRadius, this.mCenter.y - doubleOuter, sweep),
+                            mix(
+                                    this.mCenter.x + outerRadius,
+                                    this.mCenter.x + (3.0f * outerRadius),
+                                    sweep),
+                            mix(this.mCenter.y + outerRadius, this.mCenter.y - doubleOuter, sweep));
+            float fMix = mix(270.0f, 225.0f, sweep);
             this.mClockPath.arcTo(rectF3, 90.0f, 180.0f);
             this.mAIPath.arcTo(rectF4, fMix, 180.0f);
             this.mClockTextPaint.setTextAlign(Paint.Align.RIGHT);
@@ -569,25 +595,31 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         }
         RectF rectF5 =
                 new RectF(
-                        this.mCenter.x - f2,
-                        this.mCenter.y - f2,
-                        this.mCenter.x + f2,
-                        this.mCenter.y + f2);
+                        this.mCenter.x - outerRadius,
+                        this.mCenter.y - outerRadius,
+                        this.mCenter.x + outerRadius,
+                        this.mCenter.y + outerRadius);
         RectF rectF6 =
                 new RectF(
-                        mix(this.mCenter.x - f2, this.mCenter.x - (f3 * 2.0f), f),
-                        this.mCenter.y - f2,
-                        mix(this.mCenter.x + f2, this.mCenter.x + (2.0f * f2), f),
-                        mix(this.mCenter.y + f2, this.mCenter.y - f2, f));
+                        mix(
+                                this.mCenter.x - outerRadius,
+                                this.mCenter.x - (innerRadius * 2.0f),
+                                sweep),
+                        this.mCenter.y - outerRadius,
+                        mix(
+                                this.mCenter.x + outerRadius,
+                                this.mCenter.x + (2.0f * outerRadius),
+                                sweep),
+                        mix(this.mCenter.y + outerRadius, this.mCenter.y - outerRadius, sweep));
         this.mClockPath.arcTo(rectF5, 0.0f, 180.0f);
         this.mAIPath.arcTo(rectF6, 180.0f, 180.0f);
         this.mClockTextPaint.setTextAlign(Paint.Align.RIGHT);
         this.mAITextPaint.setTextAlign(Paint.Align.LEFT);
     }
 
-    private float mix(float f, float f2, float f3) {
-        float fAbs = Math.abs((f - f2) * f3);
-        return f < f2 ? f + fAbs : f - fAbs;
+    private float mix(float from, float to, float fraction) {
+        float fAbs = Math.abs((from - to) * fraction);
+        return from < to ? from + fAbs : from - fAbs;
     }
 
     private void fillClockStrings() {
@@ -610,18 +642,18 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
 
     private void fillAdditionalInfoStrings() {
         Calendar calendar = Calendar.getInstance();
-        int i = this.mAIContent;
-        if (i == 0) {
+        int content = this.mAIContent;
+        if (content == 0) {
             fillOverview(calendar);
             this.mAIContent = 1;
             return;
         }
-        if (i == 1) {
+        if (content == 1) {
             fillNotification(calendar, 0);
             this.mAIContent = 2;
             return;
         }
-        if (i == 2 && this.mNotificationDataHelper.getNotificationDataSize() > 1) {
+        if (content == 2 && this.mNotificationDataHelper.getNotificationDataSize() > 1) {
             fillNotification(calendar, 1);
             this.mAIContent = 3;
             return;
@@ -645,10 +677,10 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
     }
 
     private void fillOverview(Calendar calendar) {
-        String str = this.mDateFormat;
-        if (str == null || !str.equals("dMy")) {
-            String str2 = this.mDateFormat;
-            if (str2 == null || !str2.equals("yMd")) {
+        String dateFormat = this.mDateFormat;
+        if (dateFormat == null || !dateFormat.equals("dMy")) {
+            String pattern = this.mDateFormat;
+            if (pattern == null || !pattern.equals("yMd")) {
                 this.mAIStrings[0] =
                         String.format(
                                 "%02d | %02d | %04d",
@@ -684,9 +716,9 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mAIStrings[2] = getConnectivityString();
     }
 
-    private void fillNotification(Calendar calendar, int i) {
-        if (this.mNotificationDataHelper.getNotificationDataSize() > i) {
-            calendar.setTimeInMillis(this.mNotificationDataHelper.getNotificationDataTime(i));
+    private void fillNotification(Calendar calendar, int index) {
+        if (this.mNotificationDataHelper.getNotificationDataSize() > index) {
+            calendar.setTimeInMillis(this.mNotificationDataHelper.getNotificationDataTime(index));
             if (this.mTwentyFour == 24) {
                 this.mAIStrings[0] =
                         String.format(
@@ -701,11 +733,11 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 objArr[2] = calendar.get(9) == 0 ? "AM" : "PM";
                 strArr[0] = String.format("%02d:%02d %s", objArr);
             }
-            this.mAIStrings[1] = this.mNotificationDataHelper.getNotificationDataName(i);
+            this.mAIStrings[1] = this.mNotificationDataHelper.getNotificationDataName(index);
             if (this.mAIStrings[1].length() > 25) {
                 this.mAIStrings[1] = this.mAIStrings[1].substring(0, 24) + "...";
             }
-            this.mAIStrings[2] = this.mNotificationDataHelper.getNotificationDataText(i);
+            this.mAIStrings[2] = this.mNotificationDataHelper.getNotificationDataText(index);
             if (this.mAIStrings[2].length() > 25) {
                 this.mAIStrings[2] = this.mAIStrings[2].substring(0, 24) + "...";
                 return;
@@ -726,24 +758,24 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 || (activeNetworkInfo = connectivityManager.getActiveNetworkInfo()) == null) {
             return "Not connected";
         }
-        String str = activeNetworkInfo.isConnectedOrConnecting() ? "Connected" : "Not connected";
+        String state = activeNetworkInfo.isConnectedOrConnecting() ? "Connected" : "Not connected";
         if (activeNetworkInfo.getTypeName() != null
                 && activeNetworkInfo.getTypeName().length() != 0) {
-            str = str + " | " + activeNetworkInfo.getTypeName();
+            state = state + " | " + activeNetworkInfo.getTypeName();
         }
         if (activeNetworkInfo.getType() == 1) {
             WifiManager wifiManager =
                     (WifiManager) this.mContext.getApplicationContext().getSystemService("wifi");
             if (wifiManager.getWifiState() != 3) {
-                return str;
+                return state;
             }
-            return str + " | " + wifiManager.getConnectionInfo().getRssi() + " dBm";
+            return state + " | " + wifiManager.getConnectionInfo().getRssi() + " dBm";
         }
         if (activeNetworkInfo.getSubtypeName() == null
                 || activeNetworkInfo.getSubtypeName().length() == 0) {
-            return str;
+            return state;
         }
-        return str + " | " + activeNetworkInfo.getSubtypeName();
+        return state + " | " + activeNetworkInfo.getSubtypeName();
     }
 
     private String getRingerModeString() {
@@ -797,9 +829,9 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         return "Free " + (memoryInfo.availMem / (1024L * 1024L)) + " MB";
     }
 
-    private void handleSensorListener(boolean z) {
+    private void handleSensorListener(boolean enable) {
         if (this.mAnimationActive && this.mSensorActivated) {
-            if (z) {
+            if (enable) {
                 SensorManager sensorManager = this.mSensorManager;
                 sensorManager.registerListener(this, sensorManager.getDefaultSensor(1), 3);
                 this.mSensorLastUpdate = System.currentTimeMillis() + 1000;
@@ -820,14 +852,16 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 return;
             }
             float[] fArr = this.mSensorGravity;
-            float f = this.mSensorAlpha;
-            fArr[0] = (fArr[0] * f) + ((1.0f - f) * sensorEvent.values[0]);
+            // Low-pass filter isolating gravity from the raw accelerometer, one
+            // axis at a time; alpha is the same coefficient for all three.
+            float alphaX = this.mSensorAlpha;
+            fArr[0] = (fArr[0] * alphaX) + ((1.0f - alphaX) * sensorEvent.values[0]);
             float[] fArr2 = this.mSensorGravity;
-            float f2 = this.mSensorAlpha;
-            fArr2[1] = (fArr2[1] * f2) + ((1.0f - f2) * sensorEvent.values[1]);
+            float alphaY = this.mSensorAlpha;
+            fArr2[1] = (fArr2[1] * alphaY) + ((1.0f - alphaY) * sensorEvent.values[1]);
             float[] fArr3 = this.mSensorGravity;
-            float f3 = this.mSensorAlpha;
-            fArr3[2] = (fArr3[2] * f3) + ((1.0f - f3) * sensorEvent.values[2]);
+            float alphaZ = this.mSensorAlpha;
+            fArr3[2] = (fArr3[2] * alphaZ) + ((1.0f - alphaZ) * sensorEvent.values[2]);
             this.mSensorLinearAcceleration[0] = sensorEvent.values[0] - this.mSensorGravity[0];
             this.mSensorLinearAcceleration[1] = sensorEvent.values[1] - this.mSensorGravity[1];
             this.mSensorLinearAcceleration[2] = sensorEvent.values[2] - this.mSensorGravity[2];
