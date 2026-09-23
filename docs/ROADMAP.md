@@ -99,6 +99,59 @@ Do this **after** Kotlin and tests — it touches every screen at once.
 ### 1.7 Accessibility fallbacks
 Deferred by request. Full analysis in Part 2.
 
+### 1.8 `libTouchServiceNative.so` — research, then probably delete
+
+The last binary blob. 387 KB of C++ per ABI (four ABIs), stripped of `.symtab` and
+debug info — but as a shared library it still exports **608 dynamic symbols, 565 of
+them mangled C++**, which leak the full class and method structure without
+disassembling anything.
+
+**What it is for.** Drawing a shape anywhere on screen, inside any app, to fire an
+action — square, diamond, "delete" scribble, question mark, and two-finger swipe
+combinations. Fourteen gestures (`TouchServiceResult.names`), 11 of them two-finger,
+because a one-finger square would collide with ordinary app interaction.
+
+**Why it needs root and native code.** Android delivers touches only to the window
+under your finger, so an app cannot see you drawing a square while you scroll
+Chrome. This reads the touchscreen directly from `/dev/input`, below the framework,
+so it observes the raw finger stream *without consuming it* — the app underneath
+still works normally. That is the whole trick, and it is why this cannot be Java
+against public APIs.
+
+**Its structure is already known**, from the mangled names alone:
+
+- `gestures::Recognizer` — `resample`, `rotateBy`, `scaleToSquare`,
+  `translateToOrigin`, `distanceAtBestAngle`, `pathDistance`, `pathLength`,
+  `centroid`, `boundingBox`. This is the **$1 Unistroke Recognizer** (Wobbrock,
+  Wilson & Li, UIST 2007), function for function, in the paper's own naming — a
+  published algorithm of ~200 lines with a free reference implementation.
+- `gestures::Samples::getGesture*()` — the 14 templates as code.
+- `Logic` — evdev plumbing, with two input paths: direct `/dev/input` read, and
+  shelling out to `getevent` (hence the `popen2`/`pclose2` symbols).
+- `Fingers` — multitouch state tracking. `geometry::Point2D` / `Rectangle2D` — trivial.
+
+**Effort, if we ever rebuild it.** To readable pseudo-C: about a day in Ghidra, and
+the 565 named symbols mean you are never lost. To *compilable, correct* C++: weeks,
+and the result would be unmaintainable — decompilers emit pseudo-C, not source. To
+**reimplement**: days, and it is the only sensible option — published algorithm,
+14 template point arrays (extractable from `.rodata`, or simply re-recorded), and a
+fresh evdev reader. The recogniser is arguably a candidate for pure Java/Kotlin,
+which would delete the `.so` outright and make gestures work without root.
+
+**But it is probably dead weight.** `TSMode` defaults to `2` and
+`TouchService.onCreate` only starts the native thread when `TSMode < 2`, so the
+default install never loads it. It serves only the legacy Gestures and ISA systems,
+which additionally need root and raw `/dev/input`. It is from the 2011 era of
+hardware buttons and no gesture navigation.
+
+**Untested and probably rotten.** We have never exercised it. Given the
+`InputContext` jar silently rotted for two years, and this pokes at `/dev/input` and
+SELinux in ways Android has steadily tightened, do not assume it works on Android 15.
+
+**Decision (2026-09):** leave alone for now. Research whether anyone still relies on
+it — the XDA thread is the place to ask — then very probably delete it along with
+the Gestures/ISA feature set, which would also remove `TSMode` 0 and 1.
+
 ---
 
 ## Part 2 — Accessibility fallbacks for root-only actions
