@@ -103,12 +103,23 @@ where the two root channels differ.
 > deviations for cosmetics would erode exactly the signal that makes doing this in
 > Java worthwhile. Named constants can come later as a separate, reviewed step.
 
-### 1.4 App search + "show system apps" toggle in the app picker
-`MultiSelectActivity` currently builds one flat list from `getInstalledPackages`.
-Needs: a `SearchView` filtering the adapter, and a menu toggle for
-`ApplicationInfo.FLAG_SYSTEM`. Note the upstream CHANGELOG already has a fix here
-("over-aggressive filter drops apps without `android:appCategory`") — read that
-before touching the filter, and keep its behaviour.
+### 1.4 App search + "show system apps" toggle in the app picker  ✅ done
+Search box in the action bar, plus an overflow toggle for system packages which is
+remembered (`ShowSystemApps`, off by default — a stock device lists a couple of
+hundred otherwise). Updated system apps such as Chrome count as user apps and stay
+visible. 7 tests in `AppPickerFilterTest`.
+
+**The trap here, twice.** `onItemClick` resolves a tap as
+`mPackageInfos.get(position - 1)` — display index into the backing list — so
+filtering the adapter alone would silently bind the wrong app. Every filter change
+therefore rebuilds the model and the adapter together.
+
+The *same* coupling then bit again somewhere I had not looked: the icon loader
+reached into the activity's list by position from an `AsyncTask`, so a load queued
+before a filter change indexed past the end of the shorter list and crashed with
+`IndexOutOfBoundsException`. Caught on device, not by the oracle — which cannot see
+it, since nothing it compares changed. `AppSimpleAdapter` now carries its own model
+snapshot and never looks outside it.
 
 ### 1.5 Import / export settings
 All state is SharedPreferences (`LMT.xml`) plus the PNG icons under

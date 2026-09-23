@@ -15,7 +15,24 @@
       "class": "RootContext.smali",
       "method": "private copyRemote()V",
       "reason": "The five prebuilt InputContext<sdk>.jar assets are replaced by one jar built from source by the :inputcontext module, so the SDK ladder that selected between them is gone. The variants only ever differed where hidden-API signatures changed between releases (ProfilerInfo, getRecentTasks().getList(), ActivityManager.getService(), moveTaskToFront's extra params); the rebuilt helper reaches those APIs reflectively, which defers signature resolution to runtime and lets one build cover every API level. See tools/inputcontext/README.md and ROADMAP 3.1."
+    },
+    {
+      "class": "MultiSelectActivity.smali",
+      "method": "constructor public <init>()V",
+      "reason": "ROADMAP 1.4: initialises the new search query field. See the new_members entry for the feature as a whole."
+    },
+    {
+      "class": "MultiSelectActivity.smali",
+      "method": "public onCreate(Landroid/os/Bundle;)V",
+      "reason": "ROADMAP 1.4: onCreate no longer builds the list inline. It now gathers candidates once (gatherCandidates) and delegates display to render(), which re-runs on every filter change. Hence the large drop in references from this method - the work moved, it did not disappear."
     }
   ],
-  "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences."
+  "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
+  "_comment_new_members": "Classes where NEW methods and fields are expected because a feature was added there. Additions in these classes are accepted; anything MISSING is still reported, and every other class is unaffected.",
+  "new_members": [
+    {
+      "class": "MultiSelectActivity.smali",
+      "reason": "ROADMAP 1.4: app-picker search and a system-app toggle. Adds gatherCandidates/render/matches/isSystem, the options menu, and fields for the query, the toggle and the unfiltered candidate lists. Filtering rebuilds the backing list and the adapter together because onItemClick resolves a tap as mPackageInfos.get(position - 1)."
+    }
+  ]
 }

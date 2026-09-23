@@ -22,9 +22,14 @@ ours = json.load(open(sys.argv[2]))
 import os
 _dev_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "accepted-deviations.json")
 ACCEPTED = {}
+NEW_MEMBERS = {}
 if os.path.exists(_dev_path):
-    for d in json.load(open(_dev_path))["deviations"]:
+    _dev = json.load(open(_dev_path))
+    for d in _dev["deviations"]:
         ACCEPTED[(d["class"], d["method"])] = d["reason"]
+    # Classes where a feature was added, so NEW members are expected. Missing
+    # members are still reported, and other classes are unaffected.
+    NEW_MEMBERS = {d["class"]: d["reason"] for d in _dev.get("new_members", [])}
 verbose = "--verbose" in sys.argv
 
 EXPECTED_NEW = {
@@ -84,7 +89,7 @@ ref_names, our_names = set(ref), set(ours)
 missing = {n for n in ref_names - our_names if not base(n).startswith(EXPECTED_GONE_PREFIX)}
 added   = {n for n in our_names - ref_names if base(n) not in EXPECTED_NEW}
 
-real, reordered, synthetic_only, anon_shape, issues = [], [], [], [], 0
+real, reordered, synthetic_only, anon_shape, feature_additions, issues = [], [], [], [], [], 0
 
 if missing:
     issues += len(missing)
@@ -105,6 +110,10 @@ for name in sorted(ref_names & our_names):
     if rf != of:
         only_ref, only_our = rf - of, of - rf
         # synthetic compiler bookkeeping (this$N, val$x, $assertionsDisabled, ...)
+        if base(name) in NEW_MEMBERS:
+            # only additions are excused; a field going missing still counts
+            only_ref = {f for f in only_ref if "synthetic" not in f}
+            only_our = set()
         non_synthetic = [f for f in (only_ref | only_our) if "synthetic" not in f]
         # A named local class rewritten as an anonymous one turns its instance
         # field into a captured local: `private mPosition` -> `synthetic val$mPosition`.
@@ -145,6 +154,9 @@ for name in sorted(ref_names & our_names):
                 # lambda (no-arg ctor + static INSTANCE) vs anonymous class
                 # (outer-reference ctor); same behaviour, different shape.
                 anon_shape.append((name, sig))
+                continue
+            if base(name) in NEW_MEMBERS and sig in om and sig not in rm:
+                feature_additions.append((name, sig))
                 continue
             print(f"!! {name}: method on one side only: {sig}")
             issues += 1
@@ -281,6 +293,8 @@ print(f"methods identical     : {same}")
 print(f"methods reordered only: {len(reordered)}   (compiler scheduling - benign)")
 print(f"synthetic-only methods: {len(synthetic_only)}   (accessor/lambda/outline plumbing)")
 print(f"anon-shape methods    : {len(anon_shape)}   (lambda vs anonymous class shape)")
+if feature_additions:
+    print(f"feature additions     : {len(feature_additions)}   (new members in classes listed in accepted-deviations.json)")
 print(f"methods differing     : {len(real)}")
 print(f"  known-benign        : {len(benign)}")
 print(f"  accepted deviations : {len(accepted)}")

@@ -635,6 +635,15 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
         saveInt("PieUserImageScaling", value, null);
     }
 
+    /** Whether the app picker lists system packages; off by default. */
+    int loadShowSystemApps() {
+        return loadInt("ShowSystemApps", 0);
+    }
+
+    void saveShowSystemApps(int value) {
+        saveInt("ShowSystemApps", value, null);
+    }
+
     int loadPieNavButtonStyle() {
         return loadInt("NavButtonStyle", 0);
     }
