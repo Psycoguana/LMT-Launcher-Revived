@@ -175,7 +175,6 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
                     CommandSelectActivity.this.getApplicationContext(), imageView);
             new AsyncDrawableTask(imageView, R.drawable.none) { // from class:
                 // com.noname81.lmt.CommandSelectActivity.CommandSelectSimpleAdapter.1
-                /* JADX WARN: Can't rename method to resolve collision */
                 @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
                 protected Drawable doInBackground(Void... voidArr) {
                     return IconUtils.getIconForAction(

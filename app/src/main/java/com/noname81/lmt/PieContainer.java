@@ -12,7 +12,6 @@ import android.widget.FrameLayout;
 import java.util.Collections;
 import java.util.List;
 
-/* JADX INFO: loaded from: classes.dex */
 public class PieContainer {
     private static boolean DEBUG = false;
     private static final String TAG = "LMT::PieContainer";
@@ -26,12 +25,12 @@ public class PieContainer {
     private final SettingsValues mSettings;
     private final WindowManager mWindowManager;
 
-    private int getWindowFlags(int i) {
-        return (i > 0 ? 131072 : 32) | 32 | 8;
+    private int getWindowFlags(int position) {
+        return (position > 0 ? 131072 : 32) | 32 | 8;
     }
 
-    static void setDebug(boolean z) {
-        DEBUG = z;
+    static void setDebug(boolean enabled) {
+        DEBUG = enabled;
     }
 
     class PieLayout extends FrameLayout {
@@ -40,13 +39,13 @@ public class PieContainer {
         boolean mPieControlAdded;
         boolean mShrinking;
 
-        public PieLayout(Context context, boolean z) {
+        public PieLayout(Context context, boolean expanded) {
             super(context);
             setWillNotDraw(true);
             setEnabled(false);
             this.mPieControlAdded = false;
             this.mShrinking = false;
-            this.mBottom = z;
+            this.mBottom = expanded;
         }
 
         @Override // android.view.ViewGroup, android.view.View
@@ -75,18 +74,25 @@ public class PieContainer {
         }
 
         @Override // android.view.View
-        public void onSizeChanged(int i, int i2, int i3, int i4) {
+        public void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
             if (PieContainer.DEBUG) {
                 Log.d(
                         PieContainer.TAG,
-                        "onSizeChanged new:" + i + "," + i2 + " old:" + i3 + "," + i4);
+                        "onSizeChanged new:"
+                                + width
+                                + ","
+                                + height
+                                + " old:"
+                                + oldWidth
+                                + ","
+                                + oldHeight);
             }
-            super.onSizeChanged(i, i2, i3, i4);
+            super.onSizeChanged(width, height, oldWidth, oldHeight);
             if (this.mShrinking) {
                 PieContainer.this.mPieControl.mPie.onShrink();
                 this.mShrinking = false;
             }
-            if (i3 == 0 && i4 == 0 && Build.VERSION.SDK_INT >= 29) {
+            if (oldWidth == 0 && oldHeight == 0 && Build.VERSION.SDK_INT >= 29) {
                 setExclusionRects();
             }
         }
@@ -160,7 +166,7 @@ public class PieContainer {
             }
         }
 
-        public void debug(boolean z) {
+        public void debug(boolean enabled) {
             WindowManager.LayoutParams layoutParams =
                     (WindowManager.LayoutParams) getLayoutParams();
             if (layoutParams == null
@@ -169,7 +175,7 @@ public class PieContainer {
                     || PieContainer.this.mPieControl == null) {
                 return;
             }
-            if (z) {
+            if (enabled) {
                 layoutParams.format = -1;
             } else {
                 layoutParams.format = -2;
@@ -191,70 +197,70 @@ public class PieContainer {
     }
 
     void attachToWindowManager() {
-        int screenHeight;
-        int i;
+        int verticalInset;
+        int gravity;
         if (DEBUG) {
             Log.d(TAG, "attachToWindowManager");
         }
-        int iLoadPiePos = this.mSettings.loadPiePos();
-        int iLoadPieAreaBehindKeyboard = this.mSettings.loadPieAreaBehindKeyboard();
-        int iLoadPieOnLockScreen = this.mSettings.loadPieOnLockScreen();
-        int iLoadPieAreaGravity = this.mSettings.loadPieAreaGravity();
-        if (1 == iLoadPieAreaGravity) {
-            screenHeight = this.mSettings.getScreenHeight() / 10;
-            i = 48;
+        int piePos = this.mSettings.loadPiePos();
+        int behindKeyboard = this.mSettings.loadPieAreaBehindKeyboard();
+        int onLockScreen = this.mSettings.loadPieOnLockScreen();
+        int areaGravity = this.mSettings.loadPieAreaGravity();
+        if (1 == areaGravity) {
+            verticalInset = this.mSettings.getScreenHeight() / 10;
+            gravity = 48;
         } else {
-            screenHeight = 0;
-            i = 0;
+            verticalInset = 0;
+            gravity = 0;
         }
-        if (2 == iLoadPieAreaGravity) {
-            screenHeight = this.mSettings.getScreenHeight() / 10;
-            i = 80;
+        if (2 == areaGravity) {
+            verticalInset = this.mSettings.getScreenHeight() / 10;
+            gravity = 80;
         }
-        if (iLoadPiePos == 0 || iLoadPiePos == 4 || iLoadPiePos >= 6) {
+        if (piePos == 0 || piePos == 4 || piePos >= 6) {
             this.mWindowManager.addView(
                     this.mPieLayout1,
                     new WindowManager.LayoutParams(
                             -2,
                             -2,
-                            getWindowType(iLoadPieOnLockScreen),
-                            getWindowFlags(iLoadPieAreaBehindKeyboard),
+                            getWindowType(onLockScreen),
+                            getWindowFlags(behindKeyboard),
                             -2));
             WindowManager.LayoutParams layoutParams =
                     (WindowManager.LayoutParams) this.mPieLayout1.getLayoutParams();
             layoutParams.width = this.mSettings.loadPieAreaX();
             layoutParams.height = this.mSettings.loadPieAreaY();
-            layoutParams.gravity = 8388613 | i;
-            layoutParams.y = screenHeight;
+            layoutParams.gravity = 8388613 | gravity;
+            layoutParams.y = verticalInset;
             this.mWindowManager.updateViewLayout(this.mPieLayout1, layoutParams);
             this.mAddedLayout1 = true;
         }
-        if (iLoadPiePos == 1 || iLoadPiePos == 4 || iLoadPiePos == 5 || iLoadPiePos >= 7) {
+        if (piePos == 1 || piePos == 4 || piePos == 5 || piePos >= 7) {
             this.mWindowManager.addView(
                     this.mPieLayout2,
                     new WindowManager.LayoutParams(
                             -2,
                             -2,
-                            getWindowType(iLoadPieOnLockScreen),
-                            getWindowFlags(iLoadPieAreaBehindKeyboard),
+                            getWindowType(onLockScreen),
+                            getWindowFlags(behindKeyboard),
                             -2));
             WindowManager.LayoutParams layoutParams2 =
                     (WindowManager.LayoutParams) this.mPieLayout2.getLayoutParams();
             layoutParams2.width = this.mSettings.loadPieAreaX();
             layoutParams2.height = this.mSettings.loadPieAreaY();
-            layoutParams2.gravity = i | Gravity.START;
-            layoutParams2.y = screenHeight;
+            layoutParams2.gravity = gravity | Gravity.START;
+            layoutParams2.y = verticalInset;
             this.mWindowManager.updateViewLayout(this.mPieLayout2, layoutParams2);
             this.mAddedLayout2 = true;
         }
-        if (iLoadPiePos == 2 || iLoadPiePos == 3 || iLoadPiePos >= 5) {
+        if (piePos == 2 || piePos == 3 || piePos >= 5) {
             this.mWindowManager.addView(
                     this.mPieLayout3,
                     new WindowManager.LayoutParams(
                             -2,
                             -2,
-                            getWindowType(iLoadPieOnLockScreen),
-                            getWindowFlags(iLoadPieAreaBehindKeyboard),
+                            getWindowType(onLockScreen),
+                            getWindowFlags(behindKeyboard),
                             -2));
             WindowManager.LayoutParams layoutParams3 =
                     (WindowManager.LayoutParams) this.mPieLayout3.getLayoutParams();
@@ -315,9 +321,9 @@ public class PieContainer {
         }
     }
 
-    private int getWindowType(int i) {
+    private int getWindowType(int position) {
         if (Build.VERSION.SDK_INT < 26) {
-            return i > 0 ? 2010 : 2003;
+            return position > 0 ? 2010 : 2003;
         }
         return 2038;
     }

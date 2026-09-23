@@ -151,7 +151,6 @@ public class GesturesFragment extends Fragment implements AdapterView.OnItemClic
             IconUtils.setMaxSizeForImageView(GesturesFragment.this.getActivity(), imageView);
             new AsyncDrawableTask(imageView, R.drawable.none) { // from class:
                 // com.noname81.lmt.GesturesFragment.CommandSimpleAdapterGestures.1
-                /* JADX WARN: Can't rename method to resolve collision */
                 @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
                 protected Drawable doInBackground(Void... voidArr) {
                     return IconUtils.getIconForGesture(
@@ -164,7 +163,6 @@ public class GesturesFragment extends Fragment implements AdapterView.OnItemClic
             IconUtils.setMaxSizeForImageView(GesturesFragment.this.getActivity(), imageView2);
             new AsyncDrawableTask(imageView2, R.drawable.none) { // from class:
                 // com.noname81.lmt.GesturesFragment.CommandSimpleAdapterGestures.2
-                /* JADX WARN: Can't rename method to resolve collision */
                 @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
                 protected Drawable doInBackground(Void... voidArr) {
                     return IconUtils.getIconForAction(

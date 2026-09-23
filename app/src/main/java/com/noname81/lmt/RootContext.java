@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
-/* JADX INFO: loaded from: classes.dex */
 public class RootContext {
     private static boolean DEBUG = false;
     private static final String PREFIX = "";
@@ -59,20 +58,20 @@ public class RootContext {
         return instance;
     }
 
-    boolean isRootAvailable(boolean z) {
-        if (z && !this.mInitialized) {
+    boolean isRootAvailable(boolean log) {
+        if (log && !this.mInitialized) {
             Toast.makeText(this.mContext, "This feature needs root permissions!", 0).show();
             Log.e(TAG, "This feature needs root permissions!");
         }
         return this.mInitialized;
     }
 
-    void setDebug(int i) {
-        DEBUG = i == 1;
+    void setDebug(int mode) {
+        DEBUG = mode == 1;
     }
 
-    void setInitialized(boolean z) {
-        this.mInitialized = z;
+    void setInitialized(boolean initialized) {
+        this.mInitialized = initialized;
     }
 
     private void initRemote() throws Exception {
@@ -103,9 +102,9 @@ public class RootContext {
                 new FileOutputStream(new File(this.mAbsolutePath + "/InputContext.jar"));
         byte[] bArr = new byte[4096];
         while (true) {
-            int i = inputStreamOpen.read(bArr);
-            if (i != -1) {
-                fileOutputStream.write(bArr, 0, i);
+            int read = inputStreamOpen.read(bArr);
+            if (read != -1) {
+                fileOutputStream.write(bArr, 0, read);
             } else {
                 fileOutputStream.close();
                 inputStreamOpen.close();
@@ -209,11 +208,11 @@ public class RootContext {
         this.mRootInputStream = new DataInputStream(this.mRootProcess.getInputStream());
     }
 
-    boolean runCommandRemote(String str, boolean z) {
+    boolean runCommandRemote(String command, boolean log) {
         if (DEBUG) {
-            Log.d(TAG, "runCommandRemote(" + str + ")");
+            Log.d(TAG, "runCommandRemote(" + command + ")");
         }
-        if (!isRootAvailable(z) || this.mRemoteOutputStream == null) {
+        if (!isRootAvailable(log) || this.mRemoteOutputStream == null) {
             return false;
         }
         if (getReturnString(this.mRemoteInputStream).contains("quit")) {
@@ -225,7 +224,7 @@ public class RootContext {
         }
         try {
             try {
-                this.mRemoteOutputStream.write((str + "\n").getBytes("ASCII"));
+                this.mRemoteOutputStream.write((command + "\n").getBytes("ASCII"));
                 this.mRemoteOutputStream.flush();
                 return true;
             } catch (Exception e2) {
@@ -242,8 +241,8 @@ public class RootContext {
         }
     }
 
-    String runCommandRemoteResult(String str, boolean z) {
-        if (!runCommandRemote(str, z)) {
+    String runCommandRemoteResult(String command, boolean log) {
+        if (!runCommandRemote(command, log)) {
             return null;
         }
         try {
@@ -262,16 +261,16 @@ public class RootContext {
     private String getReturnString(DataInputStream dataInputStream) {
         StringBuilder sb = new StringBuilder();
         try {
-            int iAvailable = dataInputStream.available();
-            while (iAvailable > 0) {
-                int i =
+            int available = dataInputStream.available();
+            while (available > 0) {
+                int read =
                         dataInputStream.read(
-                                returnBuffer, 0, Math.min(iAvailable, returnBufferSize));
-                if (i == -1) {
+                                returnBuffer, 0, Math.min(available, returnBufferSize));
+                if (read == -1) {
                     break;
                 }
-                sb.append(new String(returnBuffer, 0, i));
-                iAvailable -= i;
+                sb.append(new String(returnBuffer, 0, read));
+                available -= read;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -283,15 +282,15 @@ public class RootContext {
         return string;
     }
 
-    void runCommandRoot(String str, boolean z) {
+    void runCommandRoot(String command, boolean log) {
         DataOutputStream dataOutputStream;
         if (DEBUG) {
-            Log.d(TAG, "runCommandRoot(" + str + ")");
+            Log.d(TAG, "runCommandRoot(" + command + ")");
         }
-        if (isRootAvailable(z) && (dataOutputStream = this.mRootOutputStream) != null) {
+        if (isRootAvailable(log) && (dataOutputStream = this.mRootOutputStream) != null) {
             try {
                 try {
-                    dataOutputStream.write((PREFIX + str + "\n").getBytes("ASCII"));
+                    dataOutputStream.write((PREFIX + command + "\n").getBytes("ASCII"));
                     this.mRootOutputStream.flush();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -306,18 +305,18 @@ public class RootContext {
         }
     }
 
-    String runCommandResult(String str, boolean z) {
+    String runCommandResult(String command, boolean log) {
         if (DEBUG) {
-            Log.d(TAG, "runCommandResult(" + str + ", " + z + ")");
+            Log.d(TAG, "runCommandResult(" + command + ", " + log + ")");
         }
         try {
             String[] strArr = new String[1];
-            strArr[0] = z ? this.mShell : "sh";
+            strArr[0] = log ? this.mShell : "sh";
             Process processStart = new ProcessBuilder(strArr).redirectErrorStream(true).start();
             DataOutputStream dataOutputStream =
                     new DataOutputStream(processStart.getOutputStream());
             DataInputStream dataInputStream = new DataInputStream(processStart.getInputStream());
-            dataOutputStream.write((str + "\n").getBytes("ASCII"));
+            dataOutputStream.write((command + "\n").getBytes("ASCII"));
             dataOutputStream.close();
             processStart.waitFor();
             String returnString = getReturnString(dataInputStream);

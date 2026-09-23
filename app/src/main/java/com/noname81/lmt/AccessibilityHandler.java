@@ -44,12 +44,12 @@ public class AccessibilityHandler extends AccessibilityService {
                 applicationInfo = null;
                 drawable = null;
             }
-            String str =
+            String appLabel =
                     (String)
                             (applicationInfo != null
                                     ? packageManager.getApplicationLabel(applicationInfo)
                                     : "");
-            long jCurrentTimeMillis =
+            long postedAt =
                     (System.currentTimeMillis() - SystemClock.uptimeMillis())
                             + accessibilityEvent.getEventTime();
             String strValueOf2 =
@@ -62,8 +62,8 @@ public class AccessibilityHandler extends AccessibilityService {
             NotificationDataHelper notificationDataHelper = this.mNotificationDataHelper;
             if (notificationDataHelper != null) {
                 notificationDataHelper.addNotificationData(
-                        str,
-                        jCurrentTimeMillis,
+                        appLabel,
+                        postedAt,
                         strValueOf2,
                         notification.contentIntent,
                         notification.deleteIntent,

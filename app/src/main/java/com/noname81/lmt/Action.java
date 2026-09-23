@@ -10,7 +10,6 @@ import android.util.Log;
 
 import java.io.File;
 
-/* JADX INFO: loaded from: classes.dex */
 class Action {
     static final int Activity = 27;
     static final int Apex = 41;
@@ -159,42 +158,42 @@ class Action {
         "Activate Pie Recent Apps [Root|UsageStats]"
     };
 
-    Action(int i) {
-        this.mType = i;
+    Action(int type) {
+        this.mType = type;
     }
 
-    Action(int i, String str) {
-        this.mType = i;
-        this.mString = str;
+    Action(int type, String value) {
+        this.mType = type;
+        this.mString = value;
         this.mIcon = null;
     }
 
-    Action(int i, String str, Drawable drawable) {
-        this.mType = i;
-        this.mString = str;
-        this.mIcon = drawable;
+    Action(int type, String value, Drawable icon) {
+        this.mType = type;
+        this.mString = value;
+        this.mIcon = icon;
     }
 
-    Action(int i, String str, String str2, Context context) {
-        this.mType = i;
-        this.mString = str;
-        this.mIcon = IconUtils.convertBase64StringToDrawable(context, str2);
+    Action(int type, String value, String encodedIcon, Context context) {
+        this.mType = type;
+        this.mString = value;
+        this.mIcon = IconUtils.convertBase64StringToDrawable(context, encodedIcon);
     }
 
     int getType() {
         return this.mType;
     }
 
-    public void setType(int i) {
-        this.mType = i;
+    public void setType(int type) {
+        this.mType = type;
     }
 
     public String getString() {
         return this.mString;
     }
 
-    public void setString(String str) {
-        this.mString = str;
+    public void setString(String value) {
+        this.mString = value;
     }
 
     public Drawable getIcon() {
@@ -205,78 +204,97 @@ class Action {
         this.mIcon = drawable;
     }
 
-    /* JADX WARN: Code duplicated, block: B:7:0x000e  */
     public String toString() {
-        String str;
-        int i = this.mType;
-        String str2 = "none";
-        if (i > 0) {
+        String typeName;
+        int type = this.mType;
+        String payload = "none";
+        if (type > 0) {
             String[] strArr = names;
-            if (i < strArr.length) {
-                str = strArr[i];
+            if (type < strArr.length) {
+                typeName = strArr[type];
             } else {
-                str = "none";
+                typeName = "none";
             }
         } else {
-            str = "none";
+            typeName = "none";
         }
-        String str3 = this.mString;
-        if (str3 != null && str3.length() > 0) {
-            str2 = this.mString;
+        String value = this.mString;
+        if (value != null && value.length() > 0) {
+            payload = this.mString;
         }
-        return "type: " + str + ", string: " + str2;
+        return "type: " + typeName + ", string: " + payload;
     }
 
-    Drawable getDrawable(Context context, String str, int i, int i2, boolean z) {
-        if (this.mType == 1 && !z) {
+    /**
+     * The icon for this action: a user PNG from the resource search path if one exists, otherwise
+     * the bundled drawable named after the action, optionally in the KitKat or Pixel nav-button
+     * style.
+     */
+    Drawable getDrawable(
+            Context context,
+            String userIconName,
+            int scaleUserImages,
+            int scaleAppImages,
+            boolean includeNone) {
+        if (this.mType == 1 && !includeNone) {
             return null;
         }
         int identifier = 0;
         try {
             String strLoadResourceSearchPath =
                     SettingsValues.getInstance(context).loadResourceSearchPath();
-            String str2 = names[this.mType].toLowerCase() + ".png";
-            if (str != null) {
-                File file = new File(strLoadResourceSearchPath + str);
+            String assetName = names[this.mType].toLowerCase() + ".png";
+            if (userIconName != null) {
+                File file = new File(strLoadResourceSearchPath + userIconName);
                 if (file.exists()) {
                     file.setReadable(true, false);
                     Drawable drawableCreateFromPath =
-                            Drawable.createFromPath(strLoadResourceSearchPath + str);
+                            Drawable.createFromPath(strLoadResourceSearchPath + userIconName);
                     if (drawableCreateFromPath != null) {
-                        return IconUtils.resizeImage(context, drawableCreateFromPath, i);
+                        return IconUtils.resizeImage(
+                                context, drawableCreateFromPath, scaleUserImages);
                     }
-                    Log.e(TAG, "Failed to load available image " + strLoadResourceSearchPath + str);
+                    Log.e(
+                            TAG,
+                            "Failed to load available image "
+                                    + strLoadResourceSearchPath
+                                    + userIconName);
                 }
             }
-            if (new File(strLoadResourceSearchPath + str2).exists()) {
+            if (new File(strLoadResourceSearchPath + assetName).exists()) {
                 Drawable drawableCreateFromPath2 =
-                        Drawable.createFromPath(strLoadResourceSearchPath + str2);
+                        Drawable.createFromPath(strLoadResourceSearchPath + assetName);
                 if (drawableCreateFromPath2 != null) {
-                    return IconUtils.resizeImage(context, drawableCreateFromPath2, i);
+                    return IconUtils.resizeImage(context, drawableCreateFromPath2, scaleUserImages);
                 }
-                Log.e(TAG, "Failed to load available image " + strLoadResourceSearchPath + str2);
+                Log.e(
+                        TAG,
+                        "Failed to load available image " + strLoadResourceSearchPath + assetName);
             }
         } catch (Exception unused) {
         }
         Drawable drawable = this.mIcon;
         if (drawable != null) {
-            return IconUtils.resizeImage(context, drawable, i2);
+            return IconUtils.resizeImage(context, drawable, scaleAppImages);
         }
-        if (this.mType == 2 && i2 > 0) {
+        if (this.mType == 2 && scaleAppImages > 0) {
             try {
                 return IconUtils.resizeImage(
-                        context, context.getPackageManager().getApplicationIcon(this.mString), i2);
+                        context,
+                        context.getPackageManager().getApplicationIcon(this.mString),
+                        scaleAppImages);
             } catch (Exception unused2) {
             }
         }
-        if (this.mType == 27 && i2 > 0) {
+        if (this.mType == 27 && scaleAppImages > 0) {
             PackageManager packageManager = context.getPackageManager();
             try {
-                String str3 = this.mString;
+                String value = this.mString;
                 return IconUtils.resizeImage(
                         context,
-                        packageManager.getApplicationIcon(str3.substring(0, str3.lastIndexOf(47))),
-                        i2);
+                        packageManager.getApplicationIcon(
+                                value.substring(0, value.lastIndexOf(47))),
+                        scaleAppImages);
             } catch (Exception unused3) {
             }
         }
@@ -310,17 +328,17 @@ class Action {
         }
     }
 
-    void checkNeededPermissions(Activity activity, boolean z) {
+    void checkNeededPermissions(Activity activity, boolean log) {
         int type = getType();
         if (type == 33) {
-            if (z && this.mString.contains("android.intent.action.CALL")) {
+            if (log && this.mString.contains("android.intent.action.CALL")) {
                 PermissionChecker.getInstance().checkAndRequestPhoneCallPermission(activity, true);
                 return;
             }
             return;
         }
         if (type == 45
-                && z
+                && log
                 && Build.VERSION.SDK_INT >= 21
                 && !RootContext.getInstance(activity).isRootAvailable(false)) {
             PermissionChecker.getInstance().checkAndRequestUsageStatsPermission(activity, true);

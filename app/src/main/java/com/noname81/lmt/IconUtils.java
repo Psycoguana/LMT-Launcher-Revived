@@ -18,7 +18,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 
-/* JADX INFO: loaded from: classes.dex */
 class IconUtils {
     IconUtils() {}
 
@@ -32,12 +31,12 @@ class IconUtils {
         return Base64.encodeToString(byteArrayOutputStream.toByteArray(), 0);
     }
 
-    static BitmapDrawable convertBase64StringToDrawable(Context context, String str) {
-        if (str == null || str.length() <= 0) {
+    static BitmapDrawable convertBase64StringToDrawable(Context context, String base64) {
+        if (base64 == null || base64.length() <= 0) {
             return null;
         }
         try {
-            byte[] bArrDecode = Base64.decode(str, 0);
+            byte[] bArrDecode = Base64.decode(base64, 0);
             return new BitmapDrawable(
                     context.getResources(),
                     BitmapFactory.decodeByteArray(bArrDecode, 0, bArrDecode.length));
@@ -46,14 +45,14 @@ class IconUtils {
         }
     }
 
-    static Drawable resizeImage(Context context, Drawable drawable, int i) {
+    static Drawable resizeImage(Context context, Drawable drawable, int scaleMode) {
         Resources resources = context.getResources();
-        boolean z = i == 1;
-        if (i > 0 && i <= 2) {
-            i = (int) TypedValue.applyDimension(1, 35.0f, resources.getDisplayMetrics());
+        boolean scaleToFit = scaleMode == 1;
+        if (scaleMode > 0 && scaleMode <= 2) {
+            scaleMode = (int) TypedValue.applyDimension(1, 35.0f, resources.getDisplayMetrics());
         }
-        if (i <= 0) {
-            if (z) {
+        if (scaleMode <= 0) {
+            if (scaleToFit) {
                 drawable.setLevel(1);
             }
             return drawable;
@@ -61,17 +60,19 @@ class IconUtils {
         BitmapDrawable bitmapDrawable =
                 new BitmapDrawable(
                         resources,
-                        Bitmap.createScaledBitmap(getBitmapFromDrawable(drawable), i, i, true));
-        if (z) {
+                        Bitmap.createScaledBitmap(
+                                getBitmapFromDrawable(drawable), scaleMode, scaleMode, true));
+        if (scaleToFit) {
             bitmapDrawable.setChangingConfigurations(1);
         }
         return bitmapDrawable;
     }
 
-    static void saveImageToFile(Bitmap bitmap, String str, String str2) {
+    static void saveImageToFile(Bitmap bitmap, String directory, String fileName) {
         try {
-            FileUtils.createFolder(str);
-            FileOutputStream fileOutputStream = new FileOutputStream(new File(str + str2));
+            FileUtils.createFolder(directory);
+            FileOutputStream fileOutputStream =
+                    new FileOutputStream(new File(directory + fileName));
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
             fileOutputStream.close();
         } catch (Exception e) {
@@ -79,22 +80,22 @@ class IconUtils {
         }
     }
 
-    static Bitmap getScaledBitmapFromUri(Context context, Uri uri, int i) {
+    static Bitmap getScaledBitmapFromUri(Context context, Uri uri, int maxSize) {
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
-            int i2 = 1;
+            int sampleSize = 1;
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(
                     context.getContentResolver().openInputStream(uri), null, options);
-            int i3 = options.outWidth;
-            int i4 = options.outHeight;
-            while (i3 / 2 >= i && i4 / 2 >= i) {
-                i3 /= 2;
-                i4 /= 2;
-                i2 *= 2;
+            int width = options.outWidth;
+            int height = options.outHeight;
+            while (width / 2 >= maxSize && height / 2 >= maxSize) {
+                width /= 2;
+                height /= 2;
+                sampleSize *= 2;
             }
             BitmapFactory.Options options2 = new BitmapFactory.Options();
-            options2.inSampleSize = i2;
+            options2.inSampleSize = sampleSize;
             return BitmapFactory.decodeStream(
                     context.getContentResolver().openInputStream(uri), null, options2);
         } catch (Exception e) {
@@ -103,11 +104,11 @@ class IconUtils {
         }
     }
 
-    static Drawable getDrawable(Context context, int i) {
+    static Drawable getDrawable(Context context, int resId) {
         if (Build.VERSION.SDK_INT >= 21) {
-            return context.getResources().getDrawable(i, context.getTheme());
+            return context.getResources().getDrawable(resId, context.getTheme());
         }
-        return context.getResources().getDrawable(i);
+        return context.getResources().getDrawable(resId);
     }
 
     static Drawable getIconForPieShortPress(Context context) {
@@ -118,11 +119,11 @@ class IconUtils {
         return getDrawable(context, R.drawable.pielp_s);
     }
 
-    static Drawable getIconForGesture(Context context, String str) {
+    static Drawable getIconForGesture(Context context, String gestureName) {
         return getDrawable(
                 context,
                 context.getResources()
-                        .getIdentifier(str + "_s", "drawable", context.getPackageName()));
+                        .getIdentifier(gestureName + "_s", "drawable", context.getPackageName()));
     }
 
     static Drawable getIconForISA(Context context) {
@@ -133,8 +134,8 @@ class IconUtils {
         return getDrawable(context, R.drawable.ok);
     }
 
-    static Drawable getIconForAction(Context context, Action action, String str) {
-        return action.getDrawable(context, str, 0, 1, true);
+    static Drawable getIconForAction(Context context, Action action, String userIconName) {
+        return action.getDrawable(context, userIconName, 0, 1, true);
     }
 
     static void setMaxSizeForImageView(Context context, ImageView imageView) {
@@ -146,8 +147,9 @@ class IconUtils {
                 (int) TypedValue.applyDimension(1, 70.0f, resources.getDisplayMetrics()));
     }
 
-    static String getNamePie(int i) {
-        return "pie" + i + ".png";
+    /** File name of the user-supplied PNG for pie slot {@code slot}. */
+    static String getNamePie(int slot) {
+        return "pie" + slot + ".png";
     }
 
     private static Bitmap getBitmapFromDrawable(Drawable drawable) {

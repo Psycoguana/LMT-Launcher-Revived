@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/* JADX INFO: loaded from: classes.dex */
 public class PieFragment extends Fragment implements AdapterView.OnItemClickListener {
     public static final int offsetLevel1 = 0;
     public static final int offsetLevel2 = 10;
@@ -187,27 +186,27 @@ public class PieFragment extends Fragment implements AdapterView.OnItemClickList
     }
 
     @Override // android.widget.AdapterView.OnItemClickListener
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        if (i >= 0) {
-            i--;
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (position >= 0) {
+            position--;
         }
-        if (i >= 10) {
-            i--;
+        if (position >= 10) {
+            position--;
         }
-        if (i >= 24) {
-            i--;
+        if (position >= 24) {
+            position--;
         }
-        SettingsValues.getInstance(getActivity()).setCurrentPie(i);
+        SettingsValues.getInstance(getActivity()).setCurrentPie(position);
         startActivityForResult(
                 new Intent(view.getContext(), (Class<?>) CommandSelectActivity.class), 0);
     }
 
     @Override // android.app.Fragment
-    public void onActivityResult(int i, int i2, Intent intent) {
-        super.onActivityResult(i, i2, intent);
-        if (i == 1 && i2 == -1) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == -1) {
             IconUtils.saveImageToFile(
-                    IconUtils.getScaledBitmapFromUri(getActivity(), intent.getData(), 150),
+                    IconUtils.getScaledBitmapFromUri(getActivity(), data.getData(), 150),
                     SettingsValues.getInstance(getActivity()).loadResourceSearchPath(),
                     IconUtils.getNamePie(this.mCurrentPos));
             SettingsValues.getInstance(getActivity()).restartServiceIfRequired();
@@ -217,17 +216,17 @@ public class PieFragment extends Fragment implements AdapterView.OnItemClickList
     class CommandSimpleAdapter extends SimpleAdapter {
         private int mOffset;
 
-        CommandSimpleAdapter(Context context, List<? extends Map<String, ?>> list, int i) {
+        CommandSimpleAdapter(Context context, List<? extends Map<String, ?>> items, int resource) {
             super(
                     context,
-                    list,
+                    items,
                     R.layout.listitem_icondescriptionicon,
                     new String[] {"title", "caption"},
                     new int[] {
                         R.id.listitem_icondescriptionicon_text,
                         R.id.listitem_icondescriptionicon_caption
                     });
-            this.mOffset = i;
+            this.mOffset = resource;
         }
 
         @Override // android.widget.SimpleAdapter, android.widget.Adapter
@@ -240,7 +239,6 @@ public class PieFragment extends Fragment implements AdapterView.OnItemClickList
             IconUtils.setMaxSizeForImageView(PieFragment.this.getActivity(), imageView);
             new AsyncDrawableTask(imageView, R.drawable.none) { // from class:
                 // com.noname81.lmt.PieFragment.CommandSimpleAdapter.1
-                /* JADX WARN: Can't rename method to resolve collision */
                 @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
                 protected Drawable doInBackground(Void... voidArr) {
                     if (position % 2 > 0) {
@@ -252,7 +250,6 @@ public class PieFragment extends Fragment implements AdapterView.OnItemClickList
             IconUtils.setMaxSizeForImageView(PieFragment.this.getActivity(), imageView2);
             new AsyncDrawableTask(imageView2, R.drawable.none) { // from class:
                 // com.noname81.lmt.PieFragment.CommandSimpleAdapter.2
-                /* JADX WARN: Can't rename method to resolve collision */
                 @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
                 protected Drawable doInBackground(Void... voidArr) {
                     return IconUtils.getIconForAction(
@@ -292,7 +289,7 @@ public class PieFragment extends Fragment implements AdapterView.OnItemClickList
                                                     @Override // android.content.DialogInterface.OnClickListener
                                                     public void onClick(
                                                             DialogInterface dialogInterface,
-                                                            int i2) {
+                                                            int which) {
                                                         PieFragment.this.startActivityForResult(
                                                                 new Intent(
                                                                         "android.intent.action.PICK",
@@ -309,7 +306,7 @@ public class PieFragment extends Fragment implements AdapterView.OnItemClickList
                                                     @Override // android.content.DialogInterface.OnClickListener
                                                     public void onClick(
                                                             DialogInterface dialogInterface,
-                                                            int i2) {
+                                                            int which) {
                                                         FileUtils.deleteFile(path, fileName);
                                                         PieFragment.this.mAdapter
                                                                 .notifyDataSetChanged();
