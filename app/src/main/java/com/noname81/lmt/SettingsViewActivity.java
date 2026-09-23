@@ -10,7 +10,6 @@ import com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter;
 
 import java.util.LinkedList;
 
-/* JADX INFO: loaded from: classes.dex */
 public class SettingsViewActivity extends Activity {
     SettingsViewHelper mSettingsHelper;
 
@@ -76,15 +75,13 @@ public class SettingsViewActivity extends Activity {
         this.mSettingsHelper.posPieAreaY = 7;
         this.mSettingsHelper.posPieAreaGravity = 8;
         this.mSettingsHelper.posPieAreaBehindKeyboard = 9;
-        int i = 10;
+        int pos = 10;
         if (Build.VERSION.SDK_INT < 26) {
             this.mSettingsHelper.posPieOnLockScreen = 10;
-            i = 11;
+            pos = 11;
         }
-        int i2 = i + 1;
-        this.mSettingsHelper.posAddBlacklistPie = i;
-        int i3 = i2 + 1;
-        this.mSettingsHelper.posClearBlacklistPie = i2;
+        this.mSettingsHelper.posAddBlacklistPie = pos++;
+        this.mSettingsHelper.posClearBlacklistPie = pos++;
         SettingsViewHelper settingsViewHelper2 = this.mSettingsHelper;
         settingsViewHelper2.getClass();
         separatedListAdapter.addSection(
@@ -114,22 +111,14 @@ public class SettingsViewActivity extends Activity {
         linkedList3.add(
                 SeparatedListAdapter.createItem(
                         "Pie start gap", "Size of the gap between pie and border, default = 0"));
-        int i4 = i3 + 1;
-        this.mSettingsHelper.posOffsetPieStyle = i3;
-        int i5 = i4 + 1;
-        this.mSettingsHelper.posPieColor = i4;
-        int i6 = i5 + 1;
-        this.mSettingsHelper.posPieInnerRadius = i5;
-        int i7 = i6 + 1;
-        this.mSettingsHelper.posPieOuterRadius = i6;
-        int i8 = i7 + 1;
-        this.mSettingsHelper.posPieShiftSize = i7;
-        int i9 = i8 + 1;
-        this.mSettingsHelper.posPieOutlineSize = i8;
-        int i10 = i9 + 1;
-        this.mSettingsHelper.posPieSliceGap = i9;
-        int i11 = i10 + 1;
-        this.mSettingsHelper.posPieStartGap = i10;
+        this.mSettingsHelper.posOffsetPieStyle = pos++;
+        this.mSettingsHelper.posPieColor = pos++;
+        this.mSettingsHelper.posPieInnerRadius = pos++;
+        this.mSettingsHelper.posPieOuterRadius = pos++;
+        this.mSettingsHelper.posPieShiftSize = pos++;
+        this.mSettingsHelper.posPieOutlineSize = pos++;
+        this.mSettingsHelper.posPieSliceGap = pos++;
+        this.mSettingsHelper.posPieStartGap = pos++;
         SettingsViewHelper settingsViewHelper3 = this.mSettingsHelper;
         settingsViewHelper3.getClass();
         separatedListAdapter.addSection(
@@ -161,20 +150,13 @@ public class SettingsViewActivity extends Activity {
                         "Expand trigger area",
                         "Configure if the action trigger area should be expanded to the full screen"
                                 + " for the outer pie ring, default = enabled"));
-        int i12 = i11 + 1;
-        this.mSettingsHelper.posOffsetPieBehavior = i11;
-        int i13 = i12 + 1;
-        this.mSettingsHelper.posPieLongpress = i12;
-        int i14 = i13 + 1;
-        this.mSettingsHelper.posPieAnimation = i13;
-        int i15 = i14 + 1;
-        this.mSettingsHelper.posPieVibrate = i14;
-        int i16 = i15 + 1;
-        this.mSettingsHelper.posPieVibrationTime = i15;
-        int i17 = i16 + 1;
-        this.mSettingsHelper.posPieMultiCommand = i16;
-        int i18 = i17 + 1;
-        this.mSettingsHelper.posPieExpandTriggerArea = i17;
+        this.mSettingsHelper.posOffsetPieBehavior = pos++;
+        this.mSettingsHelper.posPieLongpress = pos++;
+        this.mSettingsHelper.posPieAnimation = pos++;
+        this.mSettingsHelper.posPieVibrate = pos++;
+        this.mSettingsHelper.posPieVibrationTime = pos++;
+        this.mSettingsHelper.posPieMultiCommand = pos++;
+        this.mSettingsHelper.posPieExpandTriggerArea = pos++;
         SettingsViewHelper settingsViewHelper4 = this.mSettingsHelper;
         settingsViewHelper4.getClass();
         separatedListAdapter.addSection(
@@ -205,18 +187,12 @@ public class SettingsViewActivity extends Activity {
                         "Set user image search path",
                         "default = /storage/emulated/0/Android/data/com.noname81.lmt/files/ (Leave"
                                 + " blank to set default)"));
-        int i19 = i18 + 1;
-        this.mSettingsHelper.posOffsetPieIcons = i18;
-        int i20 = i19 + 1;
-        this.mSettingsHelper.posPieRotateImages = i19;
-        int i21 = i20 + 1;
-        this.mSettingsHelper.posPieNavButtonStyle = i20;
-        int i22 = i21 + 1;
-        this.mSettingsHelper.posPieShowScaleAppImages = i21;
-        int i23 = i22 + 1;
-        this.mSettingsHelper.posPieShowScaleUserImages = i22;
-        int i24 = i23 + 1;
-        this.mSettingsHelper.posPieUserImageSearchPath = i23;
+        this.mSettingsHelper.posOffsetPieIcons = pos++;
+        this.mSettingsHelper.posPieRotateImages = pos++;
+        this.mSettingsHelper.posPieNavButtonStyle = pos++;
+        this.mSettingsHelper.posPieShowScaleAppImages = pos++;
+        this.mSettingsHelper.posPieShowScaleUserImages = pos++;
+        this.mSettingsHelper.posPieUserImageSearchPath = pos++;
         SettingsViewHelper settingsViewHelper5 = this.mSettingsHelper;
         settingsViewHelper5.getClass();
         separatedListAdapter.addSection(
@@ -247,18 +223,13 @@ public class SettingsViewActivity extends Activity {
         linkedList6.add(
                 SeparatedListAdapter.createItem(
                         "Pie status info font", "Configure the pie font, default = Roboto Light"));
-        int i25 = i24 + 1;
-        this.mSettingsHelper.posOffsetPieExtensions = i24;
-        int i26 = i25 + 1;
-        this.mSettingsHelper.posPiePointerFromEdges = i25;
-        int i27 = i26 + 1;
-        this.mSettingsHelper.posPiePointerWarpFactor = i26;
-        int i28 = i27 + 1;
-        this.mSettingsHelper.posPiePointerColor = i27;
-        int i29 = i28 + 1;
-        this.mSettingsHelper.posPieShowStatusInfos = i28;
-        this.mSettingsHelper.posPieStatusInfoColor = i29;
-        this.mSettingsHelper.posPieStatusInfoFont = i29 + 1;
+        this.mSettingsHelper.posOffsetPieExtensions = pos++;
+        this.mSettingsHelper.posPiePointerFromEdges = pos++;
+        this.mSettingsHelper.posPiePointerWarpFactor = pos++;
+        this.mSettingsHelper.posPiePointerColor = pos++;
+        this.mSettingsHelper.posPieShowStatusInfos = pos++;
+        this.mSettingsHelper.posPieStatusInfoColor = pos++;
+        this.mSettingsHelper.posPieStatusInfoFont = pos++;
         SettingsViewHelper settingsViewHelper6 = this.mSettingsHelper;
         settingsViewHelper6.getClass();
         separatedListAdapter.addSection(
