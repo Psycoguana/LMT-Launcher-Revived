@@ -146,7 +146,7 @@ picker, so every de-rooting must update its caption or the UI will lie.
 
 ## Part 3 — Bugs and hazards found
 
-### 3.1 🔴 Root key injection is broken on Android 14+  (pre-existing, upstream)
+### 3.1 🔴 Root key injection is broken on Android 15  (pre-existing, upstream)
 
 **Verified on the test phone (Android 15) with root fully granted.** Root itself works:
 `InputContext.jar` is copied, `su` is spawned, root-owned `app_process` helpers run,
@@ -163,12 +163,15 @@ E/LMT::InputContext: java.lang.NullPointerException
 
 `InputManager.getInstance()` — a hidden API — now NPEs inside a bare `app_process`.
 
+**Version boundary is untested.** This was verified on Android 15 (SDK 35) only.
+Which release first broke it is unknown; do not claim "14+" without testing 12/13/14.
+
 **This is not a regression from the reconstruction.** Proven by invoking the
 verbatim shipped `InputContext29.jar` standalone under `su`, entirely outside LMT:
 it fails identically. The jar ships byte-identical and `RootContext`/`Launcher` are
 bytecode-verified equivalent.
 
-**Blast radius** — every root key action is a no-op on Android 14+: `Home` (root
+**Blast radius** — every root key action is a no-op: `Home` (root
 path), `Menu`, `HomeLongpress`, `BackLongpress`, `MenuLongpress`, `Key`,
 `Screenshot`, `NowOnTap`, `Assistant`, `Search` (root path), plus `input tap` and
 `input text`, which means `PiePointer`'s tap-warp too.
@@ -184,9 +187,23 @@ adding the helper jar to the build (it is currently a prebuilt asset), which is 
 worthwhile change in its own right — that jar is the last binary blob besides
 `libTouchServiceNative.so`.
 
+**What this costs, action by action.** LMT tries accessibility first for its most
+common actions, so the damage is uneven:
+
+- *Dead, no alternative* (root-only, key-injection based): `HomeLongpress` (2003),
+  `MenuLongpress` (2082), `BackLongpress` (2004), `Menu` (82), `Key` (arbitrary),
+  `Screenshot`, `NowOnTap` (219), `Assistant` (219).
+- *Accessibility-only now* — fine with the service enabled, dead without it:
+  `Home`, `Back`, `RecentApps`, `Search`, `OpenPowerMenu`, and `PiePointer`'s tap
+  (it calls `performClick` first, `input tap` only as the root fallback).
+- *Unaffected* — these use `runCommandRoot`, a plain `su` shell, not InputContext:
+  `Script`, `Wifi`, `Data`, `ImmersiveMode`, `UnpinApp`, `TaskerTask`, `Activity`.
+- *Unaffected* — the `am` family through InputContext uses `IActivityManager`
+  reflection, a different code path that runs without error: `NextApp`, `PrevApp`,
+  `LastApp`, `KillApp`, `KillAllApps`, `move-to-front`.
+
 This also makes 2.1's `GLOBAL_ACTION_TAKE_SCREENSHOT` more valuable than it first
-appeared: it is not a convenience, it is the only way Screenshot works at all on a
-modern device.
+appeared: it is not a convenience, it is the only way Screenshot works at all on Android 15.
 
 ### 3.2 🟡 Latent out-of-bounds in `Action.toString()`
 
