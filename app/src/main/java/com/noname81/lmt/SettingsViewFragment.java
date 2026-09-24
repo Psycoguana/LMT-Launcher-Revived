@@ -107,6 +107,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         activate.setTitle("Activate LMT");
         activate.setSummary("Activate or deactivate LMT");
         activate.setPersistent(false);
+        activate.setIconSpaceReserved(false);
         activate.setChecked(this.mSettings.getServiceState() > 0);
         activate.setOnPreferenceChangeListener(
                 (preference, newValue) -> {
@@ -852,6 +853,9 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     private PreferenceCategory addCategory(PreferenceScreen screen, String title) {
         PreferenceCategory category = new PreferenceCategory(requireContext());
         category.setTitle(title);
+        // No row on this screen ever has an icon; the default layout still reserves a gutter
+        // for one, which shows up as a large empty left margin on every row and header.
+        category.setIconSpaceReserved(false);
         screen.addPreference(category);
         return category;
     }
@@ -867,6 +871,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         preference.setSummary(caption);
         preference.setKey(key);
         preference.setDefaultValue(defaultValue);
+        preference.setIconSpaceReserved(false);
         category.addPreference(preference);
     }
 
@@ -879,6 +884,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         preference.setTitle(title);
         preference.setSummary(caption);
         preference.setPersistent(false);
+        preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(onClick);
         category.addPreference(preference);
     }
