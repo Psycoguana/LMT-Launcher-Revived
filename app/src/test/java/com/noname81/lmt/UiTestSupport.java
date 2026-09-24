@@ -11,6 +11,9 @@ import android.widget.ListView;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceGroup;
 
 import org.robolectric.Robolectric;
 
@@ -119,5 +122,54 @@ final class UiTestSupport {
         Field f = declaring.getDeclaredField(field);
         f.setAccessible(true);
         return f.getInt(target);
+    }
+
+    /** One visible Preference row: its label, the category title above it, and the row itself. */
+    static final class PreferenceRow {
+        final String section;
+        final String title;
+        final Preference preference;
+
+        PreferenceRow(String section, String title, Preference preference) {
+            this.section = section;
+            this.title = title;
+            this.preference = preference;
+        }
+
+        @Override
+        public String toString() {
+            return section + " / " + title;
+        }
+    }
+
+    static void showPreferences(FragmentActivity host, Fragment fragment) {
+        host.getSupportFragmentManager()
+                .beginTransaction()
+                .add(android.R.id.content, fragment)
+                .commitNow();
+        idle();
+    }
+
+    /**
+     * Every preference under every top-level {@link PreferenceGroup} (i.e. every row under every
+     * section), in screen order. {@code Preference.performClick()} drives a row exactly like a
+     * real tap would - including opening whatever dialog its listener shows - so there is no need
+     * to walk the rendered RecyclerView at all.
+     */
+    static List<PreferenceRow> preferenceRows(PreferenceFragmentCompat fragment) {
+        List<PreferenceRow> rows = new ArrayList<>();
+        PreferenceGroup screen = fragment.getPreferenceScreen();
+        for (int i = 0; i < screen.getPreferenceCount(); i++) {
+            Preference category = screen.getPreference(i);
+            String section = String.valueOf(category.getTitle());
+            if (category instanceof PreferenceGroup) {
+                PreferenceGroup group = (PreferenceGroup) category;
+                for (int j = 0; j < group.getPreferenceCount(); j++) {
+                    Preference preference = group.getPreference(j);
+                    rows.add(new PreferenceRow(section, String.valueOf(preference.getTitle()), preference));
+                }
+            }
+        }
+        return rows;
     }
 }

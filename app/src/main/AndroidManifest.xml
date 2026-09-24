@@ -33,7 +33,6 @@
         </activity>
         <activity android:exported="false" android:name="com.noname81.lmt.MultiSelectActivity"/>
         <activity android:exported="false" android:name="com.noname81.lmt.CommandSelectActivity"/>
-        <activity android:exported="false" android:name="com.noname81.lmt.SettingsViewActivity"/>
         <service android:exported="true" android:foregroundServiceType="specialUse" android:name="com.noname81.lmt.TouchService"/>
         <service android:exported="true" android:name="com.noname81.lmt.AccessibilityHandler" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>

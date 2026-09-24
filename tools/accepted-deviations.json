@@ -388,6 +388,11 @@
       "class": "SettingsViewHelper$SettingsSimpleAdapter.smali",
       "reworked": true,
       "reason": "ROADMAP 1.6 phase 1 adds the AndroidX/Material3 dependencies, which merge in many new resources and shift the numeric resource-ID space app-wide. This class's listitem_description_button field's baked-in R.id constant lands on a different numeric slot as a result (still the same resource, not a renamed or removed one) - reworked only to excuse that value-only field diff, not any real structural change."
+    },
+    {
+      "class": "SettingsViewFragment.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.6 phase 2: rebuilt as a PreferenceFragmentCompat, replacing the ~1572-line SettingsViewHelper position-dispatch system entirely. onCreateView is gone (replaced by onCreatePreferences), onSaveInstanceState's now-empty override is gone too, and the mSettingsHelper field is gone since every row's logic now lives directly on this class or in SettingsPreferenceDataStore. `reworked` exempts the whole class from content/member comparison, matching the LMT.smali precedent from phase 1."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -415,12 +420,56 @@
     {
       "class": "PieContainer$PieLayout$$ExternalSyntheticApiModelOutline0.smali",
       "reason": "Same numbered-outline-helper artifact as SettingsBackup$$ExternalSyntheticBackport0 above: ROADMAP 1.6 phase 1 raises minSdk to 21, which changes which call sites still need D8's API-outlining helper, so D8 attaches a freshly-numbered instance of it to a different 'first' class (PieContainer$PieLayout) than before. PieContainer.java is untouched by this phase."
+    },
+    {
+      "class": "SettingsPreferenceDataStore.smali",
+      "reason": "ROADMAP 1.6 phase 2: the PreferenceDataStore backing the 8 boolean-toggle settings rows. Has no upstream counterpart."
+    },
+    {
+      "class": "SettingsViewFragment$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 2: every row's dialog/click listener is now a lambda on SettingsViewFragment. The reference SettingsViewFragment had none of its own (all dispatch lived in SettingsViewHelper), so there is no reference-side $ANON bucket to match against - same situation as LMT$ANON.smali in phase 1."
+    },
+    {
+      "class": "SettingsViewFragment$IntCallback.smali",
+      "reason": "ROADMAP 1.6 phase 2: a small local functional interface used by the addNumericDialog/addChoiceDialog row-building helpers, to avoid depending on java.util.function (added in API 24, above this project's minSdk 21). Has no upstream counterpart."
+    },
+    {
+      "class": "SettingsViewFragment$IntGetter.smali",
+      "reason": "Same reason as SettingsViewFragment$IntCallback.smali above."
+    },
+    {
+      "class": "SettingsViewFragment$StringCallback.smali",
+      "reason": "Same reason as SettingsViewFragment$IntCallback.smali above."
+    },
+    {
+      "class": "SettingsViewFragment$StringGetter.smali",
+      "reason": "Same reason as SettingsViewFragment$IntCallback.smali above."
     }
   ],
   "removed_classes": [
     {
       "class": "LMT$TabsAdapter$TabInfo.smali",
       "reason": "ROADMAP 1.6 phase 1: TabsAdapter now tracks tabs as parallel title/fragment-class lists instead of a TabInfo wrapper object, since FragmentStateAdapter addresses tabs purely positionally (createFragment(int)/getItemCount()) and never needs to carry a Bundle of constructor args the way the old ActionBar/ViewPager1 adapter did."
+    },
+    {
+      "class": "SettingsViewActivity.smali",
+      "reason": "ROADMAP 1.6 phase 2: dead code (never started, HANDOFF.md), deleted now that SettingsViewHelper - its only reason to exist - is gone too."
+    },
+    {
+      "class": "SettingsViewHelper.smali",
+      "reason": "ROADMAP 1.6 phase 2: the ~1572-line position-dispatch dispatcher is deleted outright. Every row's logic moved into SettingsViewFragment (click listeners) or SettingsPreferenceDataStore (the 8 boolean toggles)."
+    },
+    {
+      "class": "SettingsViewHelper$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 2: SettingsViewHelper's anonymous InputDialog/ColorDialog/DialogInterface.OnClickListener subclasses are gone along with the class itself."
+    },
+    {
+      "class": "SettingsViewHelper$SettingsSimpleAdapter.smali",
+      "reason": "ROADMAP 1.6 phase 2: the ListView row adapter (and its hardcoded listitem_description_button id) is gone - rows are Preference objects now, not SimpleAdapter-bound list items."
+    },
+    {
+      "class": "SettingsViewHelper$SettingsSimpleAdapter$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 2: the 9 CompoundButton.OnCheckedChangeListener anonymous classes SettingsSimpleAdapter.getView() built per switch row are gone along with the class itself - each toggle is now a single SwitchPreferenceCompat with no embedded-listener duplication."
     }
   ]
 }

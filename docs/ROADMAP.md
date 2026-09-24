@@ -307,6 +307,25 @@ the Gestures/ISA feature set, which would also remove `TSMode` 0 and 1.
 
 ---
 
+### 1.10 Theme customization
+
+Depends on 1.6 (Material 3 overhaul) being in place — needs an `AppCompatActivity` /
+`DayNight` theme to attach a dynamic color scheme to. Not started; added to the
+backlog 2026-09-23, requested by the user during 1.6 phase 1.
+
+- **Light / dark / follow system**, the three standard `DayNight` modes, switched via
+  `AppCompatDelegate.setDefaultNightMode`.
+- **A small preset palette** to pick from (a handful of curated Material seed colors),
+  plus a **custom RGB/hex picker** for anything else.
+- **Material You dynamic color** (Android 12+, `DynamicColors` from the Material
+  library) — derives the theme from the user's wallpaper. Needs a fallback (one of
+  the presets above) for API < 31 or when the user opts out.
+- Persist the choice through `SettingsSharedPrefsWrapper` like every other setting,
+  and expose it from the rebuilt Settings screen (1.6 phase 2) rather than the old
+  position-dispatch system.
+
+---
+
 ## Part 2 — Accessibility fallbacks for root-only actions
 
 Researched, not implemented. API levels below are from the SDK's own

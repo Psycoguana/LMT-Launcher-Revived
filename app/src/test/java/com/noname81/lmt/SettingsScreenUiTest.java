@@ -10,11 +10,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ListView;
 
 import androidx.fragment.app.FragmentActivity;
+import androidx.preference.Preference;
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.After;
@@ -31,14 +30,14 @@ import java.util.Map;
 import java.util.TreeSet;
 
 /**
- * Pre-UI-rewrite safety net for the Settings tab: what each row, found by its label, changes.
+ * UI safety net for the Settings tab: what each row, found by its label, changes.
  *
- * <p>Taps are dispatched today by list position through ~60 {@code pos*} fields that
- * SettingsViewFragment assigns as it builds rows - a rewrite would silently cross wires. Each
- * row is driven generically: click it, answer whatever dialog appears (a number, the second
- * choice, or a colour), toggle its switch if it has one, then diff the stored settings and note
- * any activity or service it started. The resulting "label -&gt; effect" table is the contract the
- * rewritten screen has to meet.
+ * <p>Each row is driven generically: click it (via {@link Preference#performClick()}), answer
+ * whatever dialog appears (a number, the second choice, or a colour), then diff the stored
+ * settings and note any activity or service it started. The resulting "label -&gt; effect" table
+ * is the contract the Settings screen has to meet, independent of the widget backing a row
+ * (ROADMAP 1.6 phase 2 rebuilt it as a {@code PreferenceFragmentCompat}; this table did not
+ * change).
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(
@@ -123,12 +122,12 @@ public class SettingsScreenUiTest {
     public void everyRowChangesTheSettingItIsLabelledFor() throws Exception {
         Map<String, String> raw = new LinkedHashMap<>();
         Map<String, String> actual = new LinkedHashMap<>();
-        for (UiTestSupport.Row label : freshScreen().rows) {
+        for (UiTestSupport.PreferenceRow label : freshScreen().rows) {
             // Fresh store and screen per row: some rows recreate the activity or change the
             // feature mode, and none may leak into the next.
             Screen screen = freshScreen();
-            UiTestSupport.Row row = screen.find(label);
-            String effect = effectOf(screen.host, screen.list, row);
+            UiTestSupport.PreferenceRow row = screen.find(label);
+            String effect = effectOf(screen.host, row.preference);
             raw.put(row.section + " / " + row.title, effect);
             actual.put(row.section + " / " + row.title, normalise(effect));
         }
@@ -161,11 +160,10 @@ public class SettingsScreenUiTest {
 
     private static final class Screen {
         FragmentActivity host;
-        ListView list;
-        java.util.List<UiTestSupport.Row> rows;
+        java.util.List<UiTestSupport.PreferenceRow> rows;
 
-        UiTestSupport.Row find(UiTestSupport.Row label) {
-            for (UiTestSupport.Row row : rows) {
+        UiTestSupport.PreferenceRow find(UiTestSupport.PreferenceRow label) {
+            for (UiTestSupport.PreferenceRow row : rows) {
                 if (row.section.equals(label.section) && row.title.equals(label.title)) {
                     return row;
                 }
@@ -180,30 +178,22 @@ public class SettingsScreenUiTest {
         SettingsValues.getInstance(context).saveTouchServiceMode(1);
         Screen screen = new Screen();
         screen.host = UiTestSupport.hostActivity();
-        screen.list = UiTestSupport.show(screen.host, new SettingsViewFragment());
-        screen.rows = UiTestSupport.rows(screen.list);
+        SettingsViewFragment fragment = new SettingsViewFragment();
+        UiTestSupport.showPreferences(screen.host, fragment);
+        screen.rows = UiTestSupport.preferenceRows(fragment);
         return screen;
     }
 
-    private String effectOf(Activity host, ListView list, UiTestSupport.Row row) {
+    private String effectOf(Activity host, Preference preference) {
         Application app = (Application) context;
         drainStarted(app, host);
         Map<String, ?> before = new HashMap<String, Object>(prefs().getAll());
         Object dialogBefore = ShadowAlertDialog.getLatestDialog();
 
-        // The switch first, on a row nothing has touched yet, so a toggle always changes state.
-        View rowView = UiTestSupport.rowView(list, row);
-        CompoundButton toggle = findToggle(rowView);
-        StringBuilder effect = new StringBuilder();
-        if (toggle != null) {
-            toggle.performClick();
-            UiTestSupport.idle();
-            effect.append(changedKeys(before, "switch"));
-            before = new HashMap<>(prefs().getAll());
-        }
-
-        list.performItemClick(rowView, row.position, row.position);
+        preference.performClick();
         UiTestSupport.idle();
+
+        StringBuilder effect = new StringBuilder();
         Object dialog = ShadowAlertDialog.getLatestDialog();
         if (dialog != dialogBefore && dialog instanceof AlertDialog) {
             effect.append(answer((AlertDialog) dialog));
@@ -295,22 +285,6 @@ public class SettingsScreenUiTest {
 
     private android.content.SharedPreferences prefs() {
         return context.getSharedPreferences("LMT", 0);
-    }
-
-    private static CompoundButton findToggle(View view) {
-        if (view instanceof CompoundButton) {
-            return (CompoundButton) view;
-        }
-        if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) view;
-            for (int i = 0; i < group.getChildCount(); i++) {
-                CompoundButton found = findToggle(group.getChildAt(i));
-                if (found != null) {
-                    return found;
-                }
-            }
-        }
-        return null;
     }
 
     private static EditText findEditText(View view) {
