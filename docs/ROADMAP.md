@@ -612,7 +612,21 @@ since, but at least one user still reported it afterwards. This matters more now
 because 3.1 means accessibility is the *only* working path for Home/Back/Recents —
 when it unbinds, those actions die with no root fallback.
 
-### 3.6 🟡 `compare_fingerprints.py`'s own `issues` counter is dead — a second, silent oracle blind spot
+### 3.6 ✅ FIXED — `compare_fingerprints.py`'s `issues` counter was dead, a second silent oracle blind spot
+
+**Fix (before the UI rewrite):** the dead counter is gone. Unexcused one-sided
+methods are now collected, reported as `one-sided methods (REAL)`, and fail
+`RESULT`. The 1.4 gap is backfilled (`SettingsValuesBase.smali` in
+`new_members`). Mutation-checked: a stray method added to `Toaster` now gives
+`REVIEW REQUIRED`.
+
+**Also prepared for the rewrite:** whole-class additions and removals are now
+declared in `accepted-deviations.json` (`new_classes` / `removed_classes`, each
+with a reason) instead of a hard-coded Python set. Removing a class used to fail
+with no way to excuse it. Checked by deleting the dead `SettingsViewActivity`: the
+oracle failed until the removal was declared, then passed.
+
+Original finding:
 
 Found while adding 1.5: `SettingsValuesBase.smali` has printed
 `!! method on one side only: loadShowSystemApps()I` /
