@@ -518,15 +518,27 @@ and `onDraw` clips the hole out with `clipOutPath`, since outlines can only clip
 Confirmed by hand on the Samsung flagship. Verified on the test phone with synthetic touches (`adb shell input motionevent DOWN/UP` on the pie
 strip; the pie *does* accept them) and see-through pie colors (`#99000000,#cb000000,,#ffa70000,,,`).
 
-### 1.12 Red theme color makes text look washed out
+### 1.12 Red theme color makes text look washed out  ✅ done (awaiting Samsung flagship confirmation)
 
-Reported on-device: with red as the theme color, colored text looks pale and
-washed out. Likely cause: `ThemeHelper` seeds `DynamicColors` with
-`setContentBasedSource(seed)`, and M3 draws colored text in `colorPrimary`. That's
-tone 80 in dark mode, and a tone-80 red is a pale salmon pink. Things to try:
-a scheme that keeps more chroma for the text roles (fidelity/vibrant), or a
-higher-contrast scheme. Check every preset in both light and dark mode, not just
-red. Settle it by comparing screenshots on the Samsung flagship.
+Cause, measured on the test phone: in dark mode M3 puts `colorPrimary` (and `colorSecondary`) at
+**tone 80**, and at that lightness red can only reach chroma ~29 (`#ffb4a9`, salmon). The
+scheme isn't the problem: Content, Fidelity and Vibrant all give the same tone-80 primary.
+Also, the Settings tab's category titles read `android:colorAccent`, which M3 maps to the
+*secondary* color (muted `#a23d32` in light mode), while the other tabs' headers use primary.
+
+Fix (`ThemeHelper.applySeed`): do what `setContentBasedSource(seed)` does (SchemeContent →
+`ColorResourcesOverride`), but in dark mode replace `material_personalized_color_primary`
+with the same hue at **tone 70** (`DARK_PRIMARY_TONE`, red → `#ff8a7b`, chroma ~50). Contrast stays
+8.1:1 on the surface, 6.3:1 on dialog containers and 5.7:1 under on-primary text. Tone 65
+(`#ff7161`) would be redder at 6.9 / 5.3 / 4.9. `android:colorAccent` → `?attr/colorPrimary`,
+so every header uses the same color. Light mode keeps M3's tone 40 (`#a50007`, already vivid).
+Wallpaper (Material You) and Default aren't touched.
+
+The bigger cause on the Samsung flagship: One UI reports `UiModeManager.getContrast() == -1` (*reduced*
+contrast, `settings get secure contrast_level`), and Material builds the seeded scheme with it,
+so onSurface text came out `#b89d99` instead of `#fadcd7`: every title looked greyed out
+or disabled. `ThemeHelper.systemContrast` now clamps at 0 (high contrast still applies). Uses Material's `@RestrictTo` color API,
+so re-check it on Material upgrades.
 
 ### 1.13 Optimization pass: less verbose code, performance, battery
 

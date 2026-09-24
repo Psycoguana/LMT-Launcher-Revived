@@ -7,5 +7,8 @@
         <item name="android:statusBarColor">?attr/colorSurface</item>
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.LMT.MaterialAlertDialog</item>
+        <!-- The Settings tab's category titles read colorAccent, which M3 sets to the secondary
+             colour; the other tabs' headers use primary. One colour for all (ROADMAP 1.12). -->
+        <item name="android:colorAccent">?attr/colorPrimary</item>
     </style>
 </resources>

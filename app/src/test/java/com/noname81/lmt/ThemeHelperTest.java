@@ -3,8 +3,12 @@ package com.noname81.lmt;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import androidx.appcompat.app.AppCompatDelegate;
+
+import com.google.android.material.color.utilities.Contrast;
+import com.google.android.material.color.utilities.Hct;
 
 import org.junit.Test;
 
@@ -42,5 +46,19 @@ public class ThemeHelperTest {
             assertNotNull(name);
         }
         assertEquals("Custom", names[ThemeHelper.COLOR_CUSTOM]);
+    }
+
+    /** ROADMAP 1.12: the dark primary is more saturated than M3's tone 80, and still readable. */
+    @Test
+    @SuppressWarnings("RestrictedApi")
+    public void darkPrimaryIsVividAndReadable() {
+        Hct red = Hct.fromInt(0xFFF44336);
+        Hct vivid = Hct.fromInt(ThemeHelper.vividPrimary(red.getHue(), red.getChroma()));
+        Hct tone80 = Hct.from(red.getHue(), red.getChroma(), 80);
+        assertEquals(ThemeHelper.DARK_PRIMARY_TONE, vivid.getTone(), 1);
+        assertTrue(vivid.getChroma() > tone80.getChroma() * 1.5);
+        // Dark surface is tone 6, on-primary text tone 20: both need WCAG AA (4.5:1).
+        assertTrue(Contrast.ratioOfTones(vivid.getTone(), 6) >= 4.5);
+        assertTrue(Contrast.ratioOfTones(vivid.getTone(), 20) >= 4.5);
     }
 }

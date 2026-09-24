@@ -1,14 +1,24 @@
 package com.noname81.lmt;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.os.Build;
+import android.util.TypedValue;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.color.ColorResourcesOverride;
 import com.google.android.material.color.DynamicColors;
-import com.google.android.material.color.DynamicColorsOptions;
+import com.google.android.material.color.MaterialColorUtilitiesHelper;
+import com.google.android.material.color.utilities.DynamicScheme;
+import com.google.android.material.color.utilities.Hct;
+import com.google.android.material.color.utilities.SchemeContent;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Applies the Appearance settings (ROADMAP 1.10) - light/dark mode and the colour scheme - to an
@@ -37,6 +47,13 @@ final class ThemeHelper {
     };
     static final int COLOR_CUSTOM = COLOR_FIRST_PRESET + PRESET_SEEDS.length;
 
+    /**
+     * Tone of the primary colour in dark mode for a seeded scheme (ROADMAP 1.12). M3 uses tone 80,
+     * which leaves a saturated seed like red as a pale pink; 70 keeps about twice the chroma and
+     * still gives 8:1 on the surface and 5.7:1 under on-primary text.
+     */
+    static final int DARK_PRIMARY_TONE = 70;
+
     /** Material 3's baseline primary, i.e. what the default palette is built from. */
     static final int DEFAULT_CUSTOM_COLOR = 0xFF6750A4;
 
@@ -57,10 +74,57 @@ final class ThemeHelper {
             return;
         }
         Integer seed = seedFor(settings.loadThemeColor(), settings.loadThemeCustomColor());
-        if (seed != null) {
-            DynamicColors.applyToActivityIfAvailable(
-                    activity, new DynamicColorsOptions.Builder().setContentBasedSource(seed).build());
+        if (seed != null && DynamicColors.isDynamicColorAvailable()) {
+            applySeed(activity, seed);
         }
+    }
+
+    /**
+     * What {@code DynamicColorsOptions.setContentBasedSource(seed)} does, plus a more saturated
+     * primary in dark mode. Material only exposes those pieces as library-internal API.
+     */
+    @SuppressLint("RestrictedApi")
+    private static void applySeed(Activity activity, int seed) {
+        boolean dark = !isLightTheme(activity);
+        DynamicScheme scheme = new SchemeContent(Hct.fromInt(seed), dark, systemContrast(activity));
+        Map<Integer, Integer> colors =
+                new HashMap<>(MaterialColorUtilitiesHelper.createColorResourcesIdsToColorValues(scheme));
+        if (dark) {
+            colors.put(
+                    com.google.android.material.R.color.material_personalized_color_primary,
+                    vividPrimary(scheme.primaryPalette.getHue(), scheme.primaryPalette.getChroma()));
+        }
+        ColorResourcesOverride override = ColorResourcesOverride.getInstance();
+        if (override != null) {
+            override.applyIfPossible(activity, colors);
+        }
+    }
+
+    @SuppressLint("RestrictedApi")
+    static int vividPrimary(double hue, double chroma) {
+        return Hct.from(hue, chroma, DARK_PRIMARY_TONE).toInt();
+    }
+
+    /** Whether the activity's theme, with night mode already applied, is a light one. */
+    private static boolean isLightTheme(Context context) {
+        TypedValue value = new TypedValue();
+        return !context.getTheme().resolveAttribute(androidx.appcompat.R.attr.isLightTheme, value, true)
+                || value.data != 0;
+    }
+
+    /**
+     * The system contrast setting (Android 14+), but never below standard. One UI reports -1
+     * (reduced) on the Samsung flagship with no setting to change it, which dimmed every text colour
+     * (ROADMAP 1.12); Material itself passes that straight through.
+     */
+    private static double systemContrast(Context context) {
+        if (Build.VERSION.SDK_INT >= 34) {
+            UiModeManager uiModeManager = context.getSystemService(UiModeManager.class);
+            if (uiModeManager != null) {
+                return Math.max(0, uiModeManager.getContrast());
+            }
+        }
+        return 0;
     }
 
     static int nightModeFor(int mode) {

@@ -157,6 +157,9 @@ LMT uses the minimum required accessibility settings and no personal data is col
     <style name="AppTheme.Material3" parent="@style/Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">?attr/colorSurface</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.LMT.MaterialAlertDialog</item>
+        <!-- The Settings tab's category titles read colorAccent, which M3 sets to the secondary
+             colour; the other tabs' headers use primary. One colour for all (ROADMAP 1.12). -->
+        <item name="android:colorAccent">?attr/colorPrimary</item>
     </style>
     <!-- Single-choice dialog rows use our own layout and radio: Material's draws the platform
          radio, which One UI leaves grey when checked instead of the theme's primary colour. -->
