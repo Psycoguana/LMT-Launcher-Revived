@@ -342,17 +342,8 @@
   "new_members": [
     {
       "class": "MultiSelectActivity.smali",
-      "reason": "ROADMAP 1.4: app-picker search and system-app toggle. Adds gatherCandidates/render/matches/isSystem and the options menu, plus fields for the query, the toggle and the unfiltered candidate lists. Filtering rebuilds the backing list and the adapter together because onItemClick resolves a tap as mPackageInfos.get(position - 1)."
-    },
-    {
-      "class": "MultiSelectActivity$AppSimpleAdapter.smali",
       "reworked": true,
-      "reason": "ROADMAP 1.4: the adapter now carries its own model snapshot (mModel) instead of reaching into the activity's mutable list by position, and its constructor gained that parameter - so the old 3-arg constructor is gone by design. Icon loading moved into iconAt(), which bounds-checks. This fixed an IndexOutOfBoundsException crash: an AsyncTask queued before a filter change indexed past the end of the shorter list."
-    },
-    {
-      "class": "MultiSelectActivity$AppSimpleAdapter$ANON.smali",
-      "reworked": true,
-      "reason": "ROADMAP 1.4: the icon-loading AsyncTask now delegates to the adapter's bounds-checked iconAt() rather than indexing the activity's list itself."
+      "reason": "ROADMAP 1.4: app-picker search and system-app toggle. Adds gatherCandidates/render/matches/isSystem and the options menu, plus fields for the query, the toggle and the unfiltered candidate lists. ROADMAP 1.6 phase 3 then becomes an AppCompatActivity with a MaterialToolbar and a RecyclerView/SectionedRows-backed Adapter: onItemClick is gone (replaced by handleRowClick, wired per-row in Adapter.onBindViewHolder), and mActivityInfos/mPackageInfos/mShortcuts are gone - the old onItemClick resolved a tap as mPackageInfos.get(position - 1), a position re-lookup that's unnecessary now that each row's model object (PackageInfo/ActivityInfo/ResolveInfo) is captured directly at bind time. That also removes the async-icon-loading race the reworked AppSimpleAdapter (ROADMAP 1.4, see removed_classes) was built to guard against by construction, not just defensively."
     },
     {
       "class": "SettingsViewHelper.smali",
@@ -552,6 +543,26 @@
     {
       "class": "CommandSelectActivity$RowViewHolder.smali",
       "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for a data row. Has no upstream counterpart."
+    },
+    {
+      "class": "MultiSelectActivity$Adapter.smali",
+      "reason": "ROADMAP 1.6 phase 3: replaces the deleted MultiSelectActivity$AppSimpleAdapter (see removed_classes) - a RecyclerView.Adapter wrapping a rebuildable SectionedRows instead of a ListView SimpleAdapter re-created per render()."
+    },
+    {
+      "class": "MultiSelectActivity$Adapter$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 3: MultiSelectActivity$Adapter's per-row click-listener and icon-loader lambdas. Same situation as GesturesFragment$Adapter$ANON.smali in this same phase."
+    },
+    {
+      "class": "MultiSelectActivity$HeaderViewHolder.smali",
+      "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for the (single) section header row. Has no upstream counterpart."
+    },
+    {
+      "class": "MultiSelectActivity$Row.smali",
+      "reason": "ROADMAP 1.6 phase 3: a row's title/caption plus the model object (PackageInfo/ActivityInfo/ResolveInfo) it was built from, captured once at render() time instead of re-indexed by position in onItemClick. Has no upstream counterpart."
+    },
+    {
+      "class": "MultiSelectActivity$RowViewHolder.smali",
+      "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for a data row. Has no upstream counterpart."
     }
   ],
   "removed_classes": [
@@ -614,6 +625,14 @@
     {
       "class": "CommandSelectActivity$CommandSelectSimpleAdapter$ANON.smali",
       "reason": "ROADMAP 1.6 phase 3: the AsyncDrawableTask subclass this adapter built per row is gone along with it - icon loading now goes through IconLoader."
+    },
+    {
+      "class": "MultiSelectActivity$AppSimpleAdapter.smali",
+      "reason": "ROADMAP 1.6 phase 3: replaced by MultiSelectActivity$Adapter (RecyclerView instead of ListView, rebuilt via update() on each render() instead of a fresh SimpleAdapter per render())."
+    },
+    {
+      "class": "MultiSelectActivity$AppSimpleAdapter$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 3: the AsyncDrawableTask subclass this adapter built per row is gone along with it - icon loading now goes through IconLoader, capturing each row's model object directly instead of re-indexing by position."
     }
   ]
 }

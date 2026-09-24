@@ -1,9 +1,6 @@
 package com.noname81.lmt;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -15,36 +12,38 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
-import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Picks an installed app, an activity, or a launcher shortcut to bind to a slot.
  *
  * <p>Filterable by a search box, and by default system packages are hidden — a stock device lists a
  * couple of hundred otherwise. The toggle is remembered.
- *
- * <p><b>Filtering rebuilds the model, not just the view.</b> {@code onItemClick} resolves a tap as
- * {@code mPackageInfos.get(position - 1)} — the displayed row index, less the section header, used
- * to index the backing list. Filtering only the adapter would leave those two out of step and bind
- * the wrong app, silently. So every filter change rebuilds the backing list and the adapter
- * together.
  */
-public class MultiSelectActivity extends Activity implements AdapterView.OnItemClickListener {
+public class MultiSelectActivity extends AppCompatActivity {
     public static int AppSelectMode = 0;
     public static final int REQUEST_CREATE_SHORTCUT = 1;
     public static final int SelectActivity = 2;
@@ -53,23 +52,14 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
     public static final int SelectPackage = 0;
     public static final int SelectPackageActivity = 1;
     public static final int SelectShortcut = 5;
-    public static final Comparator<PackageInfo> comparator = new Comparator() { // from class:
-                // com.noname81.lmt.MultiSelectActivity$$ExternalSyntheticLambda1
-                @Override // java.util.Comparator
-                public final int compare(Object obj, Object obj2) {
-                    return ((PackageInfo) obj)
-                            .applicationInfo.name.compareToIgnoreCase(
-                                    ((PackageInfo) obj2).applicationInfo.name);
-                }
-            };
-    List<ActivityInfo> mActivityInfos;
+    public static final Comparator<PackageInfo> comparator =
+            (a, b) -> a.applicationInfo.name.compareToIgnoreCase(b.applicationInfo.name);
+
     PackageInfo mPackageInfo;
-    List<PackageInfo> mPackageInfos;
     PackageManager mPackageManager;
     SettingsValues mSettings;
-    List<ResolveInfo> mShortcuts;
 
-    private ListView mListView;
+    Adapter mAdapter;
     private String mQuery = "";
     private boolean mShowSystemApps;
 
@@ -79,7 +69,7 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
     private List<ActivityInfo> mAllActivityInfos;
     private List<ResolveInfo> mAllShortcuts;
 
-    @Override // android.app.Activity
+    @Override // androidx.fragment.app.FragmentActivity
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         this.mSettings = SettingsValues.getInstance(getApplicationContext());
@@ -88,10 +78,33 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
 
         gatherCandidates();
 
-        this.mListView = new ListView(this);
-        this.mListView.setOnItemClickListener(this);
-        this.mListView.setDividerHeight(0);
-        setContentView(this.mListView);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+
+        AppBarLayout appBarLayout = new AppBarLayout(this);
+        MaterialToolbar toolbar = new MaterialToolbar(this);
+        appBarLayout.addView(
+                toolbar,
+                new AppBarLayout.LayoutParams(
+                        AppBarLayout.LayoutParams.MATCH_PARENT,
+                        AppBarLayout.LayoutParams.WRAP_CONTENT));
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(getString(R.string.app_name));
+        root.addView(
+                appBarLayout,
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        RecyclerView recyclerView = new RecyclerView(this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        this.mAdapter = new Adapter();
+        recyclerView.setAdapter(this.mAdapter);
+        root.addView(
+                recyclerView,
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        setContentView(root);
         render();
     }
 
@@ -156,17 +169,13 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
                 || (secondary != null && secondary.toLowerCase().contains(needle));
     }
 
-    /**
-     * Rebuilds the backing list and the adapter together, applying the search query and the
-     * system-app toggle. Both must stay in step — see the class javadoc.
-     */
+    /** Rebuilds the row list, applying the search query and the system-app toggle. */
     private void render() {
-        LinkedList<Map<String, ?>> rows = new LinkedList<>();
-        SeparatedListAdapter adapter = new SeparatedListAdapter(this);
+        List<Row> rows = new ArrayList<>();
         int mode = AppSelectMode;
+        String header;
 
         if (mode == SelectActivity) {
-            this.mActivityInfos = new LinkedList<>();
             String appLabel =
                     this.mPackageInfo == null
                             ? ""
@@ -178,28 +187,20 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
                 if (!matches(this.mQuery, appLabel, activityInfo.name)) {
                     continue;
                 }
-                this.mActivityInfos.add(activityInfo);
-                rows.add(SeparatedListAdapter.createItem(appLabel, activityInfo.name));
+                rows.add(new Row(appLabel, activityInfo.name, activityInfo));
             }
-            adapter.addSection(
-                    getString(R.string.app_choose_an_activity),
-                    new AppSimpleAdapter(this, rows, this.mActivityInfos));
+            header = getString(R.string.app_choose_an_activity);
         } else if (mode == SelectShortcut) {
-            this.mShortcuts = new LinkedList<>();
             for (ResolveInfo resolveInfo : this.mAllShortcuts) {
                 String label = resolveInfo.loadLabel(this.mPackageManager).toString();
                 String packageName = resolveInfo.activityInfo.packageName;
                 if (!matches(this.mQuery, label, packageName)) {
                     continue;
                 }
-                this.mShortcuts.add(resolveInfo);
-                rows.add(SeparatedListAdapter.createItem(label, packageName));
+                rows.add(new Row(label, packageName, resolveInfo));
             }
-            adapter.addSection(
-                    getString(R.string.app_choose_a_shortcut),
-                    new AppSimpleAdapter(this, rows, this.mShortcuts));
+            header = getString(R.string.app_choose_a_shortcut);
         } else {
-            this.mPackageInfos = new LinkedList<>();
             for (PackageInfo packageInfo : this.mAllPackageInfos) {
                 if (!this.mShowSystemApps && isSystem(packageInfo.applicationInfo)) {
                     continue;
@@ -210,20 +211,18 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
                         packageInfo.applicationInfo.packageName)) {
                     continue;
                 }
-                this.mPackageInfos.add(packageInfo);
                 rows.add(
-                        SeparatedListAdapter.createItem(
+                        new Row(
                                 packageInfo.applicationInfo.name,
-                                packageInfo.applicationInfo.packageName));
+                                packageInfo.applicationInfo.packageName,
+                                packageInfo));
             }
-            adapter.addSection(
-                    getString(R.string.app_choose_an_app),
-                    new AppSimpleAdapter(this, rows, this.mPackageInfos));
+            header = getString(R.string.app_choose_an_app);
         }
-        this.mListView.setAdapter((ListAdapter) adapter);
+        this.mAdapter.update(header, rows);
     }
 
-    @Override // android.app.Activity
+    @Override // androidx.fragment.app.FragmentActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         SearchView searchView = new SearchView(this);
         searchView.setQueryHint(getString(R.string.app_search_hint));
@@ -255,14 +254,14 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
                     .setChecked(this.mShowSystemApps)
                     .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
         }
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         return true;
     }
 
-    @Override // android.app.Activity
+    @Override // androidx.fragment.app.FragmentActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
@@ -278,10 +277,10 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
         return super.onOptionsItemSelected(item);
     }
 
-    @Override // android.app.Activity
+    @Override // androidx.fragment.app.FragmentActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Drawable drawable;
-        if (requestCode == 1 && resultCode == -1) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             extras.getClass();
             String uri = ((Intent) extras.get("android.intent.extra.shortcut.INTENT")).toUri(0);
@@ -312,38 +311,33 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
         finish();
     }
 
-    @Override // android.widget.AdapterView.OnItemClickListener
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    private void handleRowClick(Row row) {
         int mode = AppSelectMode;
-        if (mode == 0) {
-            this.mSettings.setCurrentAction(
-                    this, new Action(2, this.mPackageInfos.get(position - 1).packageName));
+        if (mode == SelectPackage) {
+            this.mSettings.setCurrentAction(this, new Action(2, ((PackageInfo) row.model).packageName));
             onBackPressed();
             return;
         }
-        if (mode == 1) {
+        if (mode == SelectPackageActivity) {
             this.mSettings.setCurrentAction(
-                    this,
-                    new Action(
-                            2, this.mPackageInfos.get(position - 1).applicationInfo.packageName));
-            AppSelectMode = 2;
-            startActivityForResult(
-                    new Intent(view.getContext(), (Class<?>) MultiSelectActivity.class), 0);
+                    this, new Action(2, ((PackageInfo) row.model).applicationInfo.packageName));
+            AppSelectMode = SelectActivity;
+            startActivityForResult(new Intent(this, MultiSelectActivity.class), 0);
             finish();
             return;
         }
-        if (mode == 3) {
-            this.mSettings.setBlacklisted(this.mPackageInfos.get(position - 1).packageName);
+        if (mode == SelectBlacklisted) {
+            this.mSettings.setBlacklisted(((PackageInfo) row.model).packageName);
             onBackPressed();
             return;
         }
-        if (mode == 4) {
-            this.mSettings.setBlacklistedPie(this.mPackageInfos.get(position - 1).packageName);
+        if (mode == SelectBlacklistedPie) {
+            this.mSettings.setBlacklistedPie(((PackageInfo) row.model).packageName);
             onBackPressed();
             return;
         }
-        if (mode == 5) {
-            ActivityInfo activityInfo = this.mShortcuts.get(position - 1).activityInfo;
+        if (mode == SelectShortcut) {
+            ActivityInfo activityInfo = ((ResolveInfo) row.model).activityInfo;
             ComponentName componentName =
                     new ComponentName(activityInfo.applicationInfo.packageName, activityInfo.name);
             Intent intent = new Intent();
@@ -352,85 +346,107 @@ public class MultiSelectActivity extends Activity implements AdapterView.OnItemC
             startActivityForResult(intent, 1);
             return;
         }
-        SettingsValues settingsValues = this.mSettings;
-        StringBuilder sb = new StringBuilder();
-        int selected = position - 1;
-        sb.append(this.mActivityInfos.get(selected).packageName);
-        sb.append("/");
-        sb.append(this.mActivityInfos.get(selected).name);
-        settingsValues.setCurrentAction(this, new Action(27, sb.toString()));
+        // mode == SelectActivity
+        ActivityInfo activityInfo = (ActivityInfo) row.model;
+        this.mSettings.setCurrentAction(
+                this, new Action(27, activityInfo.packageName + "/" + activityInfo.name));
         onBackPressed();
     }
 
-    /**
-     * Rows plus the model they were built from.
-     *
-     * <p>The icon loader used to reach back into the activity's list by position. That was safe
-     * only while the list never changed; now that filtering rebuilds it, an in-flight load from the
-     * previous render would index past the end of a shorter list. So the adapter keeps its own
-     * snapshot and never looks outside it.
-     */
-    /**
-     * Rows, plus the model they were built from.
-     *
-     * <p>The icon loader used to reach back into the activity's list by position. That was safe
-     * only while the list never changed; now that filtering rebuilds it, an in-flight load from the
-     * previous render would index past the end of a shorter list and crash. So the adapter carries
-     * its own snapshot and never looks outside it.
-     */
-    class AppSimpleAdapter extends SimpleAdapter {
+    private Drawable iconFor(Object model) {
+        if (AppSelectMode == SelectActivity) {
+            return this.mPackageInfo == null
+                    ? null
+                    : this.mPackageInfo.applicationInfo.loadIcon(this.mPackageManager);
+        }
+        if (model instanceof ResolveInfo) {
+            return ((ResolveInfo) model).loadIcon(this.mPackageManager);
+        }
+        if (model instanceof PackageInfo) {
+            return ((PackageInfo) model).applicationInfo.loadIcon(this.mPackageManager);
+        }
+        return null;
+    }
 
-        /** Parallel to the rows: PackageInfo, ResolveInfo, or empty for activities. */
-        private final List<?> mModel;
+    /** A row plus the model it was built from - PackageInfo, ActivityInfo, or ResolveInfo. */
+    private static final class Row {
+        final String title;
+        final String caption;
+        final Object model;
 
-        AppSimpleAdapter(Context context, List<? extends Map<String, ?>> rows, List<?> model) {
-            super(
-                    context,
-                    rows,
-                    R.layout.listitem_icondescription,
-                    new String[] {"title", "caption"},
-                    new int[] {
-                        R.id.listitem_icondescription_text, R.id.listitem_icondescription_caption
-                    });
-            this.mModel = model;
+        Row(String title, String caption, Object model) {
+            this.title = title;
+            this.caption = caption;
+            this.model = model;
+        }
+    }
+
+    final class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        private SectionedRows<Row> mRows = new SectionedRows<>();
+
+        void update(String header, List<Row> rows) {
+            SectionedRows<Row> updated = new SectionedRows<>();
+            updated.addSection(header, rows);
+            this.mRows = updated;
+            notifyDataSetChanged();
         }
 
-        @Override // android.widget.SimpleAdapter, android.widget.Adapter
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            View row = super.getView(position, convertView, parent);
-            ImageView imageView = (ImageView) row.findViewById(R.id.listitem_icondescription_icon);
-            IconUtils.setMaxSizeForImageView(
-                    MultiSelectActivity.this.getApplicationContext(), imageView);
-            new AsyncDrawableTask(imageView, R.drawable.none) {
-                @Override
-                protected Drawable doInBackground(Void... unused) {
-                    return iconAt(position);
-                }
-            }.execute(new Void[0]);
-            return row;
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public int getItemCount() {
+            return this.mRows.getItemCount();
         }
 
-        private Drawable iconAt(int position) {
-            PackageManager packageManager = MultiSelectActivity.this.mPackageManager;
-            if (AppSelectMode == SelectActivity) {
-                PackageInfo packageInfo = MultiSelectActivity.this.mPackageInfo;
-                return packageInfo == null
-                        ? null
-                        : packageInfo.applicationInfo.loadIcon(packageManager);
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public int getItemViewType(int position) {
+            return this.mRows.getItemViewType(position);
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public RecyclerView.ViewHolder onCreateViewHolder(
+                @NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            if (viewType == SectionedRows.VIEW_TYPE_HEADER) {
+                return new HeaderViewHolder(inflater.inflate(R.layout.listheader, parent, false));
             }
-            // A render that happened after this task was queued can leave it holding
-            // a position past the end of the new, shorter list.
-            if (this.mModel == null || position < 0 || position >= this.mModel.size()) {
-                return null;
+            return new RowViewHolder(
+                    inflater.inflate(R.layout.listitem_icondescription, parent, false));
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            if (holder instanceof HeaderViewHolder) {
+                ((HeaderViewHolder) holder).text.setText(this.mRows.headerAt(position));
+                return;
             }
-            Object item = this.mModel.get(position);
-            if (item instanceof ResolveInfo) {
-                return ((ResolveInfo) item).loadIcon(packageManager);
-            }
-            if (item instanceof PackageInfo) {
-                return ((PackageInfo) item).applicationInfo.loadIcon(packageManager);
-            }
-            return null;
+            RowViewHolder rowHolder = (RowViewHolder) holder;
+            Row row = this.mRows.rowAt(position);
+            rowHolder.title.setText(row.title);
+            rowHolder.caption.setText(row.caption);
+            IconUtils.setMaxSizeForImageView(getApplicationContext(), rowHolder.icon);
+            IconLoader.load(rowHolder.icon, R.drawable.none, () -> iconFor(row.model));
+            rowHolder.itemView.setOnClickListener(v -> handleRowClick(row));
+        }
+    }
+
+    private static final class HeaderViewHolder extends RecyclerView.ViewHolder {
+        final TextView text;
+
+        HeaderViewHolder(@NonNull View itemView) {
+            super(itemView);
+            this.text = (TextView) itemView;
+        }
+    }
+
+    private static final class RowViewHolder extends RecyclerView.ViewHolder {
+        final TextView title;
+        final TextView caption;
+        final ImageView icon;
+
+        RowViewHolder(@NonNull View itemView) {
+            super(itemView);
+            this.title = itemView.findViewById(R.id.listitem_icondescription_text);
+            this.caption = itemView.findViewById(R.id.listitem_icondescription_caption);
+            this.icon = itemView.findViewById(R.id.listitem_icondescription_icon);
         }
     }
 }
