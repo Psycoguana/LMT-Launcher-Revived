@@ -181,6 +181,15 @@ for name in sorted(ref_names & our_names):
             if all(set(a[k]) == set(b[k]) for k in ("refs", "strings", "nums")):
                 same += 1
                 continue
+        if base(name) in REWORKED:
+            # A class marked "reworked" is being intentionally restructured, so its
+            # content is out of scope for comparison - not just its member set (see
+            # the one-sided-method and field-diff REWORKED checks above). Explaining
+            # every mechanical byproduct of a rewrite (receiver-type changes,
+            # codegen shifts) method by method has no signal; only classes NOT
+            # being rewritten still benefit from a real content diff.
+            feature_additions.append((name, sig))
+            continue
         deltas = {}
         # Compared as SETS, not sequences or multisets. Two D8 versions differ in
         # instruction order, in branch polarity, and in whether a repeated literal

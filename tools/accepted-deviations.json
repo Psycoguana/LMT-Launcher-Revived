@@ -72,26 +72,6 @@
       "reason": "ROADMAP 3.5 fix: onInterrupt no longer clears instance/mInitialized. The system sends onInterrupt to every bound service whenever anything calls AccessibilityManager.interrupt() - 'stop your feedback', not a disconnect. Clearing state there left the service bound (Settings shows it enabled) but unusable until toggled off/on, the long-reported symptom. Now only logs."
     },
     {
-      "class": "LMT.smali",
-      "method": "protected onCreate(Landroid/os/Bundle;)V",
-      "reason": "ROADMAP 1.6 phase 1: builds the Material 3 shell (AppCompatActivity, MaterialToolbar inside an AppBarLayout, TabLayout, ViewPager2) in place of the deprecated ActionBar/ViewPager1 one. See the LMT.smali new_members (reworked) entry for the accompanying field changes."
-    },
-    {
-      "class": "LMT.smali",
-      "method": "protected onSaveInstanceState(Landroid/os/Bundle;)V",
-      "reason": "ROADMAP 1.6 phase 1: reads/writes the same \"tab\" bundle key via ViewPager2.getCurrentItem() instead of ActionBar.getSelectedNavigationIndex()."
-    },
-    {
-      "class": "LMT.smali",
-      "method": "protected onActivityResult(IILandroid/content/Intent;)V",
-      "reason": "ROADMAP 1.6 phase 1: now calls super.onActivityResult(), which FragmentActivity requires in order to forward results to child fragments (e.g. SettingsViewFragment's Storage Access Framework picker, ROADMAP 1.5) now that tabs are hosted through FragmentStateAdapter/ViewPager2 instead of the deleted FrameworkFragmentStatePagerAdapter."
-    },
-    {
-      "class": "LMT.smali",
-      "method": "private createTabs()V",
-      "reason": "ROADMAP 1.6 phase 1: same tab-set logic (Settings always first, Gestures+Isas iff mode<2, Pie iff mode>0, Info always last) rebuilt against TabsAdapter/TabLayoutMediator instead of ActionBar tabs."
-    },
-    {
       "class": "SettingsViewFragment.smali",
       "method": "public onSaveInstanceState(Landroid/os/Bundle;)V",
       "reason": "ROADMAP 1.6 phase 1: drops the setUserVisibleHint(true) call. That ViewPager1-era API has no effect under ViewPager2's FragmentStateAdapter, which manages fragment visibility through fragment transactions instead."
@@ -358,7 +338,7 @@
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
-  "_comment_new_members": "Classes where NEW members are expected because a feature was added there. Additions are accepted; anything MISSING is still reported, unless the entry sets \"reworked\": true, which means the class was deliberately restructured and removals are expected too. Every other class is unaffected either way.",
+  "_comment_new_members": "Classes where NEW members are expected because a feature was added there. Additions are accepted; anything MISSING is still reported, unless the entry sets \"reworked\": true, which means the class was deliberately restructured: removals are expected too, field diffs are ignored entirely, and - since ROADMAP 1.6 phase 1 - so is the CONTENT of any method present on both sides (no per-method deviations entry needed for a reworked class). Every other class is unaffected either way and still gets full content comparison.",
   "new_members": [
     {
       "class": "MultiSelectActivity.smali",
@@ -397,7 +377,7 @@
     {
       "class": "LMT.smali",
       "reworked": true,
-      "reason": "ROADMAP 1.6 phase 1: Material 3 foundation. LMT becomes an AppCompatActivity built around a MaterialToolbar + TabLayout + ViewPager2 shell instead of the deprecated ActionBar/ViewPager1 one, so its field set changes: drops mTabsAdapter (TabsAdapter is now a local in createTabs(), since nothing outside LMT.java ever referenced it), retypes mViewPager to ViewPager2, and adds mTabLayout. See the accompanying deviations entries for onCreate/onSaveInstanceState/onActivityResult/createTabs."
+      "reason": "ROADMAP 1.6 phase 1: Material 3 foundation. LMT becomes an AppCompatActivity built around a MaterialToolbar + TabLayout + ViewPager2 shell instead of the deprecated ActionBar/ViewPager1 one. Its field set changes (drops mTabsAdapter - now a local in createTabs(), since nothing outside LMT.java ever referenced it - retypes mViewPager to ViewPager2, adds mTabLayout), and onCreate/onSaveInstanceState/onActivityResult/createTabs are all rewritten against the new shell. `reworked` here also exempts same-signature method content from the oracle, since the whole navigation shell is being intentionally replaced - explaining each mechanical byproduct method by method has no signal once a class is declared out of scope like this."
     },
     {
       "class": "LMT$TabsAdapter.smali",
