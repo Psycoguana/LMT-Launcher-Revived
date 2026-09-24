@@ -633,6 +633,10 @@
     {
       "class": "MultiSelectActivity$AppSimpleAdapter$ANON.smali",
       "reason": "ROADMAP 1.6 phase 3: the AsyncDrawableTask subclass this adapter built per row is gone along with it - icon loading now goes through IconLoader, capturing each row's model object directly instead of re-indexing by position."
+    },
+    {
+      "class": "AsyncDrawableTask.smali",
+      "reason": "ROADMAP 1.6 phase 3: the shared AsyncTask base class every icon-loading site subclassed is deleted outright now that all six call sites (PieFragment, GesturesFragment, IsasFragment, CommandSelectActivity, MultiSelectActivity) have moved to IconLoader (see new_classes)."
     }
   ]
 }
