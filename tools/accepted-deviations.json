@@ -368,7 +368,7 @@
     },
     {
       "class": "SettingsValuesBase.smali",
-      "reason": "ROADMAP 1.4: loadShowSystemApps/saveShowSystemApps persist the app picker's 'show system apps' toggle. Missing from this file until ROADMAP 3.6 made one-sided methods actually fail the oracle - before that they only printed a warning."
+      "reason": "ROADMAP 1.4: loadShowSystemApps/saveShowSystemApps persist the app picker's 'show system apps' toggle. Missing from this file until ROADMAP 3.6 made one-sided methods actually fail the oracle - before that they only printed a warning. ROADMAP 1.10 adds load/save ThemeMode, ThemeFollowSystemColor, ThemeColor and ThemeCustomColor for the Appearance page."
     },
     {
       "class": "LMT.smali",
@@ -430,6 +430,110 @@
     {
       "class": "SettingsBackup.smali",
       "reason": "ROADMAP 1.5: import/export settings. Has no upstream counterpart."
+    },
+    {
+      "class": "ThemeHelper.smali",
+      "reason": "ROADMAP 1.10: applies the Appearance settings (night mode via AppCompatDelegate, colour scheme via Material DynamicColors from the wallpaper or a seed) before each activity's super.onCreate. Has no upstream counterpart."
+    },
+    {
+      "class": "ThemedActivity.smali",
+      "reason": "ROADMAP 1.10: AppCompatActivity base for LMT/CommandSelectActivity/MultiSelectActivity/AppearanceActivity. Sets night mode in attachBaseContext (set any later, AppCompat patches the configuration in place and discards the dynamic colour override) and the colour scheme before super.onCreate. Has no upstream counterpart."
+    },
+    {
+      "class": "ColorSwatchDialog.smali",
+      "reason": "ROADMAP 1.10: the Appearance page's colour picker, a MaterialAlertDialogBuilder holding a 5-column RecyclerView grid of colour circles (check on the selected one). Has no upstream counterpart."
+    },
+    {
+      "class": "ColorSwatchDialog$Adapter.smali",
+      "reason": "ROADMAP 1.10: ColorSwatchDialog's grid adapter, one circle per ThemeHelper colour choice."
+    },
+    {
+      "class": "ColorSwatchDialog$Adapter$Holder.smali",
+      "reason": "ROADMAP 1.10: ColorSwatchDialog's grid view holder (circle + icon)."
+    },
+    {
+      "class": "ColorSwatchDialog$OnPicked.smali",
+      "reason": "ROADMAP 1.10: callback interface ColorSwatchDialog reports a picked choice through."
+    },
+    {
+      "class": "ColorSwatchDialog$ANON.smali",
+      "reason": "ROADMAP 1.10: ColorSwatchDialog's lambdas (OK button, custom-tile handler), merged into one $ANON name by the fingerprinter."
+    },
+    {
+      "class": "ColorSwatchDialog$Adapter$ANON.smali",
+      "reason": "ROADMAP 1.10: the grid adapter's per-circle click lambda, merged into one $ANON name by the fingerprinter."
+    },
+    {
+      "class": "ColorDotPreference.smali",
+      "reason": "ROADMAP 1.10: Preference with a colour circle widget, used for the Appearance page's Color row. Has no upstream counterpart."
+    },
+    {
+      "class": "ThemeColorDialog.smali",
+      "reason": "ROADMAP 1.10: the custom theme color picker - saturation/brightness square, hue bar, preview circle and hex field in a Material dialog. Has no upstream counterpart."
+    },
+    {
+      "class": "ThemeColorDialog$OnPicked.smali",
+      "reason": "ROADMAP 1.10: callback interface ThemeColorDialog reports the picked color through."
+    },
+    {
+      "class": "ThemeColorDialog$ANON.smali",
+      "reason": "ROADMAP 1.10: ThemeColorDialog's listeners (hue, square, hex watcher, OK), merged into one $ANON name by the fingerprinter."
+    },
+    {
+      "class": "SaturationValueView.smali",
+      "reason": "ROADMAP 1.10: custom View drawing the picker's saturation/brightness square for a given hue. Has no upstream counterpart."
+    },
+    {
+      "class": "SaturationValueView$OnChanged.smali",
+      "reason": "ROADMAP 1.10: SaturationValueView's change callback."
+    },
+    {
+      "class": "HueBarView.smali",
+      "reason": "ROADMAP 1.10: custom View drawing the picker's rainbow hue bar. Has no upstream counterpart."
+    },
+    {
+      "class": "HueBarView$OnChanged.smali",
+      "reason": "ROADMAP 1.10: HueBarView's change callback."
+    },
+    {
+      "class": "ThemeColorDialog.smali",
+      "reason": "ROADMAP 1.10: the custom theme color picker - saturation/brightness square, hue bar, preview circle and hex field in a Material dialog. Has no upstream counterpart."
+    },
+    {
+      "class": "ThemeColorDialog$OnPicked.smali",
+      "reason": "ROADMAP 1.10: callback interface ThemeColorDialog reports the picked color through."
+    },
+    {
+      "class": "ThemeColorDialog$ANON.smali",
+      "reason": "ROADMAP 1.10: ThemeColorDialog's listeners (hue, square, hex watcher, OK), merged into one $ANON name by the fingerprinter."
+    },
+    {
+      "class": "SaturationValueView.smali",
+      "reason": "ROADMAP 1.10: custom View drawing the picker's saturation/brightness square for a given hue. Has no upstream counterpart."
+    },
+    {
+      "class": "SaturationValueView$OnChanged.smali",
+      "reason": "ROADMAP 1.10: SaturationValueView's change callback."
+    },
+    {
+      "class": "HueBarView.smali",
+      "reason": "ROADMAP 1.10: custom View drawing the picker's rainbow hue bar. Has no upstream counterpart."
+    },
+    {
+      "class": "HueBarView$OnChanged.smali",
+      "reason": "ROADMAP 1.10: HueBarView's change callback."
+    },
+    {
+      "class": "AppearanceActivity.smali",
+      "reason": "ROADMAP 1.10: the Appearance page opened from the Settings tab's General section, a MaterialToolbar hosting AppearanceFragment. Has no upstream counterpart."
+    },
+    {
+      "class": "AppearanceFragment.smali",
+      "reason": "ROADMAP 1.10: PreferenceFragmentCompat with the Theme (follow system/light/dark) and Colour (default/wallpaper/presets/custom) rows. Has no upstream counterpart."
+    },
+    {
+      "class": "AppearanceFragment$ANON.smali",
+      "reason": "ROADMAP 1.10: AppearanceFragment's anonymous InputDialog/ColorDialog subclasses (the theme, colour and custom-colour pickers), merged into one $ANON name by the fingerprinter."
     },
     {
       "class": "SettingsBackup$$ExternalSyntheticBackport0.smali",

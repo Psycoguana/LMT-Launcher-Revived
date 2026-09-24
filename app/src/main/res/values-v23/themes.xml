@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Same as values/, plus dark status bar icons whenever the theme is light: the status bar
+         takes the surface colour, so white icons would vanish in light mode (ROADMAP 1.10).
+         windowLightStatusBar only exists from API 23. -->
+    <style name="AppTheme.Material3" parent="@style/Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">?attr/colorSurface</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+    </style>
+</resources>

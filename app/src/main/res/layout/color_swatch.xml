@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One colour choice in ColorSwatchDialog's grid: a 48dp circle, with a check when selected or
+     a pencil on the custom choice. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="56dp">
+
+    <FrameLayout
+        android:id="@+id/swatch"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:id="@+id/swatch_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no" />
+    </FrameLayout>
+</FrameLayout>

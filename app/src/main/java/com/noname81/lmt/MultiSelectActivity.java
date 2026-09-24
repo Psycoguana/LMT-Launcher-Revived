@@ -26,7 +26,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,7 +43,7 @@ import java.util.List;
  * <p>Filterable by a search box, and by default system packages are hidden — a stock device lists a
  * couple of hundred otherwise. The toggle is remembered.
  */
-public class MultiSelectActivity extends AppCompatActivity {
+public class MultiSelectActivity extends ThemedActivity {
     public static int AppSelectMode = 0;
     public static final int REQUEST_CREATE_SHORTCUT = 1;
     public static final int SelectActivity = 2;

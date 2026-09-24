@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The current colour choice, shown at the end of the Appearance page's Color row. -->
+<View xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/color_dot"
+    android:layout_width="32dp"
+    android:layout_height="32dp" />

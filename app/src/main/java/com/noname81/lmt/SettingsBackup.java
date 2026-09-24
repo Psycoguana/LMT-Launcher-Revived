@@ -83,6 +83,10 @@ class SettingsBackup {
         {"PieExpandTriggerArea", "1"},
         {"PieBehindKeyboard", "0"},
         {"PieOnLockScreen", "0"},
+        {"ThemeMode", String.valueOf(ThemeHelper.MODE_SYSTEM)},
+        {"ThemeFollowSystemColor", "0"},
+        {"ThemeColor", String.valueOf(ThemeHelper.COLOR_DEFAULT)},
+        {"ThemeCustomColor", String.valueOf(ThemeHelper.DEFAULT_CUSTOM_COLOR)},
     };
 
     private static final String[][] STRING_DEFAULTS = {

@@ -143,6 +143,15 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                     requireActivity().recreate();
                 });
+
+        addAction(
+                general,
+                getString(R.string.appearance_title),
+                "Light or dark theme and app colors",
+                preference -> {
+                    startActivity(new Intent(requireActivity(), AppearanceActivity.class));
+                    return true;
+                });
     }
 
     private void buildGestureRecognitionSection(PreferenceCategory category) {

@@ -644,6 +644,42 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
         saveInt("ShowSystemApps", value, null);
     }
 
+    /** Appearance (ROADMAP 1.10): one of the {@code ThemeHelper.MODE_*} constants. */
+    int loadThemeMode() {
+        return loadInt("ThemeMode", ThemeHelper.MODE_SYSTEM);
+    }
+
+    void saveThemeMode(int value) {
+        saveInt("ThemeMode", value, null);
+    }
+
+    /** Appearance: 1 to use the system's wallpaper-based colors (Material You), else 0. */
+    int loadThemeFollowSystemColor() {
+        return loadInt("ThemeFollowSystemColor", 0);
+    }
+
+    void saveThemeFollowSystemColor(int value) {
+        saveInt("ThemeFollowSystemColor", value, null);
+    }
+
+    /** Appearance: one of the {@code ThemeHelper.COLOR_*} choices, an index into its list. */
+    int loadThemeColor() {
+        return loadInt("ThemeColor", ThemeHelper.COLOR_DEFAULT);
+    }
+
+    void saveThemeColor(int value) {
+        saveInt("ThemeColor", value, null);
+    }
+
+    /** Appearance: the ARGB seed used when the colour choice is custom. */
+    int loadThemeCustomColor() {
+        return loadInt("ThemeCustomColor", ThemeHelper.DEFAULT_CUSTOM_COLOR);
+    }
+
+    void saveThemeCustomColor(int value) {
+        saveInt("ThemeCustomColor", value, null);
+    }
+
     int loadPieNavButtonStyle() {
         return loadInt("NavButtonStyle", 0);
     }

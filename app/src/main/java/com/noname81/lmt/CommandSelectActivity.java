@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,7 +26,7 @@ import java.util.List;
  * for action types that need one, collects the payload — an app, an activity, a URL, a script, a
  * key code, or (Tasker) a task chosen from Tasker's own picker.
  */
-public class CommandSelectActivity extends AppCompatActivity {
+public class CommandSelectActivity extends ThemedActivity {
     private static final int REQUEST_TASKER_TASK_SELECT = 1;
 
     Adapter mAdapter;

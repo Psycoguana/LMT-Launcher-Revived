@@ -345,22 +345,48 @@ the Gestures/ISA feature set, which would also remove `TSMode` 0 and 1.
 
 ---
 
-### 1.10 Theme customization
+### 1.10 Theme customization  ✅ done
 
-Depends on 1.6 (Material 3 overhaul) being in place — needs an `AppCompatActivity` /
-`DayNight` theme to attach a dynamic color scheme to. Not started; added to the
-backlog 2026-09-23, requested by the user during 1.6 phase 1.
+Settings → General → **Appearance** opens its own page (`AppearanceActivity` +
+`AppearanceFragment`), so the long Settings list only gains one row.
 
-- **Light / dark / follow system**, the three standard `DayNight` modes, switched via
-  `AppCompatDelegate.setDefaultNightMode`.
-- **A small preset palette** to pick from (a handful of curated Material seed colors),
-  plus a **custom RGB/hex picker** for anything else.
-- **Material You dynamic color** (Android 12+, `DynamicColors` from the Material
-  library) — derives the theme from the user's wallpaper. Needs a fallback (one of
-  the presets above) for API < 31 or when the user opts out.
-- Persist the choice through `SettingsSharedPrefsWrapper` like every other setting,
-  and expose it from the rebuilt Settings screen (1.6 phase 2) rather than the old
-  position-dispatch system.
+- **Theme:** follow system / light / dark, via `AppCompatDelegate.setDefaultNightMode`.
+  Works on every API level.
+- **Follow system color** (switch): Material You, the scheme Android derives from
+  the wallpaper. Picking a color from the grid turns it off; turning it off goes
+  back to the last grid pick.
+- **Color:** a grid of color circles (`ColorSwatchDialog`, a plain RecyclerView in
+  a Material dialog, no extra library): Default (the stock M3 baseline, unchanged
+  look), 14 Material-palette presets and Custom. The circles use an oval-masked
+  ripple (the stock borderless ripple drew a square on One UI). Custom opens
+  `ThemeColorDialog`: a saturation/brightness square, a hue bar, a preview circle
+  and a hex field, all hand-drawn Views (`SaturationValueView`, `HueBarView`)
+  rather than a library; opaque only, since the color seeds a scheme. The Color
+  row shows the current choice as a circle (`ColorDotPreference`).
+  Everything but Default goes through Material's `DynamicColors`,
+  which builds a full M3 tonal scheme from the wallpaper or a single seed
+  (`DynamicColorsOptions.setContentBasedSource`), so no hand-written palettes.
+  `DynamicColors` is Android 12+ only; below that both rows are disabled and say so.
+- Stored as `ThemeMode`/`ThemeFollowSystemColor`/`ThemeColor`/`ThemeCustomColor` ints and included in the
+  backup export/import (1.5).
+- `ThemedActivity` is the base of every screen. Night mode must be set in
+  `attachBaseContext`: set in `onCreate`, AppCompat patches the configuration in
+  place when the app's mode differs from the system's, which silently discards a
+  seeded colour scheme applied to the same resources (seen on-device: light mode +
+  blue came up purple). The colour scheme is applied before `super.onCreate`.
+  `LMT` compares a theme stamp in `onResume` and recreates when a colour changed
+  elsewhere (night mode changes recreate activities by themselves).
+- Also fixed: the status bar takes the surface colour, but icons stayed white in
+  light mode. `values-v23` sets `windowLightStatusBar` from `isLightTheme`.
+- Tests: `AppearanceUiTest` (every theme choice, the system-color switch and a
+  grid pick turning it off, disabled before API 31), `ThemeColorDialogTest` (hex
+  in/out) and `ThemeHelperTest`. Seeded schemes can't be
+  exercised under Robolectric (its resource engine can't apply the
+  `ResourcesLoader` colour override), so that path was verified on the test phone:
+  blue, teal, pink, a custom color from the new picker, system color, light and
+  dark, and back to Default. Radio buttons
+  and switches were measured on-device too: 20dp radio icons and 52dp switch
+  tracks, the M3 defaults.
 
 ---
 

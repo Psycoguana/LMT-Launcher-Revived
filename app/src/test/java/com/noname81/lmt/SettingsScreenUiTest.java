@@ -66,6 +66,7 @@ public class SettingsScreenUiTest {
         {"General / Activate LMT", "service:TouchService"},
         {"General / Autostart LMT", "Autostart"},
         {"General / Set active features", "TSMode"},
+        {"General / Appearance", "activity:AppearanceActivity"},
         // Reads the touchscreen through root `getevent`; without root it offers -1 values and
         // saves nothing. (It is also buggy with root - see docs/ROADMAP.md 3.7.)
         {"Gesture recognition / Auto configuration", ""},

@@ -7,7 +7,6 @@ import android.os.Debug;
 import android.util.Log;
 import android.widget.LinearLayout;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -27,14 +26,16 @@ import java.util.List;
  * <p>{@code TSMode} chooses which tabs exist — gestures and ISAs only appear when that feature set
  * is enabled, and Info is always last.
  */
-public class LMT extends AppCompatActivity {
+public class LMT extends ThemedActivity {
     private static final String TAG = "LMT::LMT";
     ViewPager2 mViewPager;
     TabLayout mTabLayout;
+    private String mThemeStamp;
 
     @Override // androidx.fragment.app.FragmentActivity
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        this.mThemeStamp = ThemeHelper.stamp(this);
         Log.d(TAG, "Starting GUI");
 
         LinearLayout root = new LinearLayout(this);
@@ -99,6 +100,16 @@ public class LMT extends AppCompatActivity {
                         this.mViewPager,
                         (tab, position) -> tab.setText(adapter.getTitle(position)))
                 .attach();
+    }
+
+    @Override // androidx.fragment.app.FragmentActivity
+    protected void onResume() {
+        super.onResume();
+        // A colour picked on the Appearance page (or restored from a backup) doesn't recreate
+        // this activity by itself, unlike a night mode change.
+        if (!ThemeHelper.stamp(this).equals(this.mThemeStamp)) {
+            recreate();
+        }
     }
 
     @Override // androidx.fragment.app.FragmentActivity
