@@ -217,15 +217,38 @@ This also solves a real distribution problem: these builds are signed with a loc
 key, so they cannot upgrade an installed upstream APK in place — switching requires
 an uninstall, which currently loses every setting. See 3.3.
 
-### 1.6 Material 3 overhaul
-The app is `@android:style/Theme.Holo` (`Theme.Material` on v21) with framework
-`Activity`/`Fragment` and `ActionBar` tab navigation, which has been deprecated
-since API 21. A full overhaul means AppCompat/Material3 themes, AndroidX fragments,
-`TabLayout` + `ViewPager2`, and replacing the hand-rolled
-`FrameworkFragmentStatePagerAdapter`. The pie overlay itself is custom `Canvas`
-drawing and is unaffected.
+### 1.6 Material 3 overhaul  ✅ done
+The app was `@android:style/Theme.Holo` (`Theme.Material` on v21) with framework
+`Activity`/`Fragment` and `ActionBar` tab navigation, deprecated since API 21.
+Done in three phases, each verified on-device before the next:
 
-Do this **after** Kotlin and tests — it touches every screen at once.
+- **Phase 1** (`84620a5`, `94a3df7`, `fbde96e`): `minSdk` 15→21, `LMT` becomes an
+  `AppCompatActivity` with `MaterialToolbar` + `TabLayout` + `ViewPager2`
+  (`FrameworkFragmentStatePagerAdapter` deleted), the 5 tab fragments move to
+  AndroidX. Also extended the equivalence oracle so a `reworked` class skips
+  content diffs too, not just member presence — per-method bytecode
+  equivalence stops being useful signal once a class is being intentionally
+  rewritten.
+- **Phase 2** (`6a1edc2`): the Settings tab becomes a `PreferenceFragmentCompat`
+  backed by a small `PreferenceDataStore`, replacing the ~1572-line
+  `SettingsViewHelper` position-dispatch dispatcher and the dead
+  `SettingsViewActivity`. Kept `ColorDialog`/`InputDialog` (plain
+  `android.app.AlertDialog.Builder`) instead of stock `ListPreference`/
+  `EditTextPreference` — their dialogs build on
+  `androidx.appcompat.app.AlertDialog`, which Robolectric's `ShadowAlertDialog`
+  doesn't track, and would have silently broken the UI safety-net tests.
+- **Phase 3** (`f7f0ad7`..`3e6d8ec`): `PieFragment`/`GesturesFragment`/
+  `IsasFragment`/`CommandSelectActivity`/`MultiSelectActivity` move from
+  ListView + `SeparatedListAdapter` to RecyclerView, via a new shared
+  `SectionedRows<T>` (reproduces the old header/row flattening, plus an
+  `absoluteRowIndex` that replaces fragile hand-rolled position arithmetic).
+  `AsyncDrawableTask` (`AsyncTask`) is replaced by a plain-`Executor`
+  `IconLoader` and deleted. `CommandSelectActivity`/`MultiSelectActivity`
+  become `AppCompatActivity` with their own `MaterialToolbar`. Dialogs stay on
+  plain `AlertDialog.Builder`, same reasoning as phase 2 — confirmed
+  `MaterialAlertDialogBuilder` has the identical `ShadowAlertDialog` problem.
+
+The pie overlay itself is custom `Canvas` drawing and was unaffected throughout.
 
 ### 1.7 ~~Rewrite in Kotlin~~ — deferred, probably cancelled
 
