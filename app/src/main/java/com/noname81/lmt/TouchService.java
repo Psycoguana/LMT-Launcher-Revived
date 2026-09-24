@@ -12,10 +12,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.SystemClock;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.lang.ref.WeakReference;
 
 /**
@@ -37,6 +41,25 @@ public class TouchService extends Service {
     private String NOTIFICATION_CHANNEL_NAME = "TouchService";
     private MessageHandler mMessageHandler = new MessageHandler(this);
 
+    /**
+     * Watches the gesture thread for a busy loop (ROADMAP 1.13). When its input source dies -
+     * e.g. root is denied, so the {@code su getevent} it reads exits - the native recogniser keeps
+     * calling read() on the closed pipe and burns a whole core, forever. Checked on uptime, so it
+     * never wakes a sleeping phone.
+     */
+    private static final long SPIN_BASELINE_MS = 2000;
+    private static final long SPIN_FIRST_CHECK_MS = 10000;
+    private static final long SPIN_CHECK_MS = 60000;
+    private long mSpinCpuTicks = -1;
+    private long mSpinUptime;
+    private final Runnable mSpinCheck =
+            new Runnable() {
+                @Override
+                public void run() {
+                    checkTouchServiceThread();
+                }
+            };
+
     @Override // android.app.Service
     public IBinder onBind(Intent intent) {
         return null;
@@ -44,6 +67,7 @@ public class TouchService extends Service {
 
     private final class TouchServiceThread extends HandlerThread {
         boolean stopped;
+        volatile int tid = -1; // run() is overridden, so HandlerThread.getThreadId() stays -1
 
         TouchServiceThread(String name) {
             super(name);
@@ -52,6 +76,7 @@ public class TouchService extends Service {
 
         @Override // android.os.HandlerThread, java.lang.Thread, java.lang.Runnable
         public void run() {
+            this.tid = android.os.Process.myTid();
             while (!this.stopped) {
                 TouchService.this.mMessageHandler.sendMessage(
                         Message.obtain(
@@ -145,6 +170,8 @@ public class TouchService extends Service {
                                 (this.mSettings.getScreenHeight()
                                         * this.mSettings.loadTouchscreenScreenFactorY()));
                 this.mTouchServiceThread.start();
+                this.mSpinCpuTicks = -1;
+                this.mMessageHandler.postDelayed(this.mSpinCheck, SPIN_BASELINE_MS);
             }
         }
         if (this.mSettings.loadTouchServiceMode() > 0
@@ -170,6 +197,66 @@ public class TouchService extends Service {
         Log.d(TAG, sb.toString());
         this.mSettings.setServiceState(1);
         startForeground(777, createNotification());
+    }
+
+    private void checkTouchServiceThread() {
+        TouchServiceThread thread = this.mTouchServiceThread;
+        if (thread == null || !thread.isAlive()) {
+            return;
+        }
+        long ticks = threadCpuTicks(thread.tid);
+        if (ticks < 0) {
+            return; // Can't measure it: leave the thread alone.
+        }
+        long now = SystemClock.uptimeMillis();
+        boolean baseline = this.mSpinCpuTicks < 0;
+        if (!baseline
+                && isSpinning(ticks - this.mSpinCpuTicks, now - this.mSpinUptime,
+                        Os.sysconf(OsConstants._SC_CLK_TCK))) {
+            Log.e(TAG, "Gesture thread is spinning without input, stopping it");
+            Toast.makeText(this, "LMT gestures stopped: no touch input (root denied?)", 1).show();
+            thread.quit();
+            this.mTouchServiceNative.quit();
+            return;
+        }
+        this.mSpinCpuTicks = ticks;
+        this.mSpinUptime = now;
+        this.mMessageHandler.postDelayed(
+                this.mSpinCheck, baseline ? SPIN_FIRST_CHECK_MS : SPIN_CHECK_MS);
+    }
+
+    /** More than half a core over the window: a blocked reader uses next to nothing. */
+    static boolean isSpinning(long cpuTicks, long elapsedMs, long ticksPerSecond) {
+        return elapsedMs > 0 && ticksPerSecond > 0 && cpuTicks * 1000 / ticksPerSecond * 2 > elapsedMs;
+    }
+
+    /** utime + stime of one of our threads, in clock ticks, or -1 when unreadable. */
+    static long threadCpuTicks(int tid) {
+        byte[] buffer = new byte[512];
+        int length;
+        try (FileInputStream in = new FileInputStream("/proc/self/task/" + tid + "/stat")) {
+            length = in.read(buffer);
+        } catch (Exception e) {
+            return -1;
+        }
+        return parseCpuTicks(length > 0 ? new String(buffer, 0, length) : "");
+    }
+
+    /** Fields 14 and 15 of /proc/.../stat; the name in field 2 may contain spaces. */
+    static long parseCpuTicks(String stat) {
+        int end = stat.lastIndexOf(')');
+        if (end < 0) {
+            return -1;
+        }
+        String[] fields = stat.substring(end + 2).split(" ");
+        if (fields.length < 13) {
+            return -1;
+        }
+        try {
+            return Long.parseLong(fields[11]) + Long.parseLong(fields[12]);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     Notification createNotification() {
@@ -216,6 +303,7 @@ public class TouchService extends Service {
     public void onDestroy() {
         Toast.makeText(this, "LMT stopped", 0).show();
         Log.d(TAG, "TouchService stopped");
+        this.mMessageHandler.removeCallbacks(this.mSpinCheck);
         TouchServiceNative touchServiceNative = this.mTouchServiceNative;
         if (touchServiceNative != null) {
             touchServiceNative.quit();

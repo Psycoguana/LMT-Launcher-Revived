@@ -375,6 +375,31 @@
       "class": "PieMenu.smali",
       "method": "public onTouchEvent(Landroid/view/MotionEvent;)Z",
       "reason": "ROADMAP 1.11: on touch-down, after show(true), starts PieBlur.open with the pie's centre, outer radius (inner radius + rings + outline) and inner radius (left unblurred in behind-pie mode) on Android 12+; on release and cancel, after show(false), calls PieBlur.close. With the blur setting at None (the default) open returns immediately, so the pie behaves as before."
+    },
+    {
+      "class": "TouchService$TouchServiceThread.smali",
+      "method": "constructor <init>(Lcom/noname81/lmt/TouchService;Ljava/lang/String;)V",
+      "reason": "ROADMAP 1.13 battery fix: when the gesture input source dies (root denied, so the 'su getevent' the native recogniser reads exits), Logic::run keeps calling read() on the closed pipe and burns ~96% of a core forever (measured on the test phone with Perfetto and top). The thread gains a tid field (initialised to -1) so the watchdog can read /proc/self/task/<tid>/stat: run() is overridden, so HandlerThread.getThreadId() is never set."
+    },
+    {
+      "class": "TouchService$TouchServiceThread.smali",
+      "method": "public run()V",
+      "reason": "Records Process.myTid() before entering the unchanged loop. See the constructor entry."
+    },
+    {
+      "class": "TouchService.smali",
+      "method": "constructor public <init>()V",
+      "reason": "ROADMAP 1.13 battery fix: when the gesture input source dies (root denied, so the 'su getevent' the native recogniser reads exits), Logic::run keeps calling read() on the closed pipe and burns ~96% of a core forever (measured on the test phone with Perfetto and top). Initialises the watchdog Runnable (mSpinCheck) and mSpinCpuTicks = -1."
+    },
+    {
+      "class": "TouchService.smali",
+      "method": "public onCreate()V",
+      "reason": "After starting the gesture thread, resets the watchdog and posts its first check (a baseline after 2 s, the verdict 10 s later, then every 60 s on uptime, so it never wakes the phone). If the thread uses over half a core in a window, checkTouchServiceThread quits it and the native loop, and shows a toast."
+    },
+    {
+      "class": "TouchService.smali",
+      "method": "public onDestroy()V",
+      "reason": "Also removes the pending watchdog check."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -462,6 +487,14 @@
     {
       "class": "PieMenu.smali",
       "reason": "ROADMAP 1.11: adds the mBlur field holding the pie's PieBlur view."
+    },
+    {
+      "class": "TouchService.smali",
+      "reason": "ROADMAP 1.13: spinning gesture-thread watchdog - checkTouchServiceThread, isSpinning, threadCpuTicks, parseCpuTicks and the mSpin*/SPIN_* fields."
+    },
+    {
+      "class": "TouchService$TouchServiceThread.smali",
+      "reason": "ROADMAP 1.13: tid field for the watchdog."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -749,6 +782,10 @@
     {
       "class": "PieBlur$$ExternalSyntheticApiModelOutline2.smali",
       "reason": "Same D8 API-outlining helper as PieBlur$$ExternalSyntheticApiModelOutline0 above."
+    },
+    {
+      "class": "TouchService$ANON.smali",
+      "reason": "ROADMAP 1.13: the watchdog's Runnable (mSpinCheck)."
     }
   ],
   "removed_classes": [

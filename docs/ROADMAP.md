@@ -540,7 +540,7 @@ so onSurface text came out `#b89d99` instead of `#fadcd7`: every title looked gr
 or disabled. `ThemeHelper.systemContrast` now clamps at 0 (high contrast still applies). Uses Material's `@RestrictTo` color API,
 so re-check it on Material upgrades.
 
-### 1.13 Optimization pass: less verbose code, performance, battery
+### 1.13 Optimization pass: less verbose code, performance, battery  (battery + profiling done; code cleanup open)
 
 A review pass over the whole app, looking for:
 
@@ -559,6 +559,26 @@ A review pass over the whole app, looking for:
   broadcast receivers kept registered, and the root `InputContext` process lifetime.
 - Keep every change oracle-clean; measure before/after (`dumpsys gfxinfo`,
   `dumpsys batterystats`, Perfetto) rather than guessing.
+
+**Findings so far** (Perfetto via argent's native profiler, `top -H`, test phone):
+
+- **Battery bug, fixed:** with gestures on (`TSMode` < 2) and no working root, the native
+  recogniser reads a `su getevent` pipe whose child already exited. `read()` returns EOF
+  forever and `TouchServiceThread` burns **96% of a core, even with the screen idle** (89% of
+  it in the kernel). The loop is inside `libTouchServiceNative.so`, so `TouchService` now
+  has a watchdog. It samples the thread's CPU time from `/proc/self/task/<tid>/stat` 2 s
+  after start, decides 10 s later, then checks every 60 s (on uptime, so it never wakes the
+  phone). Over half a core → it calls `quit()` on the thread and the library and shows
+  a toast. Measured after the fix: 0 CPU ticks over 10 s idle.
+- **Pie:** ~300 ms CPU per open/sweep/close across all threads; main-thread time is the
+  framework relayout from `expandLayout` plus the blur's first frame. LMT's own
+  `PieMenu` code never shows up in the samples, so micro-optimizing it wouldn't be measurable.
+- **Idle:** no leaked `Timer` threads, no wakeups with the pie closed.
+- **Settings UI:** cold start ~520 ms / warm ~80 ms on the test phone; tab switching and scrolling
+  miss the odd frame by 11-25 ms, in framework code that's still interpreted (`nterp`).
+  A baseline profile (`androidx.profileinstaller`) would help there. Not done.
+- `<profileable android:shell="true"/>` added to the manifest so Perfetto gets call stacks
+  from release builds.
 
 ---
 
