@@ -2,8 +2,14 @@ package com.noname81.lmt;
 
 import static org.robolectric.Shadows.shadowOf;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Looper;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -40,12 +46,71 @@ final class UiTestSupport {
         context.getSharedPreferences("LMT", 0).edit().clear().commit();
     }
 
+    /**
+     * A bare host wearing the app's real theme, which Material components refuse to run without.
+     * The theme is applied in onCreate, as a manifest theme would be, so it survives the
+     * recreate() some settings rows trigger.
+     */
+    public static class ThemedHost extends FragmentActivity {
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            setTheme(R.style.AppTheme_Material3);
+            super.onCreate(savedInstanceState);
+        }
+    }
+
     static FragmentActivity hostActivity() {
-        return Robolectric.buildActivity(FragmentActivity.class).setup().get();
+        return Robolectric.buildActivity(ThemedHost.class).setup().get();
     }
 
     static void idle() {
         shadowOf(Looper.getMainLooper()).idle();
+    }
+
+    /**
+     * The first text field in a shown dialog, found in its real view tree - Material dialogs are
+     * plain library code with no Robolectric shadow exposing the view passed to setView().
+     */
+    static EditText editTextIn(Dialog dialog) {
+        return firstEditText(dialog.getWindow().getDecorView());
+    }
+
+    /** Every non-empty text a shown dialog displays (title, message, buttons), for messages. */
+    static String textsIn(Dialog dialog) {
+        StringBuilder texts = new StringBuilder();
+        collectTexts(dialog.getWindow().getDecorView(), texts);
+        return texts.toString().trim();
+    }
+
+    private static EditText firstEditText(View view) {
+        if (view instanceof EditText) {
+            return (EditText) view;
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                EditText found = firstEditText(group.getChildAt(i));
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void collectTexts(View view, StringBuilder texts) {
+        if (view instanceof TextView && view.getVisibility() == View.VISIBLE) {
+            CharSequence text = ((TextView) view).getText();
+            if (text != null && text.length() > 0) {
+                texts.append(text).append(" / ");
+            }
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                collectTexts(group.getChildAt(i), texts);
+            }
+        }
     }
 
     static int privateInt(Object target, Class<?> declaring, String field) throws Exception {

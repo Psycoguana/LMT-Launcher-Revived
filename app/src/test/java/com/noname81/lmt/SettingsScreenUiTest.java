@@ -4,14 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.test.core.app.ApplicationProvider;
@@ -81,39 +79,39 @@ public class SettingsScreenUiTest {
         {"Gestures / Min gesture path length", "MinPathLength"},
         {"Gestures / Add to gesture blacklist", "activity:MultiSelectActivity"},
         {"Gestures / Clear gesture blacklist", "Blacklist"},
-        {"ISAS / Min bounding box size", "SingleSwipesBBox"},
-        {"ISAS / Activation area thickness", "SingleSwipesAArea"},
-        {"Pie Activation / Activation area position", "PiePos"},
-        {"Pie Activation / Activation area thickness", "PieAreaX"},
-        {"Pie Activation / Activation area length", "PieAreaY"},
-        {"Pie Activation / Activation area gravity", "PieAreaGravity"},
-        {"Pie Activation / Activation area behind keyboard", "PieBehindKeyboard"},
-        {"Pie Activation / Add to pie blacklist", "activity:MultiSelectActivity"},
-        {"Pie Activation / Clear pie blacklist", "BlacklistPie"},
-        {"Pie Style / Pie colors", "PieColorString"},
-        {"Pie Style / Pie inner radius", "PieInnerRadius"},
-        {"Pie Style / Pie outer radius", "PieOuterRadius"},
-        {"Pie Style / Pie shift size", "PieShiftSize"},
-        {"Pie Style / Pie outline size", "PieOutlineSize"},
-        {"Pie Style / Pie slice gap", "PieSliceGap"},
-        {"Pie Style / Pie start gap", "PieStartGap"},
-        {"Pie Behavior / Longpress time", "PieLongpress"},
-        {"Pie Behavior / Animation time", "PieAnimation"},
-        {"Pie Behavior / Feedback type", "PieVibrate"},
-        {"Pie Behavior / Vibration Time", "PieVibration"},
-        {"Pie Behavior / Multi command", "PieMultiCommand"},
-        {"Pie Behavior / Expand trigger area", "PieExpandTriggerArea"},
-        {"Pie Icons / Rotate images", "PieRotateImages"},
-        {"Pie Icons / Set nav button style", "NavButtonStyle"},
-        {"Pie Icons / Show and scale app images", "PieShowAppImages"},
-        {"Pie Icons / Show and scale user images", "PieUserImageScaling"},
-        {"Pie Icons / Set user image search path", "ResourceSearchPath"},
-        {"Pie Extensions / Pie pointer edge activation", "PiePointerFromEdges"},
-        {"Pie Extensions / Pie pointer warp factor", "PiePointerWarpFactorPercent"},
-        {"Pie Extensions / Pie pointer color", "PiePointerColorString"},
-        {"Pie Extensions / Show status infos", "PieShowStatusInfos"},
-        {"Pie Extensions / Pie status info colors", "PieStatusInfoColorString"},
-        {"Pie Extensions / Pie status info font", "PieFont"},
+        {"Invisible swipe areas / Min bounding box size", "SingleSwipesBBox"},
+        {"Invisible swipe areas / Activation area thickness", "SingleSwipesAArea"},
+        {"Pie activation / Activation area position", "PiePos"},
+        {"Pie activation / Activation area thickness", "PieAreaX"},
+        {"Pie activation / Activation area length", "PieAreaY"},
+        {"Pie activation / Activation area gravity", "PieAreaGravity"},
+        {"Pie activation / Activation area behind keyboard", "PieBehindKeyboard"},
+        {"Pie activation / Add to pie blacklist", "activity:MultiSelectActivity"},
+        {"Pie activation / Clear pie blacklist", "BlacklistPie"},
+        {"Pie style / Pie colors", "PieColorString"},
+        {"Pie style / Pie inner radius", "PieInnerRadius"},
+        {"Pie style / Pie outer radius", "PieOuterRadius"},
+        {"Pie style / Pie shift size", "PieShiftSize"},
+        {"Pie style / Pie outline size", "PieOutlineSize"},
+        {"Pie style / Pie slice gap", "PieSliceGap"},
+        {"Pie style / Pie start gap", "PieStartGap"},
+        {"Pie behavior / Longpress time", "PieLongpress"},
+        {"Pie behavior / Animation time", "PieAnimation"},
+        {"Pie behavior / Feedback type", "PieVibrate"},
+        {"Pie behavior / Vibration Time", "PieVibration"},
+        {"Pie behavior / Multi command", "PieMultiCommand"},
+        {"Pie behavior / Expand trigger area", "PieExpandTriggerArea"},
+        {"Pie icons / Rotate images", "PieRotateImages"},
+        {"Pie icons / Set nav button style", "NavButtonStyle"},
+        {"Pie icons / Show and scale app images", "PieShowAppImages"},
+        {"Pie icons / Show and scale user images", "PieUserImageScaling"},
+        {"Pie icons / Set user image search path", "ResourceSearchPath"},
+        {"Pie extensions / Pie pointer edge activation", "PiePointerFromEdges"},
+        {"Pie extensions / Pie pointer warp factor", "PiePointerWarpFactorPercent"},
+        {"Pie extensions / Pie pointer color", "PiePointerColorString"},
+        {"Pie extensions / Show status infos", "PieShowStatusInfos"},
+        {"Pie extensions / Pie status info colors", "PieStatusInfoColorString"},
+        {"Pie extensions / Pie status info font", "PieFont"},
         {"Backup / Export settings", "activity:android.intent.action.CREATE_DOCUMENT"},
         {"Backup / Import settings", "activity:android.intent.action.OPEN_DOCUMENT"},
     };
@@ -213,16 +211,15 @@ public class SettingsScreenUiTest {
             UiTestSupport.idle();
             return "[choice] ";
         }
-        EditText input = findEditText(shadowOf(dialog).getView());
+        EditText input = UiTestSupport.editTextIn(dialog);
         if (input != null) {
-            boolean colour = input.getId() != View.NO_ID;
+            boolean colour = input.getId() == R.id.color_string;
             input.setText(colour ? "#FF102030" : "37");
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
             UiTestSupport.idle();
             return colour ? "[colour] " : "[value] ";
         }
         // A plain confirmation: accept it.
-        String title = String.valueOf(shadowOf(dialog).getTitle());
         if (dialog.getButton(AlertDialog.BUTTON_POSITIVE) != null) {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
             UiTestSupport.idle();
@@ -285,21 +282,5 @@ public class SettingsScreenUiTest {
 
     private android.content.SharedPreferences prefs() {
         return context.getSharedPreferences("LMT", 0);
-    }
-
-    private static EditText findEditText(View view) {
-        if (view instanceof EditText) {
-            return (EditText) view;
-        }
-        if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) view;
-            for (int i = 0; i < group.getChildCount(); i++) {
-                EditText found = findEditText(group.getChildAt(i));
-                if (found != null) {
-                    return found;
-                }
-            }
-        }
-        return null;
     }
 }

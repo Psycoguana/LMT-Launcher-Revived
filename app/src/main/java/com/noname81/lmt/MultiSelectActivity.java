@@ -12,14 +12,16 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,8 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,34 +79,75 @@ public class MultiSelectActivity extends AppCompatActivity {
 
         gatherCandidates();
 
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
+        setContentView(R.layout.multi_select);
+        setSupportActionBar(findViewById(R.id.toolbar));
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
-        AppBarLayout appBarLayout = new AppBarLayout(this);
-        MaterialToolbar toolbar = new MaterialToolbar(this);
-        appBarLayout.addView(
-                toolbar,
-                new AppBarLayout.LayoutParams(
-                        AppBarLayout.LayoutParams.MATCH_PARENT,
-                        AppBarLayout.LayoutParams.WRAP_CONTENT));
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.app_name));
-        root.addView(
-                appBarLayout,
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT));
+        EditText search = findViewById(R.id.search);
+        search.addTextChangedListener(
+                new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-        RecyclerView recyclerView = new RecyclerView(this);
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        MultiSelectActivity.this.mQuery = s.toString().trim();
+                        MultiSelectActivity.this.render();
+                    }
+                });
+        search.setOnEditorActionListener(
+                (view, actionId, event) -> {
+                    if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                        hideKeyboard(view);
+                        return true;
+                    }
+                    return false;
+                });
+
+        // Only the app list has system packages to hide.
+        Chip showSystemApps = findViewById(R.id.show_system_apps);
+        if (AppSelectMode == SelectActivity || AppSelectMode == SelectShortcut) {
+            findViewById(R.id.filters).setVisibility(View.GONE);
+        } else {
+            showSystemApps.setChecked(this.mShowSystemApps);
+            showSystemApps.setOnCheckedChangeListener(
+                    (chip, checked) -> {
+                        this.mShowSystemApps = checked;
+                        this.mSettings.saveShowSystemApps(checked ? 1 : 0);
+                        render();
+                    });
+        }
+
+        RecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         this.mAdapter = new Adapter();
         recyclerView.setAdapter(this.mAdapter);
-        root.addView(
-                recyclerView,
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
-
-        setContentView(root);
+        // Dragging the list is a sign the user is done typing.
+        recyclerView.addOnScrollListener(
+                new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrollStateChanged(@NonNull RecyclerView list, int newState) {
+                        if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                            hideKeyboard(search);
+                        }
+                    }
+                });
         render();
+    }
+
+    private void hideKeyboard(View view) {
+        view.clearFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     /** Collects every candidate for the current mode, before any filtering. */
@@ -223,55 +265,9 @@ public class MultiSelectActivity extends AppCompatActivity {
     }
 
     @Override // androidx.fragment.app.FragmentActivity
-    public boolean onCreateOptionsMenu(Menu menu) {
-        SearchView searchView = new SearchView(this);
-        searchView.setQueryHint(getString(R.string.app_search_hint));
-        searchView.setIconifiedByDefault(false);
-        searchView.setOnQueryTextListener(
-                new SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextSubmit(String query) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onQueryTextChange(String query) {
-                        MultiSelectActivity.this.mQuery = query == null ? "" : query.trim();
-                        MultiSelectActivity.this.render();
-                        return true;
-                    }
-                });
-        menu.add(R.string.app_search_hint)
-                .setActionView(searchView)
-                .setShowAsActionFlags(
-                        MenuItem.SHOW_AS_ACTION_ALWAYS
-                                | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-
-        // Only the app list has system packages to hide.
-        if (AppSelectMode != SelectActivity && AppSelectMode != SelectShortcut) {
-            menu.add(R.string.app_show_system_apps)
-                    .setCheckable(true)
-                    .setChecked(this.mShowSystemApps)
-                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
-        }
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-        return true;
-    }
-
-    @Override // androidx.fragment.app.FragmentActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
-            return true;
-        }
-        if (item.isCheckable()) {
-            this.mShowSystemApps = !this.mShowSystemApps;
-            item.setChecked(this.mShowSystemApps);
-            this.mSettings.saveShowSystemApps(this.mShowSystemApps ? 1 : 0);
-            render();
             return true;
         }
         return super.onOptionsItemSelected(item);

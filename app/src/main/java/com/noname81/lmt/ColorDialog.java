@@ -1,6 +1,5 @@
 package com.noname81.lmt;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -9,8 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SeekBar;
 import android.widget.TextView;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.slider.Slider;
 
 import java.util.Arrays;
 
@@ -21,15 +22,13 @@ import java.util.Arrays;
  * only the parts it cares about and leave the rest at their defaults — see {@code PieMenu.init} for
  * how the string is parsed.
  */
-abstract class ColorDialog extends AlertDialog.Builder
-        implements DialogInterface.OnClickListener,
-                View.OnClickListener,
-                SeekBar.OnSeekBarChangeListener {
+abstract class ColorDialog extends MaterialAlertDialogBuilder
+        implements DialogInterface.OnClickListener, View.OnClickListener, Slider.OnChangeListener {
     private TextView mAlphaLabel;
-    private SeekBar mAlphaSeek;
+    private Slider mAlphaSeek;
     private TextView mAlphaValue;
     private TextView mBlueLabel;
-    private SeekBar mBlueSeek;
+    private Slider mBlueSeek;
     private TextView mBlueValue;
     private Button mColorLast;
     private Button mColorNext;
@@ -39,60 +38,51 @@ abstract class ColorDialog extends AlertDialog.Builder
     private int[] mColorSelectionValues;
     private EditText mColorString;
     private TextView mGreenLabel;
-    private SeekBar mGreenSeek;
+    private Slider mGreenSeek;
     private TextView mGreenValue;
     private TextView mRedLabel;
-    private SeekBar mRedSeek;
+    private Slider mRedSeek;
     private TextView mRedValue;
 
     public abstract boolean onOkClicked(String colorString);
-
-    @Override // android.widget.SeekBar.OnSeekBarChangeListener
-    public void onStartTrackingTouch(SeekBar seekBar) {}
-
-    @Override // android.widget.SeekBar.OnSeekBarChangeListener
-    public void onStopTrackingTouch(SeekBar seekBar) {}
 
     ColorDialog(Context context, String title, String[] labels, String colorString) {
         super(context);
         setTitle(title);
         View viewInflate =
-                ((LayoutInflater) context.getSystemService("layout_inflater"))
-                        .inflate(R.layout.color, (ViewGroup) null);
+                LayoutInflater.from(getContext()).inflate(R.layout.color, (ViewGroup) null);
         setView(viewInflate);
         this.mAlphaLabel = (TextView) viewInflate.findViewById(R.id.alpha_label);
         this.mAlphaValue = (TextView) viewInflate.findViewById(R.id.alpha_value);
-        this.mAlphaSeek = (SeekBar) viewInflate.findViewById(R.id.alpha_seek);
+        this.mAlphaSeek = (Slider) viewInflate.findViewById(R.id.alpha_seek);
         this.mAlphaLabel.setText(R.string.alpha_string);
-        this.mAlphaSeek.setOnSeekBarChangeListener(this);
+        this.mAlphaSeek.addOnChangeListener(this);
         this.mRedLabel = (TextView) viewInflate.findViewById(R.id.red_label);
         this.mRedValue = (TextView) viewInflate.findViewById(R.id.red_value);
-        this.mRedSeek = (SeekBar) viewInflate.findViewById(R.id.red_seek);
+        this.mRedSeek = (Slider) viewInflate.findViewById(R.id.red_seek);
         this.mRedLabel.setText(R.string.red_string);
-        this.mRedSeek.setOnSeekBarChangeListener(this);
+        this.mRedSeek.addOnChangeListener(this);
         this.mGreenLabel = (TextView) viewInflate.findViewById(R.id.green_label);
         this.mGreenValue = (TextView) viewInflate.findViewById(R.id.green_value);
-        this.mGreenSeek = (SeekBar) viewInflate.findViewById(R.id.green_seek);
+        this.mGreenSeek = (Slider) viewInflate.findViewById(R.id.green_seek);
         this.mGreenLabel.setText(R.string.green_string);
-        this.mGreenSeek.setOnSeekBarChangeListener(this);
+        this.mGreenSeek.addOnChangeListener(this);
         this.mBlueLabel = (TextView) viewInflate.findViewById(R.id.blue_label);
         this.mBlueValue = (TextView) viewInflate.findViewById(R.id.blue_value);
-        this.mBlueSeek = (SeekBar) viewInflate.findViewById(R.id.blue_seek);
+        this.mBlueSeek = (Slider) viewInflate.findViewById(R.id.blue_seek);
         this.mBlueLabel.setText(R.string.blue_string);
-        this.mBlueSeek.setOnSeekBarChangeListener(this);
+        this.mBlueSeek.addOnChangeListener(this);
         Button button = (Button) viewInflate.findViewById(R.id.color_preview);
         this.mColorPreview = button;
         button.setOnClickListener(this);
         Button button2 = (Button) viewInflate.findViewById(R.id.color_last);
         this.mColorLast = button2;
-        button2.setText("<");
         this.mColorLast.setOnClickListener(this);
         if (labels.length == 1) {
             this.mColorLast.setVisibility(4);
         }
         Button button3 = (Button) viewInflate.findViewById(R.id.color_next);
         this.mColorNext = button3;
-        button3.setText(">");
         this.mColorNext.setOnClickListener(this);
         if (labels.length == 1) {
             this.mColorNext.setVisibility(4);
@@ -126,24 +116,25 @@ abstract class ColorDialog extends AlertDialog.Builder
         }
     }
 
-    @Override // android.widget.SeekBar.OnSeekBarChangeListener
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+    @Override // com.google.android.material.slider.Slider.OnChangeListener
+    public void onValueChange(Slider slider, float value, boolean fromUser) {
         if (fromUser) {
-            if (seekBar.getId() == R.id.alpha_seek) {
+            int progress = (int) value;
+            if (slider.getId() == R.id.alpha_seek) {
                 this.mAlphaValue.setText(Integer.toString(progress));
-            } else if (seekBar.getId() == R.id.red_seek) {
+            } else if (slider.getId() == R.id.red_seek) {
                 this.mRedValue.setText(Integer.toString(progress));
-            } else if (seekBar.getId() == R.id.green_seek) {
+            } else if (slider.getId() == R.id.green_seek) {
                 this.mGreenValue.setText(Integer.toString(progress));
-            } else if (seekBar.getId() == R.id.blue_seek) {
+            } else if (slider.getId() == R.id.blue_seek) {
                 this.mBlueValue.setText(Integer.toString(progress));
             }
             int iArgb =
                     Color.argb(
-                            this.mAlphaSeek.getProgress(),
-                            this.mRedSeek.getProgress(),
-                            this.mGreenSeek.getProgress(),
-                            this.mBlueSeek.getProgress());
+                            progressOf(this.mAlphaSeek),
+                            progressOf(this.mRedSeek),
+                            progressOf(this.mGreenSeek),
+                            progressOf(this.mBlueSeek));
             this.mColorPreview.setBackgroundColor(iArgb);
             this.mColorSelectionValues[this.mColorSelectionCurrent] = iArgb;
             updateColorPreviews();
@@ -181,6 +172,10 @@ abstract class ColorDialog extends AlertDialog.Builder
         }
     }
 
+    private static int progressOf(Slider slider) {
+        return (int) slider.getValue();
+    }
+
     private void parseColorString(String colorString) {
         if (colorString.length() == 1) {
             Arrays.fill(this.mColorSelectionValues, -2);
@@ -203,24 +198,24 @@ abstract class ColorDialog extends AlertDialog.Builder
     private void updateColorPreviews() {
         int color = this.mColorSelectionValues[this.mColorSelectionCurrent];
         if (color == -2) {
-            this.mAlphaSeek.setProgress(255);
-            this.mAlphaValue.setText(Integer.toString(this.mAlphaSeek.getProgress()));
-            this.mRedSeek.setProgress(0);
-            this.mRedValue.setText(Integer.toString(this.mRedSeek.getProgress()));
-            this.mGreenSeek.setProgress(0);
-            this.mGreenValue.setText(Integer.toString(this.mGreenSeek.getProgress()));
-            this.mBlueSeek.setProgress(0);
-            this.mBlueValue.setText(Integer.toString(this.mBlueSeek.getProgress()));
+            this.mAlphaSeek.setValue(255f);
+            this.mAlphaValue.setText(Integer.toString(progressOf(this.mAlphaSeek)));
+            this.mRedSeek.setValue(0f);
+            this.mRedValue.setText(Integer.toString(progressOf(this.mRedSeek)));
+            this.mGreenSeek.setValue(0f);
+            this.mGreenValue.setText(Integer.toString(progressOf(this.mGreenSeek)));
+            this.mBlueSeek.setValue(0f);
+            this.mBlueValue.setText(Integer.toString(progressOf(this.mBlueSeek)));
             this.mColorPreview.setBackgroundColor(0xFF000000);
         } else {
             this.mAlphaValue.setText(Integer.toString(Color.alpha(color)));
-            this.mAlphaSeek.setProgress(Color.alpha(color));
+            this.mAlphaSeek.setValue((float) Color.alpha(color));
             this.mRedValue.setText(Integer.toString(Color.red(color)));
-            this.mRedSeek.setProgress(Color.red(color));
+            this.mRedSeek.setValue((float) Color.red(color));
             this.mGreenValue.setText(Integer.toString(Color.green(color)));
-            this.mGreenSeek.setProgress(Color.green(color));
+            this.mGreenSeek.setValue((float) Color.green(color));
             this.mBlueValue.setText(Integer.toString(Color.blue(color)));
-            this.mBlueSeek.setProgress(Color.blue(color));
+            this.mBlueSeek.setValue((float) Color.blue(color));
             this.mColorPreview.setBackgroundColor(
                     this.mColorSelectionValues[this.mColorSelectionCurrent]);
         }

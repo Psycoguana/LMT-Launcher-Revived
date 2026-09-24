@@ -1,7 +1,6 @@
 package com.noname81.lmt;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +17,8 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreferenceCompat;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -32,12 +33,9 @@ import java.io.OutputStream;
  * {@link SwitchPreferenceCompat} rows backed by a {@code PreferenceDataStore}. Everything else is
  * a non-persistent {@link Preference} whose click listener opens the exact same {@link
  * InputDialog}/{@link ColorDialog} the old dispatcher used and writes through {@link
- * SettingsValues} directly - both dialog classes already build on plain {@code
- * android.app.AlertDialog.Builder}, which is what lets the existing {@code SettingsScreenUiTest}
- * safety net keep working unmodified (AndroidX Preference's own stock dialogs build on {@code
- * androidx.appcompat.app.AlertDialog}, which Robolectric's {@code ShadowAlertDialog} does not
- * track). Modernising these dialogs to {@code MaterialAlertDialogBuilder} is phase 3 work,
- * alongside {@code CommandSelectActivity}/{@code MultiSelectActivity}.
+ * SettingsValues} directly. Both dialog classes build on {@code MaterialAlertDialogBuilder};
+ * {@code SettingsScreenUiTest} still sees them through {@code ShadowDialog.getLatestDialog()},
+ * which tracks any shown {@code Dialog}, and reads their fields from the real view tree.
  */
 public class SettingsViewFragment extends PreferenceFragmentCompat {
     private static final int REQUEST_EXPORT_SETTINGS = 9001;
@@ -82,14 +80,14 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         if (mode < 2) {
             buildGestureRecognitionSection(addCategory(screen, "Gesture recognition"));
             buildGesturesSection(addCategory(screen, "Gestures"));
-            buildIsasSection(addCategory(screen, "ISAS"));
+            buildIsasSection(addCategory(screen, "Invisible swipe areas"));
         }
         if (mode > 0) {
-            buildPieActivationSection(addCategory(screen, "Pie Activation"));
-            buildPieStyleSection(addCategory(screen, "Pie Style"));
-            buildPieBehaviorSection(addCategory(screen, "Pie Behavior"));
-            buildPieIconsSection(addCategory(screen, "Pie Icons"));
-            buildPieExtensionsSection(addCategory(screen, "Pie Extensions"));
+            buildPieActivationSection(addCategory(screen, "Pie activation"));
+            buildPieStyleSection(addCategory(screen, "Pie style"));
+            buildPieBehaviorSection(addCategory(screen, "Pie behavior"));
+            buildPieIconsSection(addCategory(screen, "Pie icons"));
+            buildPieExtensionsSection(addCategory(screen, "Pie extensions"));
         }
         buildBackupSection(addCategory(screen, "Backup"));
     }
@@ -108,6 +106,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         activate.setSummary("Activate or deactivate LMT");
         activate.setPersistent(false);
         activate.setIconSpaceReserved(false);
+        activate.setWidgetLayoutResource(R.layout.preference_widget_material_switch);
         activate.setChecked(this.mSettings.getServiceState() > 0);
         activate.setOnPreferenceChangeListener(
                 (preference, newValue) -> {
@@ -767,7 +766,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         final int inputDeviceFinal = inputDevice;
         final int factorXFinal = factorX;
         final int factorYFinal = factorY;
-        new AlertDialog.Builder(requireActivity())
+        new MaterialAlertDialogBuilder(requireActivity())
                 .setTitle("Do you want to use these values?")
                 .setMessage(
                         "Input device: "
@@ -872,6 +871,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         preference.setKey(key);
         preference.setDefaultValue(defaultValue);
         preference.setIconSpaceReserved(false);
+        preference.setWidgetLayoutResource(R.layout.preference_widget_material_switch);
         category.addPreference(preference);
     }
 

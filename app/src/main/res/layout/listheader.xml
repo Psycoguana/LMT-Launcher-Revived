@@ -1,3 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView android:textColor="@color/qc_normal_white" android:id="@id/list_header_text" android:paddingLeft="5.0dp" android:paddingTop="2.0dp" android:paddingRight="5.0dp" android:paddingBottom="2.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" style="?android:listSeparatorTextViewStyle"
-  xmlns:android="http://schemas.android.com/apk/res/android" />
+<!-- Section title, styled like the Settings tab's M3 PreferenceCategory titles so every list in
+     the app shares one header look. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/list_header_text"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="16dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="8dp"
+    android:textAppearance="?attr/textAppearanceTitleSmall"
+    android:textColor="?attr/colorPrimary" />

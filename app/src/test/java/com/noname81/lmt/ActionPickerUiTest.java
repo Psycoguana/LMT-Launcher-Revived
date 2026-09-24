@@ -1,15 +1,16 @@
 package com.noname81.lmt;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.robolectric.Shadows.shadowOf;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.EditText;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.After;
@@ -106,10 +107,11 @@ public class ActionPickerUiTest {
             } else if (TYPED_PAYLOAD.contains(type)) {
                 AlertDialog dialog = shown;
                 assertNotNull(row + " should ask for its payload", dialog);
-                EditText input = findEditText(dialog);
+                EditText input = UiTestSupport.editTextIn(dialog);
                 input.setText("payload-" + type);
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
                 UiTestSupport.idle();
+                assertFalse(row + ": dialog should close on OK", dialog.isShowing());
                 Action action = SettingsValues.getInstance(context).getPieAction(0);
                 assertEquals(row.toString(), type, action.getType());
                 assertEquals(row.toString(), "payload-" + type, action.getString());
@@ -117,8 +119,7 @@ public class ActionPickerUiTest {
                 AlertDialog unexpected = shown;
                 assertNull(
                         row + " should not ask for a payload, but showed: "
-                                + (unexpected == null ? "" : shadowOf(unexpected).getTitle()
-                                        + " / " + shadowOf(unexpected).getMessage()),
+                                + (unexpected == null ? "" : UiTestSupport.textsIn(unexpected)),
                         unexpected);
                 assertEquals(
                         row.toString(),
@@ -146,9 +147,5 @@ public class ActionPickerUiTest {
             }
         }
         throw new AssertionError("no row labelled " + title);
-    }
-
-    private static EditText findEditText(AlertDialog dialog) {
-        return (EditText) shadowOf(dialog).getView();
     }
 }

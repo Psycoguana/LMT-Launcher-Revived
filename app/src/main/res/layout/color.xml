@@ -1,32 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView android:layout_width="match_parent" android:layout_height="match_parent"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <LinearLayout android:orientation="horizontal" android:id="@id/alpha_layout" android:layout_width="match_parent" android:layout_height="match_parent">
-            <TextView android:id="@id/alpha_label" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="50.0dp" android:layout_height="wrap_content" />
-            <TextView android:id="@id/alpha_value" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="40.0dp" android:layout_height="wrap_content" />
-            <SeekBar android:id="@id/alpha_seek" android:paddingTop="7.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="255" />
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="24dp">
+
+        <LinearLayout
+            android:id="@id/button_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@id/color_last"
+                style="?attr/materialIconButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/color_previous"
+                app:icon="@drawable/ic_chevron_left" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@id/color_preview"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:clickable="false"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:textColor="@color/qc_normal_white"
+                app:cornerRadius="16dp"
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:strokeWidth="1dp" />
+
+            <Button
+                android:id="@id/color_next"
+                style="?attr/materialIconButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/color_next"
+                app:icon="@drawable/ic_chevron_right" />
         </LinearLayout>
-        <LinearLayout android:orientation="horizontal" android:id="@id/red_layout" android:layout_width="match_parent" android:layout_height="match_parent">
-            <TextView android:id="@id/red_label" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="50.0dp" android:layout_height="wrap_content" />
-            <TextView android:id="@id/red_value" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="40.0dp" android:layout_height="wrap_content" />
-            <SeekBar android:id="@id/red_seek" android:paddingTop="7.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="255" />
+
+        <LinearLayout
+            android:id="@id/alpha_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@id/alpha_label"
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@id/alpha_seek"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:stepSize="1"
+                android:valueFrom="0"
+                android:valueTo="255"
+                app:labelBehavior="gone"
+                app:tickVisible="false" />
+
+            <TextView
+                android:id="@id/alpha_value"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:textAppearance="?attr/textAppearanceBodyMedium" />
         </LinearLayout>
-        <LinearLayout android:orientation="horizontal" android:id="@id/green_layout" android:layout_width="match_parent" android:layout_height="match_parent">
-            <TextView android:id="@id/green_label" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="50.0dp" android:layout_height="wrap_content" />
-            <TextView android:id="@id/green_value" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="40.0dp" android:layout_height="wrap_content" />
-            <SeekBar android:id="@id/green_seek" android:paddingTop="7.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="255" />
+
+        <LinearLayout
+            android:id="@id/red_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@id/red_label"
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@id/red_seek"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:stepSize="1"
+                android:valueFrom="0"
+                android:valueTo="255"
+                app:labelBehavior="gone"
+                app:tickVisible="false" />
+
+            <TextView
+                android:id="@id/red_value"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:textAppearance="?attr/textAppearanceBodyMedium" />
         </LinearLayout>
-        <LinearLayout android:orientation="horizontal" android:id="@id/blue_layout" android:layout_width="match_parent" android:layout_height="match_parent">
-            <TextView android:id="@id/blue_label" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="50.0dp" android:layout_height="wrap_content" />
-            <TextView android:id="@id/blue_value" android:paddingLeft="7.0dp" android:paddingTop="14.0dp" android:paddingRight="7.0dp" android:layout_width="40.0dp" android:layout_height="wrap_content" />
-            <SeekBar android:id="@id/blue_seek" android:paddingTop="7.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="255" />
+
+        <LinearLayout
+            android:id="@id/green_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@id/green_label"
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@id/green_seek"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:stepSize="1"
+                android:valueFrom="0"
+                android:valueTo="255"
+                app:labelBehavior="gone"
+                app:tickVisible="false" />
+
+            <TextView
+                android:id="@id/green_value"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:textAppearance="?attr/textAppearanceBodyMedium" />
         </LinearLayout>
-        <RelativeLayout android:orientation="horizontal" android:id="@id/button_layout" android:layout_width="match_parent" android:layout_height="match_parent">
-            <Button android:textColor="@color/qc_normal_white" android:gravity="center" android:id="@id/color_preview" android:layout_width="match_parent" android:layout_height="40.0dp" android:layout_marginLeft="7.0dp" android:layout_marginTop="7.0dp" android:layout_marginRight="7.0dp" android:layout_centerHorizontal="true" />
-            <Button android:gravity="center" android:id="@id/color_last" android:layout_width="40.0dp" android:layout_height="40.0dp" android:layout_marginLeft="7.0dp" android:layout_marginTop="7.0dp" android:layout_marginRight="7.0dp" android:layout_alignParentLeft="true" />
-            <Button android:gravity="center" android:id="@id/color_next" android:layout_width="40.0dp" android:layout_height="40.0dp" android:layout_marginLeft="7.0dp" android:layout_marginTop="7.0dp" android:layout_marginRight="7.0dp" android:layout_alignParentRight="true" />
-        </RelativeLayout>
-        <EditText android:id="@id/color_string" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="7.0dp" android:layout_marginRight="7.0dp" android:inputType="text" />
+
+        <LinearLayout
+            android:id="@id/blue_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@id/blue_label"
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@id/blue_seek"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:stepSize="1"
+                android:valueFrom="0"
+                android:valueTo="255"
+                app:labelBehavior="gone"
+                app:tickVisible="false" />
+
+            <TextView
+                android:id="@id/blue_value"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:textAppearance="?attr/textAppearanceBodyMedium" />
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="?attr/textInputOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/color_string_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@id/color_string"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 </ScrollView>

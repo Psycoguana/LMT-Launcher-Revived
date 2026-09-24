@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            app:contentInsetStartWithNavigation="0dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/search_layout"
+                style="?attr/textInputOutlinedDenseStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                app:boxBackgroundColor="?attr/colorSurfaceContainerHigh"
+                app:boxCornerRadiusBottomEnd="28dp"
+                app:boxCornerRadiusBottomStart="28dp"
+                app:boxCornerRadiusTopEnd="28dp"
+                app:boxCornerRadiusTopStart="28dp"
+                app:boxStrokeColor="@android:color/transparent"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:endIconMode="clear_text"
+                app:hintEnabled="false"
+                app:startIconDrawable="@drawable/ic_search">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/app_search_hint"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.appbar.MaterialToolbar>
+
+        <HorizontalScrollView
+            android:id="@+id/filters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp"
+            android:scrollbars="none">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/show_system_apps"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_show_system_apps" />
+        </HorizontalScrollView>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

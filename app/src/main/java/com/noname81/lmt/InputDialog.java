@@ -1,16 +1,19 @@
 package com.noname81.lmt;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.EditText;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 /**
  * Small modal that collects one value — free text, a number, or a single choice.
  *
  * <p>Subclasses override {@code onOkClicked} to validate and store; returning true dismisses.
  */
-abstract class InputDialog extends AlertDialog.Builder implements DialogInterface.OnClickListener {
+abstract class InputDialog extends MaterialAlertDialogBuilder implements DialogInterface.OnClickListener {
     Context mContext;
     private final EditText mInput;
 
@@ -26,9 +29,10 @@ abstract class InputDialog extends AlertDialog.Builder implements DialogInterfac
         this.mContext = context;
         setTitle(title);
         setMessage(message);
-        EditText editText = new EditText(context);
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.input_dialog, null);
+        EditText editText = view.findViewById(R.id.input_value);
         this.mInput = editText;
-        setView(editText);
+        setView(view);
         if (initialValue != null) {
             editText.setText(initialValue);
             if (numericOnly) {

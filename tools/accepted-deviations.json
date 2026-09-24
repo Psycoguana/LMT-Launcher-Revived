@@ -348,7 +348,7 @@
     {
       "class": "MultiSelectActivity.smali",
       "reworked": true,
-      "reason": "ROADMAP 1.4: app-picker search and system-app toggle. Adds gatherCandidates/render/matches/isSystem and the options menu, plus fields for the query, the toggle and the unfiltered candidate lists. ROADMAP 1.6 phase 3 then becomes an AppCompatActivity with a MaterialToolbar and a RecyclerView/SectionedRows-backed Adapter: onItemClick is gone (replaced by handleRowClick, wired per-row in Adapter.onBindViewHolder), and mActivityInfos/mPackageInfos/mShortcuts are gone - the old onItemClick resolved a tap as mPackageInfos.get(position - 1), a position re-lookup that's unnecessary now that each row's model object (PackageInfo/ActivityInfo/ResolveInfo) is captured directly at bind time. That also removes the async-icon-loading race the reworked AppSimpleAdapter (ROADMAP 1.4, see removed_classes) was built to guard against by construction, not just defensively."
+      "reason": "ROADMAP 1.4: app-picker search and system-app toggle. Adds gatherCandidates/render/matches/isSystem and the options menu, plus fields for the query, the toggle and the unfiltered candidate lists. ROADMAP 1.6 phase 3 then becomes an AppCompatActivity with a MaterialToolbar and a RecyclerView/SectionedRows-backed Adapter: onItemClick is gone (replaced by handleRowClick, wired per-row in Adapter.onBindViewHolder), and mActivityInfos/mPackageInfos/mShortcuts are gone - the old onItemClick resolved a tap as mPackageInfos.get(position - 1), a position re-lookup that's unnecessary now that each row's model object (PackageInfo/ActivityInfo/ResolveInfo) is captured directly at bind time. That also removes the async-icon-loading race the reworked AppSimpleAdapter (ROADMAP 1.4, see removed_classes) was built to guard against by construction, not just defensively. Material 3 polish then inflates R.layout.multi_select: an inline search TextInputLayout inside the toolbar (no 'LMT' title) replaces the SearchView action view, and a 'Show system apps' filter Chip replaces the checkable overflow MenuItem, so onCreateOptionsMenu is gone and onOptionsItemSelected only handles Up. Same mQuery/mShowSystemApps state, same saveShowSystemApps persistence, same render()."
     },
     {
       "class": "SettingsViewHelper.smali",
@@ -409,6 +409,16 @@
       "class": "CommandSelectActivity.smali",
       "reworked": true,
       "reason": "ROADMAP 1.6 phase 3: becomes an AppCompatActivity with a MaterialToolbar (matching the framework ActionBar's default \"LMT\" title it got for free under the old theme) and a RecyclerView/SectionedRows-backed Adapter instead of ListView + CommandSelectSimpleAdapter. onItemClick is gone - AdapterView.OnItemClickListener is no longer implemented, replaced by handleRowClick wired per-row in Adapter.onBindViewHolder."
+    },
+    {
+      "class": "ColorDialog.smali",
+      "reworked": true,
+      "reason": "Material 3 polish: extends MaterialAlertDialogBuilder instead of android.app.AlertDialog.Builder, and the four ARGB channels are Material Sliders instead of SeekBars - SeekBar.OnSeekBarChangeListener (onProgressChanged/onStartTrackingTouch/onStopTrackingTouch) becomes Slider.OnChangeListener (onValueChange), with progressOf reading a Slider's float value back as the 0-255 int the colour maths used before. The previous/next buttons are icon buttons now, so the constructor no longer sets their '<'/'>' text. Same colour-string parsing, preview and OK/Cancel behaviour."
+    },
+    {
+      "class": "InputDialog.smali",
+      "reworked": true,
+      "reason": "Material 3 polish: extends MaterialAlertDialogBuilder instead of android.app.AlertDialog.Builder. The free-text/numeric constructor inflates an outlined TextInputLayout (R.layout.input_dialog) and uses its TextInputEditText instead of constructing a bare EditText; the single-choice constructor only changes builder type. Same title/message/initial value/numeric input type and the same onClick dispatch."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
