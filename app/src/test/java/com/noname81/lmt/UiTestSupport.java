@@ -172,4 +172,49 @@ final class UiTestSupport {
         }
         return rows;
     }
+
+    /** One visible RecyclerView row: its label, the section header above it, and its flat position. */
+    static final class SectionedRow {
+        final String section;
+        final String title;
+        final String caption;
+        final int position;
+
+        SectionedRow(String section, String title, String caption, int position) {
+            this.section = section;
+            this.title = title;
+            this.caption = caption;
+            this.position = position;
+        }
+
+        @Override
+        public String toString() {
+            return section + " / " + title;
+        }
+    }
+
+    static void showRecyclerView(FragmentActivity host, Fragment fragment) {
+        host.getSupportFragmentManager()
+                .beginTransaction()
+                .add(android.R.id.content, fragment)
+                .commitNow();
+        idle();
+    }
+
+    /**
+     * Every row (not header) in a {@link SectionedRows}, in flat position order - read directly
+     * from the model, not the rendered RecyclerView, the same way {@link #preferenceRows} avoids
+     * walking rendered Preference views.
+     */
+    static List<SectionedRow> sectionedRows(SectionedRows<SectionedRows.Labeled> rows) {
+        List<SectionedRow> result = new ArrayList<>();
+        for (int position = 0; position < rows.getItemCount(); position++) {
+            if (!rows.isHeader(position)) {
+                String section = rows.headerAt(position);
+                SectionedRows.Labeled row = rows.rowAt(position);
+                result.add(new SectionedRow(section, row.title, row.caption, position));
+            }
+        }
+        return result;
+    }
 }

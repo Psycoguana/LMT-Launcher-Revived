@@ -393,6 +393,16 @@
       "class": "SettingsViewFragment.smali",
       "reworked": true,
       "reason": "ROADMAP 1.6 phase 2: rebuilt as a PreferenceFragmentCompat, replacing the ~1572-line SettingsViewHelper position-dispatch system entirely. onCreateView is gone (replaced by onCreatePreferences), onSaveInstanceState's now-empty override is gone too, and the mSettingsHelper field is gone since every row's logic now lives directly on this class or in SettingsPreferenceDataStore. `reworked` exempts the whole class from content/member comparison, matching the LMT.smali precedent from phase 1."
+    },
+    {
+      "class": "GesturesFragment.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.6 phase 3: ListView + SeparatedListAdapter replaced by RecyclerView + a SectionedRows-backed Adapter. Drops mListView, retypes mAdapter, drops the offset* constants (SectionedRows.absoluteRowIndex replaces the hand-rolled position arithmetic they fed), drops onItemClick/the now-meaningless onSaveInstanceState override, adds handleRowClick/clickRowForTest/rowsForTest (the last two are test-only entry points, see UiTestSupport)."
+    },
+    {
+      "class": "IsasFragment.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.6 phase 3: same RecyclerView/SectionedRows rework as GesturesFragment.smali above, for the same reasons."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -444,6 +454,58 @@
     {
       "class": "SettingsViewFragment$StringGetter.smali",
       "reason": "Same reason as SettingsViewFragment$IntCallback.smali above."
+    },
+    {
+      "class": "SectionedRows.smali",
+      "reason": "ROADMAP 1.6 phase 3: the shared header/row-flattening helper replacing SeparatedListAdapter for the RecyclerView-based screens. Has no upstream counterpart."
+    },
+    {
+      "class": "SectionedRows$Labeled.smali",
+      "reason": "ROADMAP 1.6 phase 3: SectionedRows's plain title/caption row payload. Has no upstream counterpart."
+    },
+    {
+      "class": "SectionedRows$Location.smali",
+      "reason": "ROADMAP 1.6 phase 3: SectionedRows's private section/row-index pair, returned by its internal position lookup. Has no upstream counterpart."
+    },
+    {
+      "class": "IconLoader.smali",
+      "reason": "ROADMAP 1.6 phase 3: the Executor-based icon loader replacing the AsyncTask-based AsyncDrawableTask. Has no upstream counterpart."
+    },
+    {
+      "class": "IconLoader$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 3: IconLoader's Runnable lambdas (the executor task and the main-thread post-back). Has no upstream counterpart."
+    },
+    {
+      "class": "GesturesFragment$Adapter.smali",
+      "reason": "ROADMAP 1.6 phase 3: replaces the deleted GesturesFragment$CommandSimpleAdapterGestures (see removed_classes) - a RecyclerView.Adapter wrapping SectionedRows instead of a ListView SimpleAdapter."
+    },
+    {
+      "class": "GesturesFragment$Adapter$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 3: GesturesFragment$Adapter's per-row click-listener and icon-loader lambdas. The reference class had no anonymous classes of its own (icon loading was inline AsyncDrawableTask subclasses, not lambdas), so there is no reference-side $ANON bucket to match against - same situation as LMT$ANON.smali in phase 1."
+    },
+    {
+      "class": "GesturesFragment$HeaderViewHolder.smali",
+      "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for a section header row. Has no upstream counterpart."
+    },
+    {
+      "class": "GesturesFragment$RowViewHolder.smali",
+      "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for a data row. Has no upstream counterpart."
+    },
+    {
+      "class": "IsasFragment$Adapter.smali",
+      "reason": "ROADMAP 1.6 phase 3: replaces the deleted IsasFragment$CommandSimpleAdapterIsas (see removed_classes) - a RecyclerView.Adapter wrapping SectionedRows instead of a ListView SimpleAdapter."
+    },
+    {
+      "class": "IsasFragment$Adapter$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 3: same situation as GesturesFragment$Adapter$ANON.smali above."
+    },
+    {
+      "class": "IsasFragment$HeaderViewHolder.smali",
+      "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for a section header row. Has no upstream counterpart."
+    },
+    {
+      "class": "IsasFragment$RowViewHolder.smali",
+      "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for a data row. Has no upstream counterpart."
     }
   ],
   "removed_classes": [
@@ -470,6 +532,22 @@
     {
       "class": "SettingsViewHelper$SettingsSimpleAdapter$ANON.smali",
       "reason": "ROADMAP 1.6 phase 2: the 9 CompoundButton.OnCheckedChangeListener anonymous classes SettingsSimpleAdapter.getView() built per switch row are gone along with the class itself - each toggle is now a single SwitchPreferenceCompat with no embedded-listener duplication."
+    },
+    {
+      "class": "GesturesFragment$CommandSimpleAdapterGestures.smali",
+      "reason": "ROADMAP 1.6 phase 3: replaced by GesturesFragment$Adapter (RecyclerView instead of ListView)."
+    },
+    {
+      "class": "GesturesFragment$CommandSimpleAdapterGestures$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 3: the AsyncDrawableTask subclasses this adapter built per row are gone along with it - icon loading now goes through IconLoader."
+    },
+    {
+      "class": "IsasFragment$CommandSimpleAdapterIsas.smali",
+      "reason": "ROADMAP 1.6 phase 3: replaced by IsasFragment$Adapter (RecyclerView instead of ListView)."
+    },
+    {
+      "class": "IsasFragment$CommandSimpleAdapterIsas$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 3: the AsyncDrawableTask subclasses this adapter built per row are gone along with it - icon loading now goes through IconLoader."
     }
   ]
 }

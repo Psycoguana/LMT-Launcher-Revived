@@ -97,11 +97,12 @@ public class SlotMappingUiTest {
 
     @Test
     public void everyGestureRowEditsTheGestureItIsNamedAfter() throws Exception {
-        ListView list = UiTestSupport.show(host, new GesturesFragment());
-        List<UiTestSupport.Row> rows = UiTestSupport.rows(list);
+        GesturesFragment fragment = new GesturesFragment();
+        UiTestSupport.showRecyclerView(host, fragment);
+        List<UiTestSupport.SectionedRow> rows = UiTestSupport.sectionedRows(fragment.rowsForTest());
         assertEquals(TouchServiceResult.names.length, rows.size());
-        for (UiTestSupport.Row row : rows) {
-            UiTestSupport.click(list, row);
+        for (UiTestSupport.SectionedRow row : rows) {
+            fragment.clickRowForTest(row.position);
             int actual =
                     UiTestSupport.privateInt(
                             SettingsValues.getInstance(context),
@@ -115,8 +116,9 @@ public class SlotMappingUiTest {
 
     @Test
     public void everyIsaRowEditsTheZoneItsLabelAndCaptionName() throws Exception {
-        ListView list = UiTestSupport.show(host, new IsasFragment());
-        List<UiTestSupport.Row> rows = UiTestSupport.rows(list);
+        IsasFragment fragment = new IsasFragment();
+        UiTestSupport.showRecyclerView(host, fragment);
+        List<UiTestSupport.SectionedRow> rows = UiTestSupport.sectionedRows(fragment.rowsForTest());
         assertEquals(12, rows.size());
         // SettingsValues.getIsaAction: slot/3 picks the edge (bottom, top, left, right) and
         // slot%3 the third along it - left..right for horizontal edges, top..bottom for vertical.
@@ -125,8 +127,8 @@ public class SlotMappingUiTest {
             {"left", "center", "right"}, {"left", "center", "right"},
             {"top", "center", "bottom"}, {"top", "center", "bottom"}
         };
-        for (UiTestSupport.Row row : rows) {
-            UiTestSupport.click(list, row);
+        for (UiTestSupport.SectionedRow row : rows) {
+            fragment.clickRowForTest(row.position);
             int slot =
                     UiTestSupport.privateInt(
                             SettingsValues.getInstance(context),

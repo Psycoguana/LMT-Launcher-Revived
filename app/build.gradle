@@ -93,6 +93,9 @@ dependencies {
     implementation 'androidx.fragment:fragment:1.8.5'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
     implementation 'androidx.preference:preference:1.2.1'
+    // ROADMAP 1.6 phase 3: RecyclerView for the Pie/Gestures/ISA tabs and the two picker
+    // activities, replacing ListView + SeparatedListAdapter.
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.13'
