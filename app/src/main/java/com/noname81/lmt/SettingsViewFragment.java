@@ -821,7 +821,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
 
     private void handleExportSettingsPicked(Uri uri) {
         try {
-            exportSettings(requireActivity().getContentResolver().openOutputStream(uri), "" + uri);
+            exportSettings(requireActivity().getContentResolver().openOutputStream(uri));
         } catch (Exception e) {
             toastFailure("Export failed: ", e);
         }
@@ -829,28 +829,26 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
 
     private void handleImportSettingsPicked(Uri uri) {
         try {
-            importSettings(requireActivity().getContentResolver().openInputStream(uri), "" + uri);
+            importSettings(requireActivity().getContentResolver().openInputStream(uri));
         } catch (Exception e) {
             toastFailure("Import failed: ", e);
         }
     }
 
-    private void exportSettings(OutputStream destStream, String label) throws Exception {
+    private void exportSettings(OutputStream destStream) throws Exception {
         SettingsBackup.exportZip(this.mSettings, this.mSettings.loadResourceSearchPath(), destStream);
-        Toast.makeText(requireActivity(), "Exported settings to " + label, Toast.LENGTH_LONG).show();
+        Toast.makeText(requireActivity(), "Settings exported", Toast.LENGTH_SHORT).show();
     }
 
-    private void importSettings(InputStream srcStream, String label) throws Exception {
+    private void importSettings(InputStream srcStream) throws Exception {
         boolean restored =
                 SettingsBackup.importZip(
                         this.mSettings, this.mSettings.loadResourceSearchPath(), srcStream);
         if (restored) {
             this.mSettings.restartServiceIfRequired();
-            Toast.makeText(requireActivity(), "Imported settings from " + label, Toast.LENGTH_LONG)
-                    .show();
+            Toast.makeText(requireActivity(), "Settings imported", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(requireActivity(), "Not a valid LMT backup: " + label, Toast.LENGTH_LONG)
-                    .show();
+            Toast.makeText(requireActivity(), "Not a valid LMT backup", Toast.LENGTH_LONG).show();
         }
     }
 

@@ -387,6 +387,45 @@ Settings → General → **Appearance** opens its own page (`AppearanceActivity`
   dark, and back to Default. Radio buttons
   and switches were measured on-device too: 20dp radio icons and 52dp switch
   tracks, the M3 defaults.
+- Follow-up polish (light theme and responsiveness):
+  - The bundled command/gesture icons are white PNGs drawn for the pie's dark
+    background and vanished on light lists. `IconLoader` now tints any grey-only,
+    mostly white bitmap `colorOnSurfaceVariant` on a light theme. App icons and
+    coloured icons are left alone. The command picker's checkmark is tinted
+    `colorPrimary`.
+  - Switching tabs flashed every icon: `ViewPager2` dropped off-screen pages and
+    each tab's `onResume` rebinds its rows, resetting icons to the placeholder
+    and fading them in. All tabs now stay alive (`setOffscreenPageLimit`), and
+    `IconLoader.load` takes a row key: rebinding the same row keeps the current
+    icon and swaps the reload in place. A load that lands after its view was
+    rebound is dropped (this was an existing race).
+  - The app picker scanned every installed package on the main thread before
+    showing anything. It now opens at once with pulsing skeleton rows and fills
+    in when a background scan finishes.
+  - Single-choice dialogs drew the platform radio, which One UI leaves grey when
+    checked. `ThemeOverlay.LMT.MaterialAlertDialog` swaps in
+    `dialog_singlechoice_item` with a radio drawn from theme colours (primary
+    when checked).
+  - Export/import toasts say "Settings exported" / "Settings imported" with no
+    URI. The "Show system apps" chip sits at the right.
+
+### 1.11 Blurred pie background
+
+Blur what's behind the pie while it is open, as the system does for the
+notification shade and power menu, instead of drawing the pie over the plain app.
+
+- Framework support is Android 12+ (API 31): `WindowManager.LayoutParams.FLAG_BLUR_BEHIND`
+  with `setBlurBehindRadius`, or `setBackgroundBlurRadius` for a blurred window
+  background. Only works when `WindowManager.isCrossWindowBlurEnabled()` is true
+  (off in battery saver, on some devices, and when the user disables it). Listen
+  with `addCrossWindowBlurEnabledListener` and fall back to today's look.
+- Research first: the pie windows (`PieContainer.addToWindowManager`) are small
+  edge strips that grow when the pie opens. Blur-behind covers the whole screen
+  under the window, so decide between blurring the full screen while the pie is
+  open and blurring only the pie's disc (background blur on a window sized to it).
+  Also check whether overlay window types (`getWindowType`, including the
+  lock-screen variant) are allowed to blur, and what it costs in frame time.
+- A setting to turn it on/off (and maybe a radius), backed up by 1.5's export.
 
 ---
 

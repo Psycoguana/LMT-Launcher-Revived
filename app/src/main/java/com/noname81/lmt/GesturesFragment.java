@@ -112,6 +112,7 @@ public class GesturesFragment extends Fragment {
             IconLoader.load(
                     rowHolder.icon,
                     R.drawable.none,
+                    absoluteIndex,
                     () ->
                             IconUtils.getIconForGesture(
                                     requireActivity(),
@@ -120,6 +121,7 @@ public class GesturesFragment extends Fragment {
             IconLoader.load(
                     rowHolder.icon2,
                     R.drawable.none,
+                    absoluteIndex,
                     () ->
                             IconUtils.getIconForAction(
                                     requireActivity(),

@@ -6,5 +6,6 @@
     <style name="AppTheme.Material3" parent="@style/Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">?attr/colorSurface</item>
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.LMT.MaterialAlertDialog</item>
     </style>
 </resources>

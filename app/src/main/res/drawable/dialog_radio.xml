@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- M3 radio (20dp, primary when selected) drawn from theme colours, for single-choice dialogs. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/dialog_radio_on" android:state_checked="true" />
+    <item android:drawable="@drawable/dialog_radio_off" />
+</selector>

@@ -95,6 +95,8 @@ public class LMT extends ThemedActivity {
         }
         adapter.addTab(getString(R.string.navigation_info), InfoFragment.class);
         this.mViewPager.setAdapter(adapter);
+        // Keep every tab's page alive: rebuilding one on each visit reloaded all its icons.
+        this.mViewPager.setOffscreenPageLimit(Math.max(1, adapter.getItemCount() - 1));
         new TabLayoutMediator(
                         this.mTabLayout,
                         this.mViewPager,

@@ -42,6 +42,7 @@
     <id name="listitem_icondescriptionicon_caption" />
     <id name="listitem_icondescriptionicon_icon" />
     <id name="listitem_icondescriptionicon_icon2" />
+    <id name="icon_loader_request" />
     <id name="listitem_icondescriptionicon_text" />
     <id name="notification_image" />
     <id name="notification_text" />
@@ -155,6 +156,15 @@ LMT uses the minimum required accessibility settings and no personal data is col
     <style name="AppTheme" parent="@style/AppBaseTheme" />
     <style name="AppTheme.Material3" parent="@style/Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">?attr/colorSurface</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.LMT.MaterialAlertDialog</item>
+    </style>
+    <!-- Single-choice dialog rows use our own layout and radio: Material's draws the platform
+         radio, which One UI leaves grey when checked instead of the theme's primary colour. -->
+    <style name="ThemeOverlay.LMT.MaterialAlertDialog" parent="@style/ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="alertDialogStyle">@style/MaterialAlertDialog.LMT</item>
+    </style>
+    <style name="MaterialAlertDialog.LMT" parent="@style/MaterialAlertDialog.Material3">
+        <item name="singleChoiceItemLayout">@layout/dialog_singlechoice_item</item>
     </style>
     <string name="app_search_hint">Search apps</string>
     <string name="app_show_system_apps">Show system apps</string>

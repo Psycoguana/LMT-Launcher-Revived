@@ -18,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -36,6 +38,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Picks an installed app, an activity, or a launcher shortcut to bind to a slot.
@@ -69,14 +73,17 @@ public class MultiSelectActivity extends ThemedActivity {
     private List<ActivityInfo> mAllActivityInfos;
     private List<ResolveInfo> mAllShortcuts;
 
+    /** False until {@link #gatherCandidates()} has finished off the main thread. */
+    private boolean mLoaded;
+
+    private static final Executor LOADER = Executors.newSingleThreadExecutor();
+
     @Override // androidx.fragment.app.FragmentActivity
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         this.mSettings = SettingsValues.getInstance(getApplicationContext());
         this.mPackageManager = getPackageManager();
         this.mShowSystemApps = this.mSettings.loadShowSystemApps() > 0;
-
-        gatherCandidates();
 
         setContentView(R.layout.multi_select);
         setSupportActionBar(findViewById(R.id.toolbar));
@@ -138,7 +145,21 @@ public class MultiSelectActivity extends ThemedActivity {
                         }
                     }
                 });
-        render();
+        // Listing every installed package and loading its label takes a noticeable moment, so the
+        // screen opens at once with skeleton rows and fills in when the scan is done.
+        this.mAdapter.showSkeleton();
+        LOADER.execute(
+                () -> {
+                    gatherCandidates();
+                    runOnUiThread(
+                            () -> {
+                                if (isFinishing() || isDestroyed()) {
+                                    return;
+                                }
+                                this.mLoaded = true;
+                                render();
+                            });
+                });
     }
 
     private void hideKeyboard(View view) {
@@ -212,6 +233,9 @@ public class MultiSelectActivity extends ThemedActivity {
 
     /** Rebuilds the row list, applying the search query and the system-app toggle. */
     private void render() {
+        if (!this.mLoaded) {
+            return;
+        }
         List<Row> rows = new ArrayList<>();
         int mode = AppSelectMode;
         String header;
@@ -377,29 +401,43 @@ public class MultiSelectActivity extends ThemedActivity {
     }
 
     final class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        private static final int VIEW_TYPE_SKELETON = -1;
+        private static final int SKELETON_ROWS = 12;
+
         private SectionedRows<Row> mRows = new SectionedRows<>();
+        private boolean mSkeleton;
+
+        void showSkeleton() {
+            this.mSkeleton = true;
+            notifyDataSetChanged();
+        }
 
         void update(String header, List<Row> rows) {
             SectionedRows<Row> updated = new SectionedRows<>();
             updated.addSection(header, rows);
             this.mRows = updated;
+            this.mSkeleton = false;
             notifyDataSetChanged();
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         public int getItemCount() {
-            return this.mRows.getItemCount();
+            return this.mSkeleton ? SKELETON_ROWS : this.mRows.getItemCount();
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         public int getItemViewType(int position) {
-            return this.mRows.getItemViewType(position);
+            return this.mSkeleton ? VIEW_TYPE_SKELETON : this.mRows.getItemViewType(position);
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         public RecyclerView.ViewHolder onCreateViewHolder(
                 @NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            if (viewType == VIEW_TYPE_SKELETON) {
+                return new SkeletonViewHolder(
+                        inflater.inflate(R.layout.listitem_skeleton, parent, false));
+            }
             if (viewType == SectionedRows.VIEW_TYPE_HEADER) {
                 return new HeaderViewHolder(inflater.inflate(R.layout.listheader, parent, false));
             }
@@ -409,6 +447,9 @@ public class MultiSelectActivity extends ThemedActivity {
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            if (holder instanceof SkeletonViewHolder) {
+                return;
+            }
             if (holder instanceof HeaderViewHolder) {
                 ((HeaderViewHolder) holder).text.setText(this.mRows.headerAt(position));
                 return;
@@ -418,8 +459,20 @@ public class MultiSelectActivity extends ThemedActivity {
             rowHolder.title.setText(row.title);
             rowHolder.caption.setText(row.caption);
             IconUtils.setMaxSizeForImageView(getApplicationContext(), rowHolder.icon);
-            IconLoader.load(rowHolder.icon, R.drawable.none, () -> iconFor(row.model));
+            IconLoader.load(rowHolder.icon, R.drawable.none, row.model, () -> iconFor(row.model));
             rowHolder.itemView.setOnClickListener(v -> handleRowClick(row));
+        }
+    }
+
+    /** A pulsing placeholder row shown while the candidates load. */
+    private static final class SkeletonViewHolder extends RecyclerView.ViewHolder {
+        SkeletonViewHolder(@NonNull View itemView) {
+            super(itemView);
+            AlphaAnimation pulse = new AlphaAnimation(1.0f, 0.4f);
+            pulse.setDuration(700);
+            pulse.setRepeatMode(Animation.REVERSE);
+            pulse.setRepeatCount(Animation.INFINITE);
+            itemView.startAnimation(pulse);
         }
     }
 

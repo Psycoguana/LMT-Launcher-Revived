@@ -1,6 +1,7 @@
 package com.noname81.lmt;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.color.MaterialColors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -201,10 +203,17 @@ public class CommandSelectActivity extends ThemedActivity {
             IconLoader.load(
                     rowHolder.icon,
                     R.drawable.none,
+                    actionType,
                     () -> IconUtils.getIconForAction(getApplicationContext(), new Action(actionType), null));
             if (actionType
                     == SettingsValues.getInstance(getApplicationContext()).getCurrentAction().getType()) {
                 rowHolder.icon2.setImageDrawable(IconUtils.getIconForOK(getApplicationContext()));
+                // ok.png is white; tint it so the selection mark shows on light themes too.
+                rowHolder.icon2.setImageTintList(
+                        ColorStateList.valueOf(
+                                MaterialColors.getColor(
+                                        rowHolder.icon2,
+                                        com.google.android.material.R.attr.colorPrimary)));
             } else {
                 rowHolder.icon2.setImageDrawable(null);
             }

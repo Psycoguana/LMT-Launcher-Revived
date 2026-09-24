@@ -241,6 +241,7 @@ public class PieFragment extends Fragment {
             IconLoader.load(
                     rowHolder.icon,
                     R.drawable.none,
+                    absoluteIndex,
                     () ->
                             absoluteIndex % 2 > 0
                                     ? IconUtils.getIconForPieLongPress(requireActivity())
@@ -249,6 +250,7 @@ public class PieFragment extends Fragment {
             IconLoader.load(
                     rowHolder.icon2,
                     R.drawable.none,
+                    absoluteIndex,
                     () ->
                             IconUtils.getIconForAction(
                                     requireActivity(),

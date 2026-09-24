@@ -129,11 +129,15 @@ public class IsasFragment extends Fragment {
             rowHolder.caption.setText(row.caption);
             IconUtils.setMaxSizeForImageView(requireActivity(), rowHolder.icon);
             IconLoader.load(
-                    rowHolder.icon, R.drawable.none, () -> IconUtils.getIconForISA(requireActivity()));
+                    rowHolder.icon,
+                    R.drawable.none,
+                    absoluteIndex,
+                    () -> IconUtils.getIconForISA(requireActivity()));
             IconUtils.setMaxSizeForImageView(requireActivity(), rowHolder.icon2);
             IconLoader.load(
                     rowHolder.icon2,
                     R.drawable.none,
+                    absoluteIndex,
                     () ->
                             IconUtils.getIconForAction(
                                     requireActivity(),

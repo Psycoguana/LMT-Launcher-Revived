@@ -46,22 +46,22 @@
             </com.google.android.material.textfield.TextInputLayout>
         </com.google.android.material.appbar.MaterialToolbar>
 
-        <HorizontalScrollView
+        <FrameLayout
             android:id="@+id/filters"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingBottom="8dp"
-            android:scrollbars="none">
+            android:paddingBottom="8dp">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/show_system_apps"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="end"
                 android:text="@string/app_show_system_apps" />
-        </HorizontalScrollView>
+        </FrameLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Replaces Material's mtrl_alert_select_dialog_singlechoice: that one draws the platform radio,
+     which One UI leaves grey when checked instead of using the theme's primary colour. -->
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?attr/listPreferredItemHeightSmall"
+    android:gravity="center_vertical"
+    android:textAlignment="viewStart"
+    android:paddingStart="24dp"
+    android:paddingEnd="?attr/dialogPreferredPadding"
+    android:drawableStart="@drawable/dialog_radio"
+    android:drawablePadding="20dp"
+    android:textAppearance="?attr/textAppearanceBodyLarge"
+    android:textColor="?attr/colorOnSurfaceVariant"
+    android:ellipsize="marquee" />
