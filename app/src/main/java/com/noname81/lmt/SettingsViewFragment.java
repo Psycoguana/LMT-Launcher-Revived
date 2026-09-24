@@ -750,7 +750,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                                                                         maxAt + 4,
                                                                         geteventLines[line].indexOf(
                                                                                 ",", maxAt)))
-                                                        / screenWidth)
+                                                        / (float) screenWidth)
                                                 * 100.0f);
                         int maxAt2 = geteventLines[nextLine].indexOf("max");
                         factorY =
@@ -762,7 +762,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                                                                                 .indexOf(
                                                                                         ",",
                                                                                         maxAt2)))
-                                                        / screenHeight)
+                                                        / (float) screenHeight)
                                                 * 100.0f);
                     }
                 }

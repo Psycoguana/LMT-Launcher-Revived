@@ -409,23 +409,53 @@ Settings → General → **Appearance** opens its own page (`AppearanceActivity`
   - Export/import toasts say "Settings exported" / "Settings imported" with no
     URI. The "Show system apps" chip sits at the right.
 
-### 1.11 Blurred pie background
+### 1.11 Blurred pie background  🔬 researched
 
 Blur what's behind the pie while it is open, as the system does for the
 notification shade and power menu, instead of drawing the pie over the plain app.
 
-- Framework support is Android 12+ (API 31): `WindowManager.LayoutParams.FLAG_BLUR_BEHIND`
-  with `setBlurBehindRadius`, or `setBackgroundBlurRadius` for a blurred window
-  background. Only works when `WindowManager.isCrossWindowBlurEnabled()` is true
-  (off in battery saver, on some devices, and when the user disables it). Listen
-  with `addCrossWindowBlurEnabledListener` and fall back to today's look.
-- Research first: the pie windows (`PieContainer.addToWindowManager`) are small
-  edge strips that grow when the pie opens. Blur-behind covers the whole screen
-  under the window, so decide between blurring the full screen while the pie is
-  open and blurring only the pie's disc (background blur on a window sized to it).
-  Also check whether overlay window types (`getWindowType`, including the
-  lock-screen variant) are allowed to blur, and what it costs in frame time.
-- A setting to turn it on/off (and maybe a radius), backed up by 1.5's export.
+**Findings (2026-09-24):**
+
+- **The framework blur is off on both test phones.** `adb shell wm disable-blur`
+  prints `Blur supported on device: false` on the test phone *and* the Samsung flagship
+  (`ro.surface_flinger.supports_background_blur` is unset). That is the gate behind
+  `WindowManager.isCrossWindowBlurEnabled()`, so `FLAG_BLUR_BEHIND` +
+  `setBlurBehindRadius` / `setBackgroundBlurRadius` (API 31) would silently do
+  nothing there. One UI's blurred shade uses Samsung's own private blur, not the
+  AOSP one. The framework route only helps Pixels and similar devices.
+- **Window geometry is not a blocker.** `PieLayout.expandLayout()` already grows the
+  pie window to full screen (`MATCH_PARENT`) while the pie is open, and
+  `shrinkLayout()` re-adds it as the edge strip. A blur flag would be set in the
+  first and cleared in the second (the strip must never blur). Windows are
+  `TYPE_APPLICATION_OVERLAY` (2038) on API 26+, format `TRANSLUCENT`.
+- **Route that works on Samsung without root: accessibility screenshot.**
+  `AccessibilityService.takeScreenshot` (API 30) returns a `HardwareBuffer` of the
+  screen. Take it when the pie opens, before the pie draws, blur a downscaled copy
+  (`RenderEffect.createBlurEffect` on API 31+, a cheap downscale/upscale on 30),
+  and fade it in as the expanded window's background. Costs and limits to check:
+  it needs `android:canTakeScreenshot="true"` in `xml-v22/service_config.xml`
+  (adds a "take screenshots" line to the service's consent screen; check whether
+  it also makes existing users re-enable the service), the system rate-limits it
+  (about one call per 333 ms, unverified), `FLAG_SECURE` windows come back black,
+  and it's async, so the blur arrives a frame or more after the pie opens.
+- **Rejected:** MediaProjection (a consent dialog every session and a cast
+  indicator). Root `screencap` (hundreds of ms per shot, too slow).
+- **Plan if we build it:** framework blur-behind when
+  `isCrossWindowBlurEnabled()`, else the accessibility screenshot when the service
+  is on and the SDK is 30+, else today's look. Listen with
+  `addCrossWindowBlurEnabledListener` (battery saver turns it off). Add an on/off
+  setting (maybe a radius), backed up by 1.5's export. Measure frame time on the
+  TEST_PHONE, the slow device.
+
+### 1.12 Red theme color makes text look washed out
+
+Reported on-device: with red as the theme color, colored text looks pale and
+washed out. Likely cause: `ThemeHelper` seeds `DynamicColors` with
+`setContentBasedSource(seed)`, and M3 draws colored text in `colorPrimary`. That's
+tone 80 in dark mode, and a tone-80 red is a pale salmon pink. Things to try:
+a scheme that keeps more chroma for the text roles (fidelity/vibrant), or a
+higher-contrast scheme. Check every preset in both light and dark mode, not just
+red. Settle it by comparing screenshots on the Samsung flagship.
 
 ---
 
@@ -783,7 +813,7 @@ outstanding warnings are still there before doing either.
 
 ---
 
-### 3.7 🟡 Auto configuration computes a touchscreen factor of 0 (upstream, gestures/ISA mode only)
+### 3.7 ✅ FIXED — Auto configuration computes a touchscreen factor of 0 (upstream, gestures/ISA mode only)
 
 `SettingsViewHelper`'s Auto configuration row computes
 `Math.round((maxFromGetevent / screenWidth) * 100.0f)` with two `int`s, so the
@@ -791,8 +821,10 @@ division truncates *before* the scaling. The common case is a touchscreen whose 
 coordinate is `width − 1`, and that yields `0 / … * 100 = 0`. The `<= -1` guard
 doesn't catch it, and a factor of 0 then divides `getIsaAction`'s coordinates to
 infinity. The fix is a float division; the same applies to Y. Found while writing
-`SettingsScreenUiTest`, not fixed yet: it needs root to exercise, and pie-only
-users (the default) never reach it.
+`SettingsScreenUiTest`. Fixed by casting the divisor to `float`
+(`SettingsViewFragment`, both axes). No oracle entry needed: the code lives in a
+row lambda, and the `SettingsViewFragment$ANON` bucket is already accepted as new.
+Not exercised on-device (needs root plus gestures/ISA mode).
 
 ---
 
