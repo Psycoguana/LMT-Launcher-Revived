@@ -553,7 +553,32 @@ hand-edited prefs file, or from adding an id to `names[]` carelessly. `<` is cor
 - **Reinstalling clears the accessibility service binding.** Re-enable it after
   every install, or accessibility-backed actions silently do nothing.
 
-### 3.5 🟡 Accessibility service silently unbinds (separate, still live)
+### 3.5 ✅ FIXED — Accessibility service "silently unbinds" (was upstream)
+
+**Root cause: `onInterrupt()` treated as a disconnect.** Upstream's
+`AccessibilityHandler.onInterrupt()` set `instance = null; mInitialized = false`.
+But the system sends `onInterrupt()` to *every bound service* whenever anything
+calls `AccessibilityManager.interrupt()`. That means "stop your current feedback",
+not "you are disconnected", and any app can trigger it. After one interrupt, LMT
+treated its service as gone. The service itself stayed bound, so Settings still
+showed it enabled, and `onServiceConnected()` never ran again until a toggle off
+and on. That matches the reported symptom *and* the reported workaround.
+
+**Reproduced on the test phone.** A throwaway `app_process` probe called
+`IAccessibilityManager.interrupt(0)` as the unprivileged shell user, with no root.
+LMT's service received `onInterrupt` in its own process, and `dumpsys
+accessibility` still listed it under Bound and Enabled services before and after.
+
+**Fix:** `onInterrupt()` now only logs (`LMT::Accessibility: onInterrupt -
+ignored`). A mirror-image bug surfaced while writing the test: nothing cleared
+the state on a *real* disconnect, so LMT kept calling into a dead service. A new
+`onUnbind()` does that now. 4 tests in `AccessibilityHandlerTest`. The interrupt
+test and the unbind test both failed against the old code before the fix.
+
+To see how often interrupts actually happen on a device: `adb logcat | grep
+"LMT::Accessibility"`.
+
+Original report, kept for context:
 
 Distinct from 3.1 and reported repeatedly on XDA: Android drops LMT's accessibility
 binding while still *showing* it as enabled. motomotomotoG, Mar 2026 — "Android

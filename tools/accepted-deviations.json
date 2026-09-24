@@ -65,6 +65,11 @@
       "class": "CommandSelectActivity.smali",
       "method": "public onItemClick(Landroid/widget/AdapterView;Landroid/view/View;IJ)V",
       "reason": "ROADMAP 2.3: TaskerTask opens Tasker's own task picker (ACTION_TASK_SELECT via startActivityForResult) when Tasker is installed, instead of the free-text name dialog; the dialog remains the fallback when resolveActivity finds no Tasker. See the new_members entry for the onActivityResult that receives the pick."
+    },
+    {
+      "class": "AccessibilityHandler.smali",
+      "method": "public onInterrupt()V",
+      "reason": "ROADMAP 3.5 fix: onInterrupt no longer clears instance/mInitialized. The system sends onInterrupt to every bound service whenever anything calls AccessibilityManager.interrupt() - 'stop your feedback', not a disconnect. Clearing state there left the service bound (Settings shows it enabled) but unusable until toggled off/on, the long-reported symptom. Now only logs."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -95,6 +100,10 @@
     {
       "class": "CommandSelectActivity.smali",
       "reason": "ROADMAP 2.3: adds the REQUEST_TASKER_TASK_SELECT request code and onActivityResult, which stores the task name Tasker's picker returns as its result data string."
+    },
+    {
+      "class": "AccessibilityHandler.smali",
+      "reason": "ROADMAP 3.5: adds onUnbind, which clears instance/mInitialized on a real disconnect - previously nothing did, so LMT kept calling into a dead service."
     }
   ]
 }

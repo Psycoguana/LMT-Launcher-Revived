@@ -5,6 +5,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.GestureDescription;
 import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Path;
@@ -98,10 +99,22 @@ public class AccessibilityHandler extends AccessibilityService {
         mInitialized = true;
     }
 
+    // "Stop your current feedback" - sent to every bound service whenever anything calls
+    // AccessibilityManager.interrupt(). It is not a disconnect: upstream cleared the state here,
+    // which left the service bound (Settings shows it on) but unusable until toggled off and on.
+    // See docs/ROADMAP.md 3.5.
     @Override // android.accessibilityservice.AccessibilityService
     public void onInterrupt() {
+        Log.i(TAG, "onInterrupt - ignored, service stays bound");
+    }
+
+    // The real disconnect: without clearing here, LMT kept calling into a dead service.
+    @Override // android.app.Service
+    public boolean onUnbind(Intent intent) {
+        Log.i(TAG, "onUnbind");
         instance = null;
         mInitialized = false;
+        return super.onUnbind(intent);
     }
 
     static void setDebug(int enabled) {
