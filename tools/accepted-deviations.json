@@ -365,6 +365,16 @@
       "class": "Launcher.smali",
       "method": "private doOpenHolo()V",
       "reason": "ROADMAP 2.1: without root, opens the system all-apps screen via GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS (API 31) when the accessibility service is connected. With root it still runs the same launcher-specific `am start`, which opens that launcher's own drawer, and without either it still reaches runCommandRoot so the 'needs root' toast is unchanged."
+    },
+    {
+      "class": "PieMenu.smali",
+      "method": "private init(Landroid/content/Context;)V",
+      "reason": "ROADMAP 1.11: creates the PieBlur view that draws a blurred accessibility screenshot behind the pie. See the PieBlur.smali new_classes entry."
+    },
+    {
+      "class": "PieMenu.smali",
+      "method": "public onTouchEvent(Landroid/view/MotionEvent;)Z",
+      "reason": "ROADMAP 1.11: on touch-down, after show(true), starts PieBlur.open with the pie's centre, outer radius (inner radius + rings + outline) and inner radius (left unblurred in behind-pie mode) on Android 12+; on release and cancel, after show(false), calls PieBlur.close. With the blur setting at None (the default) open returns immediately, so the pie behaves as before."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -448,6 +458,10 @@
     {
       "class": "Launcher.smali",
       "reason": "ROADMAP 2.1: static accessibilityFallback(int) maps a root-only action to the accessibility global action that replaces it on this Android version (0 when none), and performAccessibilityFallback(int) runs it when the service is connected. Used by doScreenshotAction, doMenuAction and doOpenNova/Apex/Holo."
+    },
+    {
+      "class": "PieMenu.smali",
+      "reason": "ROADMAP 1.11: adds the mBlur field holding the pie's PieBlur view."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -719,6 +733,22 @@
     {
       "class": "MultiSelectActivity$SkeletonViewHolder.smali",
       "reason": "Pulsing skeleton row shown while the app picker scans installed packages off the main thread, so the screen opens immediately. Has no upstream counterpart."
+    },
+    {
+      "class": "PieBlur.smali",
+      "reason": "ROADMAP 1.11: blurred pie background. A View added behind the pie that takes one accessibility screenshot per opening (AccessibilityService.takeScreenshot, API 30) and draws it with a RenderEffect blur (API 31), either full screen or clipped to a disc behind the pie. Keeps the pie invisible until the frame arrives (150 ms timeout) so the pie never ends up in its own background."
+    },
+    {
+      "class": "PieBlur$ANON.smali",
+      "reason": "The TakeScreenshotCallback and the oval ViewOutlineProvider inside PieBlur (ROADMAP 1.11); anonymous classes of a new class."
+    },
+    {
+      "class": "PieBlur$$ExternalSyntheticApiModelOutline0.smali",
+      "reason": "D8 API-outlining helpers for PieBlur's calls to APIs newer than minSdk 21 (RenderEffect, takeScreenshot, HardwareBuffer); generated, not source. ROADMAP 1.11."
+    },
+    {
+      "class": "PieBlur$$ExternalSyntheticApiModelOutline2.smali",
+      "reason": "Same D8 API-outlining helper as PieBlur$$ExternalSyntheticApiModelOutline0 above."
     }
   ],
   "removed_classes": [

@@ -44,6 +44,7 @@ class PieMenu extends FrameLayout {
     private static final int MAX_LEVELS = 5;
     private static final String TAG = "LMT::PieMenu";
     private int mAnimationTime;
+    private PieBlur mBlur;
     private Point mCenter;
     private int[] mCounts;
     private PieItem mCurrentItem;
@@ -126,6 +127,7 @@ class PieMenu extends FrameLayout {
     private void init(Context context) {
         this.mSettings = SettingsValues.getInstance(context);
         this.mToaster = Toaster.getInstance(context);
+        this.mBlur = new PieBlur(context);
         this.mLongpressHandler = new Handler();
         this.mLongpressRunnable = null;
         this.mLongpress = false;
@@ -826,6 +828,16 @@ class PieMenu extends FrameLayout {
             setCenter(x, y);
             if (isValidPosition(x, y)) {
                 show(true, false);
+                if (PieBlur.isSupported()) {
+                    this.mBlur.open(
+                            this,
+                            this.mCenter.x,
+                            this.mCenter.y,
+                            this.mRadius
+                                    + (this.mRadiusInc * this.mLevels)
+                                    + this.mSettings.loadPieOutlineSize(),
+                            this.mRadius);
+                }
                 return true;
             }
         } else if (1 == actionMasked) {
@@ -849,6 +861,7 @@ class PieMenu extends FrameLayout {
                 PieItem pieItem = this.mCurrentItem;
                 deselect();
                 show(false, false);
+                this.mBlur.close();
                 if (!zOnTouchEvent && pieItem != null) {
                     fireClick(pieItem);
                 }
@@ -858,6 +871,7 @@ class PieMenu extends FrameLayout {
         } else if (3 == actionMasked) {
             if (this.mOpen) {
                 show(false, false);
+                this.mBlur.close();
                 deselect();
                 return false;
             }

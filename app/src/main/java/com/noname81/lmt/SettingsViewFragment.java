@@ -474,6 +474,35 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.savePieStartGap(v);
                     this.mSettings.restartServiceIfRequired();
                 });
+
+        // Read on every pie opening, so neither row needs a service restart.
+        addChoiceDialog(
+                category,
+                "Blur",
+                "Blur the screen while the pie is open. Needs Android 12+ and the accessibility"
+                        + " service, default = none",
+                "Blur",
+                new String[] {"None", "Blur background", "Blur behind pie"},
+                this.mSettings::loadPieBlur,
+                v -> {
+                    this.mSettings.savePieBlur(v);
+                    if (v != PieBlur.MODE_NONE) {
+                        if (!PieBlur.isSupported()) {
+                            Toast.makeText(requireContext(), "Blur needs Android 12 or newer", 0)
+                                    .show();
+                        } else {
+                            AccessibilityHandler.isAccessibilityAvailable(requireContext(), true);
+                        }
+                    }
+                });
+
+        addNumericDialog(
+                category,
+                "Blur amount",
+                "Blur radius in pixels, 1 to 150, default = 50",
+                "Blur amount",
+                this.mSettings::loadPieBlurRadius,
+                this.mSettings::savePieBlurRadius);
     }
 
     private void buildPieBehaviorSection(PreferenceCategory category) {

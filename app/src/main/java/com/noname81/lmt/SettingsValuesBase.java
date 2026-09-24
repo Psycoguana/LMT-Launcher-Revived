@@ -711,4 +711,22 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
     void savePieOnLockScreen(int value) {
         saveInt("PieOnLockScreen", value, null);
     }
+
+    /** Pie blur (ROADMAP 1.11): one of the {@code PieBlur.MODE_*} constants. */
+    int loadPieBlur() {
+        return loadInt("PieBlur", PieBlur.MODE_NONE);
+    }
+
+    void savePieBlur(int value) {
+        saveInt("PieBlur", value, null);
+    }
+
+    /** Pie blur radius in pixels, 1-150. */
+    int loadPieBlurRadius() {
+        return loadInt("PieBlurRadius", 50);
+    }
+
+    void savePieBlurRadius(int value) {
+        saveInt("PieBlurRadius", Math.max(1, Math.min(150, value)), null);
+    }
 }

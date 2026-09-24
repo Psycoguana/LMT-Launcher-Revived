@@ -130,6 +130,11 @@ public class AccessibilityHandler extends AccessibilityService {
         return available;
     }
 
+    /** The bound service, or null when it is off; used for screenshots (ROADMAP 1.11). */
+    static AccessibilityService connectedService() {
+        return mInitialized ? instance : null;
+    }
+
     static void performAction(int globalAction) {
         AccessibilityHandler accessibilityHandler;
         if (DEBUG) {

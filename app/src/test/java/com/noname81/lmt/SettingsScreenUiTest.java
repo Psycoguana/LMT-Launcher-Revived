@@ -96,6 +96,8 @@ public class SettingsScreenUiTest {
         {"Pie style / Pie outline size", "PieOutlineSize"},
         {"Pie style / Pie slice gap", "PieSliceGap"},
         {"Pie style / Pie start gap", "PieStartGap"},
+        {"Pie style / Blur", "PieBlur"},
+        {"Pie style / Blur amount", "PieBlurRadius"},
         {"Pie behavior / Longpress time", "PieLongpress"},
         {"Pie behavior / Animation time", "PieAnimation"},
         {"Pie behavior / Feedback type", "PieVibrate"},

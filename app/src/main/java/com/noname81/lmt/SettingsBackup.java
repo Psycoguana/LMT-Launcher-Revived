@@ -87,6 +87,8 @@ class SettingsBackup {
         {"ThemeFollowSystemColor", "0"},
         {"ThemeColor", String.valueOf(ThemeHelper.COLOR_DEFAULT)},
         {"ThemeCustomColor", String.valueOf(ThemeHelper.DEFAULT_CUSTOM_COLOR)},
+        {"PieBlur", String.valueOf(PieBlur.MODE_NONE)},
+        {"PieBlurRadius", "50"},
     };
 
     private static final String[][] STRING_DEFAULTS = {

@@ -409,43 +409,114 @@ Settings → General → **Appearance** opens its own page (`AppearanceActivity`
   - Export/import toasts say "Settings exported" / "Settings imported" with no
     URI. The "Show system apps" chip sits at the right.
 
-### 1.11 Blurred pie background  🔬 researched
+### 1.11 Blurred pie background  ✅ done (Samsung live blur / AOSP blur-behind upgrades still open)
 
 Blur what's behind the pie while it is open, as the system does for the
 notification shade and power menu, instead of drawing the pie over the plain app.
 
-**Findings (2026-09-24):**
+**Findings (2026-09-24), from the phones' own framework/services jars plus web research:**
 
-- **The framework blur is off on both test phones.** `adb shell wm disable-blur`
-  prints `Blur supported on device: false` on the test phone *and* the Samsung flagship
-  (`ro.surface_flinger.supports_background_blur` is unset). That is the gate behind
-  `WindowManager.isCrossWindowBlurEnabled()`, so `FLAG_BLUR_BEHIND` +
-  `setBlurBehindRadius` / `setBackgroundBlurRadius` (API 31) would silently do
-  nothing there. One UI's blurred shade uses Samsung's own private blur, not the
-  AOSP one. The framework route only helps Pixels and similar devices.
-- **Window geometry is not a blocker.** `PieLayout.expandLayout()` already grows the
-  pie window to full screen (`MATCH_PARENT`) while the pie is open, and
-  `shrinkLayout()` re-adds it as the edge strip. A blur flag would be set in the
-  first and cleared in the second (the strip must never blur). Windows are
-  `TYPE_APPLICATION_OVERLAY` (2038) on API 26+, format `TRANSLUCENT`.
-- **Route that works on Samsung without root: accessibility screenshot.**
-  `AccessibilityService.takeScreenshot` (API 30) returns a `HardwareBuffer` of the
-  screen. Take it when the pie opens, before the pie draws, blur a downscaled copy
-  (`RenderEffect.createBlurEffect` on API 31+, a cheap downscale/upscale on 30),
-  and fade it in as the expanded window's background. Costs and limits to check:
-  it needs `android:canTakeScreenshot="true"` in `xml-v22/service_config.xml`
-  (adds a "take screenshots" line to the service's consent screen; check whether
-  it also makes existing users re-enable the service), the system rate-limits it
-  (about one call per 333 ms, unverified), `FLAG_SECURE` windows come back black,
-  and it's async, so the blur arrives a frame or more after the pie opens.
-- **Rejected:** MediaProjection (a consent dialog every session and a cast
-  indicator). Root `screencap` (hundreds of ms per shot, too slow).
-- **Plan if we build it:** framework blur-behind when
-  `isCrossWindowBlurEnabled()`, else the accessibility screenshot when the service
-  is on and the SDK is 30+, else today's look. Listen with
-  `addCrossWindowBlurEnabledListener` (battery saver turns it off). Add an on/off
-  setting (maybe a radius), backed up by 1.5's export. Measure frame time on the
-  TEST_PHONE, the slow device.
+- **AOSP cross-window blur is off on both test phones.** `adb shell wm disable-blur`
+  prints `Blur supported on device: false` on the test phone and the Samsung flagship
+  (`ro.surface_flinger.supports_background_blur` unset). So `FLAG_BLUR_BEHIND` /
+  `setBlurBehindRadius` / `setBackgroundBlurRadius` (API 31) do nothing there. Samsung's
+  developer forum has an unanswered "Why does OneUI not support CrossWindowBlur?"
+  thread (S24 Ultra). This route only helps Pixels and similar phones.
+- **Samsung has its own blur API: `android.view.SemBlurInfo` + `View.semSetBlurInfo`**
+  (decompiled from `framework.jar` on both phones). Three modes:
+  - `BLUR_MODE_WINDOW` (0): a live blur of whatever is behind the window, done by
+    SurfaceFlinger, with presets (`BLUR_UI_*`/`BLUR_BG_*`), corner radius, clip rect and tint.
+    Gated only by `CoreRune.FW_WINDOW_BLUR_SUPPORTED`, which comes from the floating
+    feature `SEC_FLOATING_FEATURE_GRAPHICS_SUPPORT_3D_SURFACE_TRANSITION_FLAG`,
+    *not* by the AOSP switch. **The test phone doesn't have that feature** (logs "This model
+    doesn't support window blur!"). The Samsung flagship likely does (untested: disconnected).
+  - `BLUR_MODE_WINDOW_CAPTURED` (1): blurs a bitmap you pass in. The test phone declares
+    `SEC_FLOATING_FEATURE_GRAPHICS_SUPPORT_CAPTURED_BLUR`, so this is probably how One UI
+    blurs its own shade on low-end phones: capture once, blur the still image.
+  - `BLUR_MODE_CANVAS` (2): blurs the view's own content (useless here).
+  - Not documented. It would be called through reflection, and it's unknown whether hidden-API
+    rules let a third-party app call it (to test). There's also a
+    `SEM_EXTENSION_FLAG_CHANGE_DIM_EFFECT_TO_BLUR` window extension flag (turns dim-behind
+    into blur); not yet traced.
+- **The screenshot route's cost is one capture per pie open, not a stream.**
+  `AbstractAccessibilityServiceConnection.takeScreenshot` (test phone `services.jar`) calls
+  `WindowManagerService.captureDisplay` → SurfaceFlinger on the GPU → a `HardwareBuffer`
+  handed over without a copy (`Bitmap.wrapHardwareBuffer`), rate-limited to one call per
+  333 ms (confirmed in code), needs the `canTakeScreenshot` capability (flag 128). Upper
+  bound for the capture on the test phone: root `screencap` to /dev/null takes 280–410 ms, but that
+  includes starting a process, copying to the CPU and writing ~10 MB. The accessibility
+  path skips all three; its real latency is **unmeasured**. The blur itself
+  (`RenderEffect`, API 31) runs on the RenderThread (GPU). The screen behind is frozen
+  while the pie is open, which is fine (video behind the pie would freeze).
+- **Libraries don't help:** BlurView (Dimezis), RealtimeBlurView and BlurBehind blur views
+  *inside their own app*. None can see another app's pixels from an overlay.
+- **Rejected:** MediaProjection (a consent dialog every session and a cast indicator), root
+  `screencap` (too slow, see above).
+- **Window geometry is not a blocker:** `PieLayout.expandLayout()` already makes the
+  window full screen while the pie is open; `shrinkLayout()` puts back the edge strip.
+  Set blur in the first, clear it in the second.
+
+**Scope: whole screen or just behind the pie? Undecided, so build both** as one
+setting (Off / Behind the pie / Whole screen) and pick the default after seeing them.
+Every route below can do both:
+
+| Route | Where it works | Behind the pie only |
+|---|---|---|
+| Samsung `BLUR_MODE_WINDOW` | Samsung phones with the 3D-surface feature flag (likely flagships) | Supports clip path and corner radius, so a disc fits naturally |
+| AOSP blur (`setBackgroundBlurRadius`) | Android 12+ where `isCrossWindowBlurEnabled()` (Pixels and some other brands, never Samsung) | A disc-sized window with a corner radius of half its size; cheaper than full screen |
+| Accessibility screenshot + `RenderEffect` blur | Any Android 11+ with the service on, any brand. The universal floor | Capture cost is the same (whole display); only the (already cheap) blur shrinks. A frozen snapshot is much less noticeable in a small disc |
+| None | Android 5–10, or the service off | Today's look (maybe a dim). Rooted phones below 11 could use root `screencap`, but it's slow |
+
+Disc details: the pie opens where you touch and grows outward, so the blur must be a
+circle that follows it, not a square. Pick routes in the table's order, checked while
+the app runs, and listen with `addCrossWindowBlurEnabledListener` (battery saver turns it off).
+
+**Probe results (test phone, TEST_MODEL, Android 15, 2026-09-24).** `blurprobe/` is a separate
+throwaway app driven by adb broadcasts (commands in `ProbeService`'s javadoc). Sideloaded,
+it needs `cmd appops set com.noname81.blurprobe ACCESS_RESTRICTED_SETTINGS allow` before
+its accessibility service can be enabled.
+
+| Route | Result on the test phone |
+|---|---|
+| Accessibility screenshot + `RenderEffect`, **disc** (r=400 px) | ✅ Works, aligned. Capture **~21 ms**; to the first frame committed **~75–90 ms** warm (6 runs, avg 91 ms) |
+| Same, **full screen** | ✅ Works. Capture ~20 ms; first frame 90–160 ms warm (avg 211 ms including one 672 ms cold first run) |
+| Samsung `BLUR_MODE_WINDOW` (live) | ❌ "This model doesn't support window blur!" (as predicted from the feature flag) |
+| Samsung `BLUR_MODE_WINDOW_CAPTURED` | ⚠️ Works but worse: needs an `ARGB_8888` CPU copy (54–208 ms), a HARDWARE bitmap crashes at draw time, first frame 230–630 ms, a weaker blur, and it stretches the *whole* bitmap into the view (a disc would need a CPU crop first) |
+| `semAddExtensionFlags(CHANGE_DIM_EFFECT_TO_BLUR)` + `FLAG_DIM_BEHIND` | ❌ No blur, and the dim disappeared too |
+| AOSP `FLAG_BLUR_BEHIND` | ❌ `isCrossWindowBlurEnabled=false`, nothing drawn. `ViewRootImpl.createBackgroundBlurDrawable` is not reachable, so an AOSP *disc* on an overlay would need another way (a disc-sized window with blur-behind blurs the whole screen) |
+
+Reflection into `SemBlurInfo` / `View.semSetBlurInfo` is **not** blocked by the hidden-API
+rules. The times above include creating a new window each time. The real pie reuses its
+expanded window, so it only swaps a bitmap in and should be faster.
+
+**Conclusion so far:** the accessibility screenshot + `RenderEffect` route is fast
+enough (one ~20 ms GPU capture per pie open, blur on the RenderThread; nothing runs while
+the pie is closed, so no battery cost at idle) and is the universal Android 11+ route. Samsung
+live blur and the dim-to-blur flag still need testing on the Samsung flagship (flagship, likely has the
+feature flag): `--es t sem --ei mode 0 --es scope disc` and `--es t dimblur`. Android 11
+(API 30) has no `RenderEffect`; it needs a downscale + CPU blur on a small copy, or no blur.
+
+**Build notes for the real thing:** capture on the pie's touch-down, before the pie
+draws (otherwise the pie is in the screenshot), and fade the blur in. Keep one blur view in
+the expanded window and only swap its bitmap. Close the `HardwareBuffer` on shrink. Opening
+the pie twice within 333 ms gets `ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT` → reuse the
+last frame. Needs `canTakeScreenshot` in LMT's service config (check whether that makes
+existing users re-enable the service). Add an Off / Behind the pie / Whole screen setting,
+backed up by 1.5's export.
+
+**Built (2026-09-24):** `PieBlur` (a View added behind the pie) implements the accessibility
+screenshot + `RenderEffect` route. Settings → Pie style → **Blur** (None / Blur background /
+Blur behind pie, key `PieBlur`) and **Blur amount** (radius 1–150 px, default 50, key
+`PieBlurRadius`); both are in the export. `PieMenu.onTouchEvent` calls `PieBlur.open` on
+touch-down (the pie stays invisible until the frame arrives, 150 ms timeout) and `close`
+on release/cancel. `canTakeScreenshot` was added to `xml-v22/service_config.xml`: on the test phone the
+update kept the service enabled and granted the capability (`capabilities=160`). Samsung
+live blur (Samsung flagship) and AOSP blur-behind are not wired yet; they'd be upgrades on top of this.
+
+Behind-pie mode blurs a **ring**: the inner circle stays sharp (the blur sits on a `RenderNode`
+and `onDraw` clips the hole out with `clipOutPath`, since outlines can only clip convex shapes).
+Confirmed by hand on the Samsung flagship. Verified on the test phone with synthetic touches (`adb shell input motionevent DOWN/UP` on the pie
+strip; the pie *does* accept them) and see-through pie colors (`#99000000,#cb000000,,#ffa70000,,,`).
 
 ### 1.12 Red theme color makes text look washed out
 
@@ -456,6 +527,26 @@ tone 80 in dark mode, and a tone-80 red is a pale salmon pink. Things to try:
 a scheme that keeps more chroma for the text roles (fidelity/vibrant), or a
 higher-contrast scheme. Check every preset in both light and dark mode, not just
 red. Settle it by comparing screenshots on the Samsung flagship.
+
+### 1.13 Optimization pass: less verbose code, performance, battery
+
+A review pass over the whole app, looking for:
+
+- **Verbosity:** code shapes left over from decompilation (redundant `this.` qualifiers,
+  `-2`/`8388613`-style magic numbers instead of named constants, duplicated `PieLayout` add
+  blocks in `PieContainer.attachToWindowManager`, long `if` ladders that could be tables),
+  dead branches for SDKs below minSdk 21 (e.g. `SDK_INT < 16` in `PieContainer.rotate`;
+  overlaps with Part 4), and helpers now shared by the M3 rewrite.
+- **Performance:** work on the main thread (settings reads, package queries, icon
+  decoding), repeated `SettingsValues` lookups in hot paths (pie touch/draw), allocations in
+  `onDraw`/`onTouchEvent` in `PieMenu`/`PieControl`, an in-memory app-icon cache
+  (the app picker re-fades its icons on every open).
+- **Battery:** what runs while idle: the always-on overlay strips, the accessibility
+  event types subscribed (`typeNotificationStateChanged` only?), wake locks, polling
+  or timers in `PieStatusInfo` (clock/battery/notifications while the pie is closed),
+  broadcast receivers kept registered, and the root `InputContext` process lifetime.
+- Keep every change oracle-clean; measure before/after (`dumpsys gfxinfo`,
+  `dumpsys batterystats`, Perfetto) rather than guessing.
 
 ---
 
