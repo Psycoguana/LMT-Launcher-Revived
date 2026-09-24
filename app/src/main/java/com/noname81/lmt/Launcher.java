@@ -731,7 +731,7 @@ class Launcher {
         }
         // Tasker's own external-access broadcast, needing PERMISSION_RUN_TASKS - neither
         // root nor the accessibility service is involved. See docs/ROADMAP.md 2.3.
-        this.mContext.sendBroadcast(TaskerIntents.runTask(taskName));
+        this.mContext.sendBroadcast(TaskerIntents.runTask(this.mContext, taskName));
     }
 
     void doOpenNotificationBar() {

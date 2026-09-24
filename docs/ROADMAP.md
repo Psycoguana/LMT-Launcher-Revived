@@ -314,7 +314,8 @@ Nova's own drawer — close, not identical.
 
 ### 2.3 De-rooting that needs no accessibility at all
 
-- **32 TaskerTask — ✅ done (root-free), picker still typed by hand.**
+- **32 TaskerTask — ✅ done: root-free, with Tasker's own task picker.**
+  Confirmed by a live pie trigger with a real finger.
 
   `Launcher.doTaskerAction` now `sendBroadcast`s
   `net.dinglisch.android.tasker.ACTION_TASK` (via the new `TaskerIntents` helper)
@@ -339,27 +340,49 @@ Nova's own drawer — close, not identical.
   installing free-trial Tasker (`tasker.joaoapps.com/releases/playstore/`, no
   Google account needed on the test device) and checking why nothing happened.
 
-  **Verified:** the intent shape matches Tasker's real filter (`dumpsys`), the
-  manifest permission is granted to LMT (confirmed in Android's own permission
-  UI, which names it by the exact string `PERMISSION_RUN_TASKS`), and Tasker's
-  "Allow External Access" + per-app grant are on. **Not verified:** a live
-  trigger through LMT's own UI. `adb shell am broadcast` cannot stand in for
-  this — `PERMISSION_RUN_TASKS` is `prot=dangerous`, and shell isn't granted
-  app-scoped dangerous permissions, so every such broadcast was silently dropped
-  by the OS regardless of the fix (confirmed by testing before *and* after,
-  same silent drop both times). The real path is pie/gesture/ISA touch capture,
-  and every synthetic swipe tried here (argent, uiautomator-level) failed to
-  summon the pie at all — consistent with 1.9's note that the app's touch
-  detection is a *native* layer, not the ordinary Android input stack synthetic
-  gestures inject into. Confirm on a real finger before shipping.
+  **The second bug, and the real reason this ever needed root.** With the data
+  URI fixed, a live pie trigger still did nothing. `dumpsys activity broadcasts`
+  showed every one of LMT's broadcasts as
+  `SKIPPED ... Background execution not allowed ... to .ReceiverStaticRunTasks`.
+  Since API 26 an implicit broadcast to a manifest-declared receiver reaches a
+  backgrounded app only if the Intent names that app's package. A broadcast
+  issued through root isn't subject to this per-app policy at all, which is why
+  upstream's `su am broadcast` worked. `runTask()` now resolves whichever Tasker
+  package is installed (`net.dinglisch.android.tasker`, then the Play Store's
+  `...taskerm`, the same order as `TaskerIntent.getInstalledTaskerPackage()`)
+  and calls `setPackage()`. Verified in isolation: the same explicit broadcast
+  from `adb shell` then fails with `Permission Denial ... requires
+  PERMISSION_RUN_TASKS` instead. That is a different gate, specific to shell
+  lacking the permission, which shows the background block is gone.
 
-  **Task picker still not built.** `ACTION_TASK_SELECT` was tried and shelved -
-  see `TaskerIntents`'s class javadoc. Verified on-device (Tasker 6.6.20): it
-  does a literal name-match against an empty query and immediately toasts "no
-  tasks found" instead of opening a list. Not the general external picker the
-  reference source implies, at least not in this Tasker version. The task name
-  is still typed by hand in a free-text `InputDialog`, same as before this
-  change.
+  **Two separate user-side gates, both required, both silent when closed:**
+  Android's runtime grant of `PERMISSION_RUN_TASKS` to LMT (Settings → Apps →
+  LMT → Permissions → Additional permissions), *and* LMT's entry in Tasker's
+  own allowlist (Tasker → Preferences → Misc → Allow External Access → select
+  LMT). Granting the first did not grant the second; the live trigger only
+  worked once both were set.
+
+  **Testing limits worth knowing.** `adb shell am broadcast` can't stand in
+  for LMT, because `PERMISSION_RUN_TASKS` is `prot=dangerous` and shell never
+  holds it. Synthetic swipes (argent/uiautomator) never summoned the pie at
+  all, consistent with 1.9: the touch detection is a native layer, below the
+  input stack those tools inject into. The live trigger needs a real finger.
+
+  **Task picker — done.** Selecting TaskerTask opens Tasker's own "Task
+  Selection" list (`ACTION_TASK_SELECT` via `startActivityForResult`). The
+  result's `getDataString()` is the bare task name, which is stored as the
+  action's payload. When Tasker isn't installed (`resolveActivity` finds
+  nothing), it falls back to the old free-text dialog. This is the same intent
+  and parsing that two maintained apps ship: HTTP Shortcuts
+  (`TaskerTaskPickerContract.kt`, `intent?.dataString`) and TapTap. Both were
+  found with Sourcegraph code search after web search came up empty.
+
+  *A mistake worth recording:* the first attempt shelved the picker as broken.
+  It opened, toasted "No tasks found with name", and closed at once. The cause
+  was the test, not the API. The only task had just been created and still
+  sat under Tasker's unapplied-changes check mark, and the picker lists only
+  saved tasks. Once the task was saved, the same intent showed the list. The
+  lesson is to check the fixture before blaming the API.
 
   There is an existing stopgap (the **Shortcut** action can target Tasker's
   "Tasker Task" shortcut — motomotomotoG, XDA, Mar 2026) but it is a workaround,

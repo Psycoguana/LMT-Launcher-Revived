@@ -22,9 +22,10 @@ import java.util.Map;
  *
  * <p>Presents {@link Action}'s catalogue grouped into sections by the {@code Offset*} markers, and
  * for action types that need one, collects the payload — an app, an activity, a URL, a script, a
- * key code.
+ * key code, or (Tasker) a task chosen from Tasker's own picker.
  */
 public class CommandSelectActivity extends Activity implements AdapterView.OnItemClickListener {
+    private static final int REQUEST_TASKER_TASK_SELECT = 1;
     private int mPos = 0;
 
     @Override // android.app.Activity
@@ -123,6 +124,14 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
             finish();
             return;
         }
+        if (position == Action.TaskerTask) {
+            Intent picker = TaskerIntents.selectTaskIntent();
+            if (getPackageManager().resolveActivity(picker, 0) != null) {
+                startActivityForResult(picker, REQUEST_TASKER_TASK_SELECT);
+                return;
+            }
+            // No Tasker installed: fall through to typing the name, as before.
+        }
         if ((position > 25 && position < 30) || position == 32) {
             Action currentAction =
                     SettingsValues.getInstance(getApplicationContext()).getCurrentAction();
@@ -151,6 +160,21 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
         }
         SettingsValues.getInstance(getApplicationContext())
                 .setCurrentAction(this, new Action(this.mPos));
+        onBackPressed();
+    }
+
+    @Override // android.app.Activity
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQUEST_TASKER_TASK_SELECT || resultCode != RESULT_OK) {
+            return;
+        }
+        String taskName = TaskerIntents.taskNameFromSelectResult(data);
+        if (taskName == null) {
+            return;
+        }
+        SettingsValues.getInstance(getApplicationContext())
+                .setCurrentAction(getParent(), new Action(Action.TaskerTask, taskName));
         onBackPressed();
     }
 
