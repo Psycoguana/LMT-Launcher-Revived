@@ -1,5 +1,6 @@
 package com.noname81.lmt;
 
+import android.accessibilityservice.AccessibilityService;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ActivityNotFoundException;
@@ -222,6 +223,9 @@ class Launcher {
     private void doMenuAction() {
         if (DEBUG) {
             Log.d(TAG, "doMenuAction()");
+        }
+        if (performAccessibilityFallback(Action.Menu)) {
+            return;
         }
         doKeyAction(82);
     }
@@ -813,6 +817,9 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doScreenshotAction()");
         }
+        if (performAccessibilityFallback(Action.Screenshot)) {
+            return;
+        }
         doKeyAction("1000 120");
     }
 
@@ -852,6 +859,10 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doOpenNova()");
         }
+        if (!this.mRootContext.isRootAvailable(false)
+                && performAccessibilityFallback(Action.Nova)) {
+            return;
+        }
         this.mRootContext.runCommandRoot(
                 "am start -a com.teslacoilsw.launcher.ACTION -n"
                         + " com.teslacoilsw.launcher/.NovaShortcutHandler",
@@ -861,6 +872,10 @@ class Launcher {
     private void doOpenApex() {
         if (DEBUG) {
             Log.d(TAG, "doOpenApex()");
+        }
+        if (!this.mRootContext.isRootAvailable(false)
+                && performAccessibilityFallback(Action.Apex)) {
+            return;
         }
         this.mRootContext.runCommandRoot(
                 "am start -a com.anddoes.launcher.ACTION -n com.anddoes.launcher/.Launcher -e"
@@ -872,9 +887,45 @@ class Launcher {
         if (DEBUG) {
             Log.d(TAG, "doOpenHolo()");
         }
+        if (!this.mRootContext.isRootAvailable(false)
+                && performAccessibilityFallback(Action.Holo)) {
+            return;
+        }
         this.mRootContext.runCommandRoot(
                 "am start -a com.mobint.hololauncher.ACTION -n com.mobint.hololauncher/.Launcher -e"
                         + " ACTION 'DRAWER'",
                 true);
+    }
+
+    /**
+     * ROADMAP 2.1: the accessibility global action that stands in for a root-only {@code
+     * actionType} on this Android version, or 0 when there is none. Screenshot and Menu send the
+     * same thing the root key event did; the launcher drawers open the system's all-apps screen
+     * rather than that launcher's own drawer, so those still prefer root.
+     */
+    static int accessibilityFallback(int actionType) {
+        int sdk = Build.VERSION.SDK_INT;
+        switch (actionType) {
+            case Action.Screenshot:
+                return sdk >= 28 ? AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT : 0;
+            case Action.Nova:
+            case Action.Apex:
+            case Action.Holo:
+                return sdk >= 31 ? AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS : 0;
+            case Action.Menu:
+                return sdk >= 36 ? AccessibilityService.GLOBAL_ACTION_MENU : 0;
+            default:
+                return 0;
+        }
+    }
+
+    /** Runs {@link #accessibilityFallback} if there is one and the service is connected. */
+    private boolean performAccessibilityFallback(int actionType) {
+        int globalAction = accessibilityFallback(actionType);
+        if (globalAction == 0 || !AccessibilityHandler.isAccessibilityAvailable(this.mContext, false)) {
+            return false;
+        }
+        AccessibilityHandler.performAction(globalAction);
+        return true;
     }
 }

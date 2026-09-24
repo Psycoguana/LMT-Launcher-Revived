@@ -59,7 +59,7 @@
     {
       "class": "Action.smali",
       "method": "constructor static <clinit>()V",
-      "reason": "ROADMAP 2.3: TaskerTask no longer needs root (see the Launcher.smali::doTaskerAction entry below), so its caption tag changes from [Root] to [None]."
+      "reason": "ROADMAP 2.3: TaskerTask no longer needs root (see the Launcher.smali::doTaskerAction entry below), so its caption tag changes from [Root] to [None]. ROADMAP 2.1 then retags Menu, Screenshot and the Nova/Apex/Holo drawers, which gained an accessibility path: e.g. [Root] becomes [Accessibility (Android 9+)|Root] for Screenshot."
     },
     {
       "class": "Launcher.smali",
@@ -340,6 +340,31 @@
       "class": "TouchServiceResult.smali",
       "method": "constructor static <clinit>()V",
       "reason": "Same minSdk-21 codegen shift as AccessibilityHandler.createClick's entry above; here it only changes the numeric-literal encoding order of the names array, not any value."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doScreenshotAction()V",
+      "reason": "ROADMAP 2.1: tries the accessibility global action from Launcher.accessibilityFallback first (GLOBAL_ACTION_TAKE_SCREENSHOT, API 28), then the unchanged root key event."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doMenuAction()V",
+      "reason": "ROADMAP 2.1: tries GLOBAL_ACTION_MENU (API 36, the same KEYCODE_MENU the root path injects) via Launcher.accessibilityFallback first, then the unchanged root `input keyevent 82`."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doOpenNova()V",
+      "reason": "ROADMAP 2.1: without root, opens the system all-apps screen via GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS (API 31) when the accessibility service is connected. With root it still runs the same launcher-specific `am start`, which opens that launcher's own drawer, and without either it still reaches runCommandRoot so the 'needs root' toast is unchanged."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doOpenApex()V",
+      "reason": "ROADMAP 2.1: without root, opens the system all-apps screen via GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS (API 31) when the accessibility service is connected. With root it still runs the same launcher-specific `am start`, which opens that launcher's own drawer, and without either it still reaches runCommandRoot so the 'needs root' toast is unchanged."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doOpenHolo()V",
+      "reason": "ROADMAP 2.1: without root, opens the system all-apps screen via GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS (API 31) when the accessibility service is connected. With root it still runs the same launcher-specific `am start`, which opens that launcher's own drawer, and without either it still reaches runCommandRoot so the 'needs root' toast is unchanged."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -419,6 +444,10 @@
       "class": "InputDialog.smali",
       "reworked": true,
       "reason": "Material 3 polish: extends MaterialAlertDialogBuilder instead of android.app.AlertDialog.Builder. The free-text/numeric constructor inflates an outlined TextInputLayout (R.layout.input_dialog) and uses its TextInputEditText instead of constructing a bare EditText; the single-choice constructor only changes builder type. Same title/message/initial value/numeric input type and the same onClick dispatch."
+    },
+    {
+      "class": "Launcher.smali",
+      "reason": "ROADMAP 2.1: static accessibilityFallback(int) maps a root-only action to the accessibility global action that replaces it on this Android version (0 when none), and performAccessibilityFallback(int) runs it when the service is connected. Used by doScreenshotAction, doMenuAction and doOpenNova/Apex/Holo."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",

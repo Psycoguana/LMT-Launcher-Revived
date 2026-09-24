@@ -439,7 +439,7 @@ The plumbing already exists: `AccessibilityHandler.performAction(int)` wraps
 `xml-v22/service_config.xml` already declares `canPerformGestures="true"`.
 `performGlobalAction` needs no extra manifest flags.
 
-### 2.1 Drop-in replacements — one `case` each in `Launcher.fireAction`
+### 2.1 Drop-in replacements — one `case` each in `Launcher.fireAction`  ✅ done (Screenshot confirmed on-device; Menu and drawers awaiting a finger test)
 
 | LMT action | today | replacement | since |
 |---|---|---|---|
@@ -450,6 +450,21 @@ The plumbing already exists: `AccessibilityHandler.performAction(int)` wraps
 `GLOBAL_ACTION_MENU` is API **36**, so it works on a Samsung flagship (SDK 36) but not on the
 Test phone (SDK 35). The drawer replacement opens the *system* all-apps surface, not
 Nova's own drawer — close, not identical.
+
+Implemented as `Launcher.accessibilityFallback(actionType)` (the version gate,
+unit-tested in `AccessibilityFallbackTest`) and `performAccessibilityFallback`,
+which runs it only when the accessibility service is connected:
+
+- **Screenshot** and **Menu** try accessibility first, then the unchanged root
+  key event. Both paths send the same thing.
+- **Nova/Apex/Holo** still prefer root, because root opens that launcher's own
+  drawer. Without root they open the system all-apps screen. With neither, the
+  "needs root" toast is unchanged.
+- Picker captions say which Android version the accessibility path needs, e.g.
+  `[Accessibility (Android 9+)|Root]`.
+
+Not verifiable by argent: the pie, gestures and ISAs only fire on a real finger
+(see 1.9), so the live check is a manual one.
 
 ### 2.2 New capabilities LMT has no action for
 
