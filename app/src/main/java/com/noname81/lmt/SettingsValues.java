@@ -41,10 +41,14 @@ class SettingsValues extends SettingsValuesBase {
     }
 
     static SettingsValues getInstance(Context context) {
-        if (instance == null) {
-            instance = new SettingsValues(context);
+        // IconLoader's worker threads call this too; unguarded, two threads can each build an
+        // instance and the later write discards state (e.g. the selected slot) set on the first.
+        synchronized (SettingsValues.class) {
+            if (instance == null) {
+                instance = new SettingsValues(context);
+            }
+            return instance;
         }
-        return instance;
     }
 
     long getDays() {
