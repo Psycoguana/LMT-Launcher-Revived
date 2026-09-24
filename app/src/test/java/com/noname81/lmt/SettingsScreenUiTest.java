@@ -14,6 +14,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.After;
@@ -159,7 +160,7 @@ public class SettingsScreenUiTest {
     }
 
     private static final class Screen {
-        Activity host;
+        FragmentActivity host;
         ListView list;
         java.util.List<UiTestSupport.Row> rows;
 

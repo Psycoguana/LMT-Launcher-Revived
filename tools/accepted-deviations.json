@@ -70,6 +70,291 @@
       "class": "AccessibilityHandler.smali",
       "method": "public onInterrupt()V",
       "reason": "ROADMAP 3.5 fix: onInterrupt no longer clears instance/mInitialized. The system sends onInterrupt to every bound service whenever anything calls AccessibilityManager.interrupt() - 'stop your feedback', not a disconnect. Clearing state there left the service bound (Settings shows it enabled) but unusable until toggled off/on, the long-reported symptom. Now only logs."
+    },
+    {
+      "class": "LMT.smali",
+      "method": "protected onCreate(Landroid/os/Bundle;)V",
+      "reason": "ROADMAP 1.6 phase 1: builds the Material 3 shell (AppCompatActivity, MaterialToolbar inside an AppBarLayout, TabLayout, ViewPager2) in place of the deprecated ActionBar/ViewPager1 one. See the LMT.smali new_members (reworked) entry for the accompanying field changes."
+    },
+    {
+      "class": "LMT.smali",
+      "method": "protected onSaveInstanceState(Landroid/os/Bundle;)V",
+      "reason": "ROADMAP 1.6 phase 1: reads/writes the same \"tab\" bundle key via ViewPager2.getCurrentItem() instead of ActionBar.getSelectedNavigationIndex()."
+    },
+    {
+      "class": "LMT.smali",
+      "method": "protected onActivityResult(IILandroid/content/Intent;)V",
+      "reason": "ROADMAP 1.6 phase 1: now calls super.onActivityResult(), which FragmentActivity requires in order to forward results to child fragments (e.g. SettingsViewFragment's Storage Access Framework picker, ROADMAP 1.5) now that tabs are hosted through FragmentStateAdapter/ViewPager2 instead of the deleted FrameworkFragmentStatePagerAdapter."
+    },
+    {
+      "class": "LMT.smali",
+      "method": "private createTabs()V",
+      "reason": "ROADMAP 1.6 phase 1: same tab-set logic (Settings always first, Gestures+Isas iff mode<2, Pie iff mode>0, Info always last) rebuilt against TabsAdapter/TabLayoutMediator instead of ActionBar tabs."
+    },
+    {
+      "class": "SettingsViewFragment.smali",
+      "method": "public onSaveInstanceState(Landroid/os/Bundle;)V",
+      "reason": "ROADMAP 1.6 phase 1: drops the setUserVisibleHint(true) call. That ViewPager1-era API has no effect under ViewPager2's FragmentStateAdapter, which manages fragment visibility through fragment transactions instead."
+    },
+    {
+      "class": "GesturesFragment$CommandSimpleAdapterGestures$ANON.smali",
+      "method": "protected varargs doInBackground([Ljava/lang/Void;)Landroid/graphics/drawable/Drawable;",
+      "reason": "ROADMAP 1.6 phase 1: this fragment now extends androidx.fragment.app.Fragment instead of the deprecated android.app.Fragment. androidx.fragment.app.Fragment#getActivity() returns FragmentActivity (an android.app.Activity subclass) instead of plain Activity, so every call site's compiled receiver type changes. No behavioural change - getActivity() still returns the hosting LMT activity."
+    },
+    {
+      "class": "GesturesFragment$CommandSimpleAdapterGestures.smali",
+      "method": "public getView(ILandroid/view/View;Landroid/view/ViewGroup;)Landroid/view/View;",
+      "reason": "ROADMAP 1.6 phase 1: getActivity() now returns FragmentActivity (see the doInBackground entry above for the same class family)."
+    },
+    {
+      "class": "GesturesFragment.smali",
+      "method": "public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;",
+      "reason": "ROADMAP 1.6 phase 1: extends androidx.fragment.app.Fragment; getActivity() now returns FragmentActivity."
+    },
+    {
+      "class": "GesturesFragment.smali",
+      "method": "public onItemClick(Landroid/widget/AdapterView;Landroid/view/View;IJ)V",
+      "reason": "ROADMAP 1.6 phase 1: extends androidx.fragment.app.Fragment; getActivity() now returns FragmentActivity."
+    },
+    {
+      "class": "IsasFragment$CommandSimpleAdapterIsas$ANON.smali",
+      "method": "protected varargs doInBackground([Ljava/lang/Void;)Landroid/graphics/drawable/Drawable;",
+      "reason": "ROADMAP 1.6 phase 1: this fragment now extends androidx.fragment.app.Fragment instead of the deprecated android.app.Fragment, so getActivity() returns FragmentActivity instead of plain Activity. No behavioural change."
+    },
+    {
+      "class": "IsasFragment$CommandSimpleAdapterIsas.smali",
+      "method": "public getView(ILandroid/view/View;Landroid/view/ViewGroup;)Landroid/view/View;",
+      "reason": "ROADMAP 1.6 phase 1: getActivity() now returns FragmentActivity (see the doInBackground entry above for the same class family)."
+    },
+    {
+      "class": "IsasFragment.smali",
+      "method": "public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;",
+      "reason": "ROADMAP 1.6 phase 1: extends androidx.fragment.app.Fragment; getActivity() now returns FragmentActivity."
+    },
+    {
+      "class": "IsasFragment.smali",
+      "method": "public onItemClick(Landroid/widget/AdapterView;Landroid/view/View;IJ)V",
+      "reason": "ROADMAP 1.6 phase 1: extends androidx.fragment.app.Fragment; getActivity() now returns FragmentActivity."
+    },
+    {
+      "class": "InfoFragment$ANON.smali",
+      "method": "public onDoubleTap(Landroid/view/MotionEvent;)Z",
+      "reason": "ROADMAP 1.6 phase 1: InfoFragment now extends androidx.fragment.app.Fragment, so getActivity() returns FragmentActivity instead of plain Activity. No behavioural change."
+    },
+    {
+      "class": "InfoFragment.smali",
+      "method": "private addGestureListener(Landroid/view/View;)V",
+      "reason": "ROADMAP 1.6 phase 1: extends androidx.fragment.app.Fragment; getActivity() now returns FragmentActivity."
+    },
+    {
+      "class": "InfoFragment.smali",
+      "method": "public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;",
+      "reason": "ROADMAP 1.6 phase 1: extends androidx.fragment.app.Fragment; getActivity() now returns FragmentActivity."
+    },
+    {
+      "class": "PieFragment$CommandSimpleAdapter$ANON$ANON.smali",
+      "method": "public onClick(Landroid/content/DialogInterface;I)V",
+      "reason": "ROADMAP 1.6 phase 1: PieFragment now extends androidx.fragment.app.Fragment, so getActivity() returns FragmentActivity instead of plain Activity. No behavioural change."
+    },
+    {
+      "class": "PieFragment$CommandSimpleAdapter$ANON.smali",
+      "method": "protected varargs doInBackground([Ljava/lang/Void;)Landroid/graphics/drawable/Drawable;",
+      "reason": "ROADMAP 1.6 phase 1: getActivity() now returns FragmentActivity (see the sibling onClick entry for the same class family)."
+    },
+    {
+      "class": "PieFragment$CommandSimpleAdapter$ANON.smali",
+      "method": "public onClick(Landroid/view/View;)V",
+      "reason": "ROADMAP 1.6 phase 1: getActivity() now returns FragmentActivity. The mPosition -> val$mPosition field rename is the compiler's own synthetic-capture naming and is excused automatically (synthetic-only field diff)."
+    },
+    {
+      "class": "PieFragment$CommandSimpleAdapter.smali",
+      "method": "public getView(ILandroid/view/View;Landroid/view/ViewGroup;)Landroid/view/View;",
+      "reason": "ROADMAP 1.6 phase 1: getActivity() now returns FragmentActivity (see the CommandSimpleAdapter$ANON entries above for the same class family)."
+    },
+    {
+      "class": "PieFragment.smali",
+      "method": "public onActivityResult(IILandroid/content/Intent;)V",
+      "reason": "ROADMAP 1.6 phase 1: extends androidx.fragment.app.Fragment; getActivity() now returns FragmentActivity."
+    },
+    {
+      "class": "PieFragment.smali",
+      "method": "public onCreateView(Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;",
+      "reason": "ROADMAP 1.6 phase 1: extends androidx.fragment.app.Fragment; getActivity() now returns FragmentActivity."
+    },
+    {
+      "class": "PieFragment.smali",
+      "method": "public onItemClick(Landroid/widget/AdapterView;Landroid/view/View;IJ)V",
+      "reason": "ROADMAP 1.6 phase 1: extends androidx.fragment.app.Fragment; getActivity() now returns FragmentActivity."
+    },
+    {
+      "class": "CommandSelectActivity$CommandSelectSimpleAdapter.smali",
+      "method": "constructor <init>(Lcom/noname81/lmt/CommandSelectActivity;Landroid/content/Context;Ljava/util/List;I)V",
+      "reason": "ROADMAP 1.6 phase 1 raises minSdk to 21. D8 compiles this SimpleAdapter subclass's constructor (its small int literal setup) with a different instruction encoding at this minSdk floor - same 0/1/2 values, not a code change in this file. The same nums-only diff appears in every SimpleAdapter-derived constructor across the app (see GesturesFragment/IsasFragment/PieFragment/SettingsViewHelper's adapter constructors below)."
+    },
+    {
+      "class": "GesturesFragment$CommandSimpleAdapterGestures.smali",
+      "method": "constructor <init>(Lcom/noname81/lmt/GesturesFragment;Landroid/content/Context;Ljava/util/List;I)V",
+      "reason": "Same minSdk-21 SimpleAdapter-constructor codegen change as CommandSelectActivity$CommandSelectSimpleAdapter's constructor entry above."
+    },
+    {
+      "class": "IsasFragment$CommandSimpleAdapterIsas.smali",
+      "method": "constructor <init>(Lcom/noname81/lmt/IsasFragment;Landroid/content/Context;Ljava/util/List;I)V",
+      "reason": "Same minSdk-21 SimpleAdapter-constructor codegen change as CommandSelectActivity$CommandSelectSimpleAdapter's constructor entry above."
+    },
+    {
+      "class": "PieFragment$CommandSimpleAdapter.smali",
+      "method": "constructor <init>(Lcom/noname81/lmt/PieFragment;Landroid/content/Context;Ljava/util/List;I)V",
+      "reason": "Same minSdk-21 SimpleAdapter-constructor codegen change as CommandSelectActivity$CommandSelectSimpleAdapter's constructor entry above."
+    },
+    {
+      "class": "SettingsViewHelper$SettingsSimpleAdapter.smali",
+      "method": "constructor <init>(Lcom/noname81/lmt/SettingsViewHelper;Landroid/content/Context;Ljava/util/List;IZ)V",
+      "reason": "Same minSdk-21 SimpleAdapter-constructor codegen change as CommandSelectActivity$CommandSelectSimpleAdapter's constructor entry above."
+    },
+    {
+      "class": "SettingsViewHelper$SettingsSimpleAdapter.smali",
+      "method": "addButton(Landroid/content/Context;Landroid/widget/LinearLayout;ZLandroid/widget/CompoundButton$OnCheckedChangeListener;)V",
+      "reason": "ROADMAP 1.6 phase 1 adds the AndroidX/Material3 dependencies, which merge in many new resources and shift the numeric ID space; this pre-existing method's baked-in resource-id constant lands on a different slot. See the matching new_members (reworked) entry for this class's field diff. No code changed."
+    },
+    {
+      "class": "DebugHelper.smali",
+      "method": "showDebugMenu(Landroid/content/Context;)V",
+      "reason": "Same devirtualization/anon-merge noise already documented on SettingsViewHelper.onItemClick above: the reference-only InputDialog.show() ref and our DebugHelper$ANON.show() ref are the same builder call resolving through a different merged anonymous-class receiver type once ROADMAP 1.6 phase 1 adds/removes classes elsewhere in this dex. Not a behavioural difference."
+    },
+    {
+      "class": "AccessibilityHandler.smali",
+      "method": "private static createClick(FF)Landroid/accessibilityservice/GestureDescription;",
+      "reason": "ROADMAP 1.6 phase 1 raises minSdk from 15 to 21. Below API 21, D8 wraps calls to APIs added after minSdk in synthetic Launcher$$ExternalSyntheticApiModelOutline0/$$ExternalSyntheticBackport* bridge classes, to protect Dalvik's eager class verification on pre-Lollipop devices; ART (API 21+) doesn't have that verification behaviour, so D8 stops generating the wrapper and calls the framework/JDK method directly. Same behaviour, different bytecode shape. No source in this file changed."
+    },
+    {
+      "class": "AccessibilityHandler.smali",
+      "method": "public onAccessibilityEvent(Landroid/view/accessibility/AccessibilityEvent;)V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as the createClick entry above."
+    },
+    {
+      "class": "AccessibilityHandler.smali",
+      "method": "static isAccessibilityAvailable(Landroid/content/Context;Z)Z",
+      "reason": "Same minSdk-21 API-outlining/backport removal as the createClick entry above."
+    },
+    {
+      "class": "AccessibilityHandler.smali",
+      "method": "static performAction(I)V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as the createClick entry above."
+    },
+    {
+      "class": "Action.smali",
+      "method": "checkNeededPermissions(Landroid/app/Activity;Z)V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "IconUtils.smali",
+      "method": "static getDrawable(Landroid/content/Context;I)Landroid/graphics/drawable/Drawable;",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "doOpenNotificationBar()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "doOpenQuickSettings()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doActivityAction(Ljava/lang/String;)V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doDataToggleAction()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doKillAllAppsAction()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doKillAppAction()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doLastApp()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doNextApp()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private doPrevApp()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private moveTaskToFront(Ljava/lang/String;I)V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "private startActivity(Ljava/lang/String;)V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "PermissionChecker.smali",
+      "method": "hasUsageStatsPermission(Landroid/content/Context;Z)Z",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "PieContainer.smali",
+      "method": "rotate()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "PieStatusInfo.smali",
+      "method": "private getMemInfo()Ljava/lang/String;",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "RootContext.smali",
+      "method": "private initRemote()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "RootContext.smali",
+      "method": "private initRemoteProcess20()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "SettingsValues.smali",
+      "method": "getPackageNamesOfRecentApps(I)Ljava/lang/String;",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "SettingsValues.smali",
+      "method": "rotate()V",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "SettingsViewActivity.smali",
+      "method": "public onCreate(Landroid/os/Bundle;)V",
+      "reason": "Same minSdk-21 codegen change as AccessibilityHandler.createClick's entry above: D8 emits a direct Objects.requireNonNull null-check instead of a pre-21 backport helper. SettingsViewActivity is dead code (never started, ROADMAP 1.6 phase-1 HANDOFF), so this is inert either way."
+    },
+    {
+      "class": "TouchService.smali",
+      "method": "createNotification()Landroid/app/Notification;",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
+      "class": "TouchServiceResult.smali",
+      "method": "constructor static <clinit>()V",
+      "reason": "Same minSdk-21 codegen shift as AccessibilityHandler.createClick's entry above; here it only changes the numeric-literal encoding order of the names array, not any value."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -91,7 +376,7 @@
     },
     {
       "class": "SettingsViewHelper.smali",
-      "reason": "ROADMAP 1.5: adds posOffsetBackup/posExportSettings/posImportSettings fields for the new Backup section's rows, a mFragment field and REQUEST_EXPORT_SETTINGS/REQUEST_IMPORT_SETTINGS request codes for the Storage Access Framework flow, the (Activity, Fragment) constructor overload, and canUseFilePicker/handleExportSettingsPicked/handleImportSettingsPicked/exportSettings/importSettings/toastFailure to drive it."
+      "reason": "ROADMAP 1.5: adds posOffsetBackup/posExportSettings/posImportSettings fields for the new Backup section's rows, a mFragment field and REQUEST_EXPORT_SETTINGS/REQUEST_IMPORT_SETTINGS request codes for the Storage Access Framework flow, the (Activity, Fragment) constructor overload, and canUseFilePicker/handleExportSettingsPicked/handleImportSettingsPicked/exportSettings/importSettings/toastFailure to drive it. ROADMAP 1.6 phase 1 additionally retypes mFragment from android.app.Fragment to androidx.fragment.app.Fragment, which is a same-kind addition under this entry."
     },
     {
       "class": "SettingsViewFragment.smali",
@@ -108,14 +393,25 @@
     {
       "class": "SettingsValuesBase.smali",
       "reason": "ROADMAP 1.4: loadShowSystemApps/saveShowSystemApps persist the app picker's 'show system apps' toggle. Missing from this file until ROADMAP 3.6 made one-sided methods actually fail the oracle - before that they only printed a warning."
+    },
+    {
+      "class": "LMT.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.6 phase 1: Material 3 foundation. LMT becomes an AppCompatActivity built around a MaterialToolbar + TabLayout + ViewPager2 shell instead of the deprecated ActionBar/ViewPager1 one, so its field set changes: drops mTabsAdapter (TabsAdapter is now a local in createTabs(), since nothing outside LMT.java ever referenced it), retypes mViewPager to ViewPager2, and adds mTabLayout. See the accompanying deviations entries for onCreate/onSaveInstanceState/onActivityResult/createTabs."
+    },
+    {
+      "class": "LMT$TabsAdapter.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.6 phase 1: rebuilt as a ViewPager2 FragmentStateAdapter (getItemCount/createFragment) in place of the deleted FrameworkFragmentStatePagerAdapter-derived adapter. None of the old ActionBar.TabListener/ViewPager.OnPageChangeListener methods carry over - tab selection now syncs automatically via TabLayoutMediator, which the reworked LMT$TabsAdapter$TabInfo removal (see removed_classes) also reflects: tabs are tracked as parallel title/fragment-class lists instead of a wrapper object."
+    },
+    {
+      "class": "SettingsViewHelper$SettingsSimpleAdapter.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.6 phase 1 adds the AndroidX/Material3 dependencies, which merge in many new resources and shift the numeric resource-ID space app-wide. This class's listitem_description_button field's baked-in R.id constant lands on a different numeric slot as a result (still the same resource, not a renamed or removed one) - reworked only to excuse that value-only field diff, not any real structural change."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
   "new_classes": [
-    {
-      "class": "FrameworkFragmentStatePagerAdapter.smali",
-      "reason": "Hand-written replacement for the deprecated support-v13 pager adapter."
-    },
     {
       "class": "BuildConfig.smali",
       "reason": "Generated by AGP once buildConfig is enabled, so getVersion() can read VERSION_NAME instead of a hardcoded string."
@@ -131,7 +427,20 @@
     {
       "class": "TaskerIntents.smali",
       "reason": "ROADMAP 2.3: TaskerTask, de-rooted, plus Tasker's task picker. Has no upstream counterpart."
+    },
+    {
+      "class": "LMT$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 1: LMT's TabLayoutMediator.TabConfigurationStrategy lambda is the class's first anonymous/lambda class. The reference LMT has none - its TabsAdapter implemented ActionBar.TabListener/ViewPager.OnPageChangeListener directly - so there is no reference-side $ANON bucket to match against."
+    },
+    {
+      "class": "PieContainer$PieLayout$$ExternalSyntheticApiModelOutline0.smali",
+      "reason": "Same numbered-outline-helper artifact as SettingsBackup$$ExternalSyntheticBackport0 above: ROADMAP 1.6 phase 1 raises minSdk to 21, which changes which call sites still need D8's API-outlining helper, so D8 attaches a freshly-numbered instance of it to a different 'first' class (PieContainer$PieLayout) than before. PieContainer.java is untouched by this phase."
     }
   ],
-  "removed_classes": []
+  "removed_classes": [
+    {
+      "class": "LMT$TabsAdapter$TabInfo.smali",
+      "reason": "ROADMAP 1.6 phase 1: TabsAdapter now tracks tabs as parallel title/fragment-class lists instead of a TabInfo wrapper object, since FragmentStateAdapter addresses tabs purely positionally (createFragment(int)/getItemCount()) and never needs to carry a Bundle of constructor args the way the old ActionBar/ViewPager1 adapter did."
+    }
+  ]
 }

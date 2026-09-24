@@ -1,6 +1,5 @@
 package com.noname81.lmt;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -13,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import androidx.fragment.app.Fragment;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,13 +32,13 @@ public class GesturesFragment extends Fragment implements AdapterView.OnItemClic
     private SeparatedListAdapter mAdapter;
     private ListView mListView;
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
         setUserVisibleHint(true);
     }
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public void onResume() {
         SeparatedListAdapter separatedListAdapter;
         if (this.mListView != null && (separatedListAdapter = this.mAdapter) != null) {
@@ -47,7 +48,7 @@ public class GesturesFragment extends Fragment implements AdapterView.OnItemClic
         super.onResume();
     }
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         super.onCreateView(layoutInflater, viewGroup, bundle);
         LinkedList linkedList = new LinkedList();

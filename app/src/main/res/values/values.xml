@@ -151,8 +151,11 @@ LMT uses the minimum required accessibility settings and no personal data is col
     <string name="pie_level_3_item_7_longpress">The seventh item on level 3</string>
     <string name="pie_status_info_no_additional_info">No additional info</string>
     <string name="red_string">red</string>
-    <style name="AppBaseTheme" parent="@android:style/Theme.Holo" />
+    <style name="AppBaseTheme" parent="@android:style/Theme.Material" />
     <style name="AppTheme" parent="@style/AppBaseTheme" />
+    <style name="AppTheme.Material3" parent="@style/Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">?attr/colorSurface</item>
+    </style>
     <string name="app_search_hint">Search apps</string>
     <string name="app_show_system_apps">Show system apps</string>
     <string name="app_no_matches">No matching apps</string>

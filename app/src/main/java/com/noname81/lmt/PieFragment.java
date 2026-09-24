@@ -1,7 +1,6 @@
 package com.noname81.lmt;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,6 +16,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import androidx.fragment.app.Fragment;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +31,13 @@ public class PieFragment extends Fragment implements AdapterView.OnItemClickList
     private int mCurrentPos;
     private ListView mListView;
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
         setUserVisibleHint(true);
     }
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public void onResume() {
         SeparatedListAdapter separatedListAdapter;
         if (this.mListView != null && (separatedListAdapter = this.mAdapter) != null) {
@@ -46,7 +47,7 @@ public class PieFragment extends Fragment implements AdapterView.OnItemClickList
         super.onResume();
     }
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         super.onCreateView(layoutInflater, viewGroup, bundle);
         LinkedList linkedList = new LinkedList();
@@ -202,7 +203,7 @@ public class PieFragment extends Fragment implements AdapterView.OnItemClickList
                 new Intent(view.getContext(), (Class<?>) CommandSelectActivity.class), 0);
     }
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == -1) {

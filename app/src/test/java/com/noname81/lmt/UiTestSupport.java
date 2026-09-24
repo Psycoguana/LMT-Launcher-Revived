@@ -2,14 +2,15 @@ package com.noname81.lmt;
 
 import static org.robolectric.Shadows.shadowOf;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import org.robolectric.Robolectric;
 
@@ -60,13 +61,15 @@ final class UiTestSupport {
         context.getSharedPreferences("LMT", 0).edit().clear().commit();
     }
 
-    static Activity hostActivity() {
-        return Robolectric.buildActivity(Activity.class).setup().get();
+    static FragmentActivity hostActivity() {
+        return Robolectric.buildActivity(FragmentActivity.class).setup().get();
     }
 
-    static ListView show(Activity host, Fragment fragment) {
-        host.getFragmentManager().beginTransaction().add(android.R.id.content, fragment).commit();
-        host.getFragmentManager().executePendingTransactions();
+    static ListView show(FragmentActivity host, Fragment fragment) {
+        host.getSupportFragmentManager()
+                .beginTransaction()
+                .add(android.R.id.content, fragment)
+                .commitNow();
         idle();
         return (ListView) fragment.getView();
     }

@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId 'com.noname81.lmt'
-        minSdk 15
+        minSdk 21
         targetSdk 34
         versionCode versionMajor * 1000 + versionMinor * 100
         versionName "${versionMajor}.${versionMinor}"
@@ -86,10 +86,13 @@ android {
 }
 
 dependencies {
-    // The only genuine third-party dependency in the whole app: ViewPager.
-    // Everything else the decompiler attributed to android.support.* turned out
-    // to be jadx substituting library constants for plain integer literals.
-    implementation 'androidx.viewpager:viewpager:1.0.0'
+    // ROADMAP 1.6: Material 3 shell for LMT (AppCompatActivity, MaterialToolbar,
+    // TabLayout, ViewPager2) plus AndroidX Preference for the phase-2 Settings rewrite.
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.fragment:fragment:1.8.5'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+    implementation 'androidx.preference:preference:1.2.1'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.13'

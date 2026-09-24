@@ -4,11 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 import android.widget.ListView;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.After;
@@ -44,7 +44,7 @@ public class SlotMappingUiTest {
     private static final Pattern PIE_ITEM = Pattern.compile("Pie item (\\d)( longpress)?");
 
     private Context context;
-    private Activity host;
+    private FragmentActivity host;
 
     @Before
     public void setUp() throws Exception {

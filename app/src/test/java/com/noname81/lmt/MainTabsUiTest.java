@@ -2,10 +2,11 @@ package com.noname81.lmt;
 
 import static org.junit.Assert.assertEquals;
 
-import android.app.ActionBar;
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
+
+import com.google.android.material.tabs.TabLayout;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,10 +66,10 @@ public class MainTabsUiTest {
         UiTestSupport.resetSingletons(context);
         SettingsValues.getInstance(context).saveTouchServiceMode(mode);
         LMT activity = Robolectric.buildActivity(LMT.class).setup().get();
-        ActionBar bar = activity.getActionBar();
+        TabLayout tabLayout = activity.mTabLayout;
         List<String> tabs = new ArrayList<>();
-        for (int i = 0; i < bar.getTabCount(); i++) {
-            tabs.add(String.valueOf(bar.getTabAt(i).getText()).toUpperCase());
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            tabs.add(String.valueOf(tabLayout.getTabAt(i).getText()).toUpperCase());
         }
         return tabs;
     }

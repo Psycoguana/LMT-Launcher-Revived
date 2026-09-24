@@ -1,45 +1,77 @@
 package com.noname81.lmt;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Debug;
 import android.util.Log;
+import android.widget.LinearLayout;
 
-import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * The settings activity: a ViewPager of tabs whose set depends on the feature mode.
+ * The settings activity: a ViewPager2 of tabs whose set depends on the feature mode.
  *
  * <p>{@code TSMode} chooses which tabs exist — gestures and ISAs only appear when that feature set
  * is enabled, and Info is always last.
  */
-public class LMT extends Activity {
+public class LMT extends AppCompatActivity {
     private static final String TAG = "LMT::LMT";
-    TabsAdapter mTabsAdapter;
-    ViewPager mViewPager;
+    ViewPager2 mViewPager;
+    TabLayout mTabLayout;
 
-    @Override // android.app.Activity
+    @Override // androidx.fragment.app.FragmentActivity
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         Log.d(TAG, "Starting GUI");
-        ViewPager viewPager = new ViewPager(this);
+
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+
+        AppBarLayout appBarLayout = new AppBarLayout(this);
+        MaterialToolbar toolbar = new MaterialToolbar(this);
+        appBarLayout.addView(
+                toolbar,
+                new AppBarLayout.LayoutParams(
+                        AppBarLayout.LayoutParams.MATCH_PARENT,
+                        AppBarLayout.LayoutParams.WRAP_CONTENT));
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        this.mTabLayout = new TabLayout(this);
+        appBarLayout.addView(
+                this.mTabLayout,
+                new AppBarLayout.LayoutParams(
+                        AppBarLayout.LayoutParams.MATCH_PARENT,
+                        AppBarLayout.LayoutParams.WRAP_CONTENT));
+        root.addView(
+                appBarLayout,
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        ViewPager2 viewPager = new ViewPager2(this);
         this.mViewPager = viewPager;
         viewPager.setId(R.id.pager);
-        setContentView(this.mViewPager);
-        ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(2);
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayShowTitleEnabled(false);
+        root.addView(viewPager, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        setContentView(root);
         createTabs();
         if (bundle != null) {
-            actionBar.setSelectedNavigationItem(bundle.getInt("tab", 0));
+            this.mViewPager.setCurrentItem(bundle.getInt("tab", 0), false);
         }
         if (Debug.isDebuggerConnected()) {
             DebugHelper.getInstance().showDebugMenu(this);
@@ -48,32 +80,30 @@ public class LMT extends Activity {
     }
 
     private void createTabs() {
-        ActionBar actionBar = getActionBar();
-        this.mTabsAdapter = new TabsAdapter(this, this.mViewPager);
+        TabsAdapter adapter = new TabsAdapter(this);
         int iLoadTouchServiceMode =
                 SettingsValues.getInstance(getApplicationContext()).loadTouchServiceMode();
-        this.mTabsAdapter.addTab(
-                actionBar.newTab().setText(R.string.navigation_settings),
-                SettingsViewFragment.class);
+        adapter.addTab(getString(R.string.navigation_settings), SettingsViewFragment.class);
         if (iLoadTouchServiceMode < 2) {
-            this.mTabsAdapter.addTab(
-                    actionBar.newTab().setText(R.string.navigation_gestures),
-                    GesturesFragment.class);
-            this.mTabsAdapter.addTab(
-                    actionBar.newTab().setText(R.string.navigation_isas), IsasFragment.class);
+            adapter.addTab(getString(R.string.navigation_gestures), GesturesFragment.class);
+            adapter.addTab(getString(R.string.navigation_isas), IsasFragment.class);
         }
         if (iLoadTouchServiceMode > 0) {
-            this.mTabsAdapter.addTab(
-                    actionBar.newTab().setText(R.string.navigation_pie), PieFragment.class);
+            adapter.addTab(getString(R.string.navigation_pie), PieFragment.class);
         }
-        this.mTabsAdapter.addTab(
-                getActionBar().newTab().setText(R.string.navigation_info), InfoFragment.class);
+        adapter.addTab(getString(R.string.navigation_info), InfoFragment.class);
+        this.mViewPager.setAdapter(adapter);
+        new TabLayoutMediator(
+                        this.mTabLayout,
+                        this.mViewPager,
+                        (tab, position) -> tab.setText(adapter.getTitle(position)))
+                .attach();
     }
 
-    @Override // android.app.Activity
+    @Override // androidx.fragment.app.FragmentActivity
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        bundle.putInt("tab", getActionBar().getSelectedNavigationIndex());
+        bundle.putInt("tab", this.mViewPager.getCurrentItem());
     }
 
     private void checkAndRequestPermissions() {
@@ -85,8 +115,9 @@ public class LMT extends Activity {
         permissionChecker.hasUsageStatsPermission(this, true);
     }
 
-    @Override // android.app.Activity
+    @Override // androidx.fragment.app.FragmentActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PermissionChecker.DRAW_OVER_APPS_REQUEST_CODE) {
             PermissionChecker.getInstance().hasDrawOverAppsPermission(this, true);
         }
@@ -95,77 +126,34 @@ public class LMT extends Activity {
         }
     }
 
-    public static class TabsAdapter extends FrameworkFragmentStatePagerAdapter
-            implements ActionBar.TabListener, ViewPager.OnPageChangeListener {
-        private final ActionBar mActionBar;
-        private final Context mContext;
-        private final ArrayList<TabInfo> mTabs;
-        private final ViewPager mViewPager;
+    private static class TabsAdapter extends FragmentStateAdapter {
+        private final List<CharSequence> mTitles = new ArrayList<>();
+        private final List<Class<? extends Fragment>> mFragmentClasses = new ArrayList<>();
 
-        @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-        public void onPageScrollStateChanged(int state) {}
-
-        @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-        public void onPageScrolled(int position, float offset, int offsetPixels) {}
-
-        @Override // android.app.ActionBar.TabListener
-        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {}
-
-        @Override // android.app.ActionBar.TabListener
-        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {}
-
-        static final class TabInfo {
-            private final Bundle args;
-            private final Class<?> clss;
-
-            TabInfo(Class<?> cls, Bundle bundle) {
-                this.clss = cls;
-                this.args = bundle;
-            }
+        TabsAdapter(FragmentActivity activity) {
+            super(activity);
         }
 
-        TabsAdapter(Activity activity, ViewPager viewPager) {
-            super(activity.getFragmentManager());
-            this.mTabs = new ArrayList<>();
-            this.mContext = activity;
-            this.mActionBar = activity.getActionBar();
-            this.mViewPager = viewPager;
-            viewPager.setAdapter(this);
-            viewPager.setOnPageChangeListener(this);
+        void addTab(CharSequence title, Class<? extends Fragment> cls) {
+            this.mTitles.add(title);
+            this.mFragmentClasses.add(cls);
         }
 
-        void addTab(ActionBar.Tab tab, Class<?> cls) {
-            TabInfo tabInfo = new TabInfo(cls, null);
-            tab.setTag(tabInfo);
-            tab.setTabListener(this);
-            this.mTabs.add(tabInfo);
-            this.mActionBar.addTab(tab);
-            notifyDataSetChanged();
+        CharSequence getTitle(int position) {
+            return this.mTitles.get(position);
         }
 
-        @Override // androidx.viewpager.widget.PagerAdapter
-        public int getCount() {
-            return this.mTabs.size();
+        @Override // androidx.viewpager2.adapter.FragmentStateAdapter
+        public int getItemCount() {
+            return this.mFragmentClasses.size();
         }
 
-        @Override // FrameworkFragmentStatePagerAdapter
-        public Fragment getItem(int position) {
-            TabInfo tabInfo = this.mTabs.get(position);
-            return Fragment.instantiate(this.mContext, tabInfo.clss.getName(), tabInfo.args);
-        }
-
-        @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
-        public void onPageSelected(int position) {
-            this.mActionBar.setSelectedNavigationItem(position);
-        }
-
-        @Override // android.app.ActionBar.TabListener
-        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-            Object tag = tab.getTag();
-            for (int index = 0; index < this.mTabs.size(); index++) {
-                if (this.mTabs.get(index) == tag) {
-                    this.mViewPager.setCurrentItem(index);
-                }
+        @Override // androidx.viewpager2.adapter.FragmentStateAdapter
+        public Fragment createFragment(int position) {
+            try {
+                return this.mFragmentClasses.get(position).getDeclaredConstructor().newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
             }
         }
     }

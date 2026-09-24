@@ -1,7 +1,6 @@
 package com.noname81.lmt;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+
+import androidx.fragment.app.Fragment;
 
 import com.noname81.lmt.SettingsViewHelper.SettingsSimpleAdapter;
 
@@ -25,13 +26,12 @@ import java.util.LinkedList;
 public class SettingsViewFragment extends Fragment {
     SettingsViewHelper mSettingsHelper;
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        setUserVisibleHint(true);
     }
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         super.onCreateView(layoutInflater, viewGroup, bundle);
         this.mSettingsHelper = new SettingsViewHelper(getActivity(), this);
@@ -406,7 +406,7 @@ public class SettingsViewFragment extends Fragment {
         return listView;
     }
 
-    @Override // android.app.Fragment
+    @Override // androidx.fragment.app.Fragment
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_OK || data == null) {
