@@ -65,6 +65,7 @@ public class SlotMappingUiTest {
         for (UiTestSupport.SectionedRow row : UiTestSupport.sectionedRows(fragment.rowsForTest())) {
             int expected = pieSlotFromLabel(row);
             fragment.clickRowForTest(row.position);
+            UiTestSupport.idle();
             int actual =
                     UiTestSupport.privateInt(
                             SettingsValues.getInstance(context),
@@ -99,6 +100,7 @@ public class SlotMappingUiTest {
         assertEquals(TouchServiceResult.names.length, rows.size());
         for (UiTestSupport.SectionedRow row : rows) {
             fragment.clickRowForTest(row.position);
+            UiTestSupport.idle();
             int actual =
                     UiTestSupport.privateInt(
                             SettingsValues.getInstance(context),
@@ -125,6 +127,7 @@ public class SlotMappingUiTest {
         };
         for (UiTestSupport.SectionedRow row : rows) {
             fragment.clickRowForTest(row.position);
+            UiTestSupport.idle();
             int slot =
                     UiTestSupport.privateInt(
                             SettingsValues.getInstance(context),

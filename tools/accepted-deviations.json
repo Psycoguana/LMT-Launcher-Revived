@@ -408,6 +408,11 @@
       "class": "PieFragment.smali",
       "reworked": true,
       "reason": "ROADMAP 1.6 phase 3: same RecyclerView/SectionedRows rework as GesturesFragment.smali/IsasFragment.smali, plus the icon2 click handler (icon-selection confirm dialog / image picker) and mCurrentPos move here as handleIconClick/clickIconForTest - CommandSimpleAdapter is gone, replaced by Adapter."
+    },
+    {
+      "class": "CommandSelectActivity.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.6 phase 3: becomes an AppCompatActivity with a MaterialToolbar (matching the framework ActionBar's default \"LMT\" title it got for free under the old theme) and a RecyclerView/SectionedRows-backed Adapter instead of ListView + CommandSelectSimpleAdapter. onItemClick is gone - AdapterView.OnItemClickListener is no longer implemented, replaced by handleRowClick wired per-row in Adapter.onBindViewHolder."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -531,6 +536,22 @@
     {
       "class": "PieFragment$RowViewHolder.smali",
       "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for a data row. Has no upstream counterpart."
+    },
+    {
+      "class": "CommandSelectActivity$Adapter.smali",
+      "reason": "ROADMAP 1.6 phase 3: replaces the deleted CommandSelectActivity$CommandSelectSimpleAdapter (see removed_classes) - a RecyclerView.Adapter wrapping SectionedRows instead of a ListView SimpleAdapter."
+    },
+    {
+      "class": "CommandSelectActivity$Adapter$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 3: CommandSelectActivity$Adapter's per-row click-listener and icon-loader lambdas. Same situation as GesturesFragment$Adapter$ANON.smali in this same phase."
+    },
+    {
+      "class": "CommandSelectActivity$HeaderViewHolder.smali",
+      "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for a section header row. Has no upstream counterpart."
+    },
+    {
+      "class": "CommandSelectActivity$RowViewHolder.smali",
+      "reason": "ROADMAP 1.6 phase 3: RecyclerView view holder for a data row. Has no upstream counterpart."
     }
   ],
   "removed_classes": [
@@ -585,6 +606,14 @@
     {
       "class": "PieFragment$CommandSimpleAdapter$ANON$ANON.smali",
       "reason": "ROADMAP 1.6 phase 3: the icon-selection dialog's DialogInterface.OnClickListener subclasses (nested inside the icon2 click listener) are gone along with it - PieFragment.handleIconClick builds the same dialog with lambdas directly."
+    },
+    {
+      "class": "CommandSelectActivity$CommandSelectSimpleAdapter.smali",
+      "reason": "ROADMAP 1.6 phase 3: replaced by CommandSelectActivity$Adapter (RecyclerView instead of ListView)."
+    },
+    {
+      "class": "CommandSelectActivity$CommandSelectSimpleAdapter$ANON.smali",
+      "reason": "ROADMAP 1.6 phase 3: the AsyncDrawableTask subclass this adapter built per row is gone along with it - icon loading now goes through IconLoader."
     }
   ]
 }

@@ -9,7 +9,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.EditText;
-import android.widget.ListView;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -73,9 +72,9 @@ public class ActionPickerUiTest {
 
     @Test
     public void everyRowAssignsTheActionItIsLabelledWith() throws Exception {
-        List<UiTestSupport.Row> rows = rowsOfAFreshPicker();
+        List<UiTestSupport.SectionedRow> rows = rowsOfAFreshPicker();
         Set<Integer> covered = new HashSet<>();
-        for (UiTestSupport.Row row : rows) {
+        for (UiTestSupport.SectionedRow row : rows) {
             int type = Arrays.asList(Action.names).indexOf(row.title);
             assertEquals(row + ": caption", Action.captions[type], row.caption);
             covered.add(type);
@@ -84,9 +83,9 @@ public class ActionPickerUiTest {
             SettingsValues.getInstance(context).setCurrentPie(0);
             CommandSelectActivity picker =
                     Robolectric.buildActivity(CommandSelectActivity.class).setup().get();
-            ListView list = (ListView) shadowOf(picker).getContentView();
             Object dialogBefore = ShadowAlertDialog.getLatestDialog();
-            UiTestSupport.click(list, findRow(list, row.title));
+            picker.clickRowForTest(findRowPosition(picker, row.title));
+            UiTestSupport.idle();
             // getLatestDialog() survives across activities, so only a *new* one counts.
             AlertDialog shown =
                     ShadowAlertDialog.getLatestDialog() == dialogBefore
@@ -134,16 +133,16 @@ public class ActionPickerUiTest {
         }
     }
 
-    private List<UiTestSupport.Row> rowsOfAFreshPicker() {
+    private List<UiTestSupport.SectionedRow> rowsOfAFreshPicker() {
         CommandSelectActivity picker =
                 Robolectric.buildActivity(CommandSelectActivity.class).setup().get();
-        return UiTestSupport.rows((ListView) shadowOf(picker).getContentView());
+        return UiTestSupport.sectionedActionRows(picker.rowsForTest());
     }
 
-    private static UiTestSupport.Row findRow(ListView list, String title) {
-        for (UiTestSupport.Row row : UiTestSupport.rows(list)) {
+    private static int findRowPosition(CommandSelectActivity picker, String title) {
+        for (UiTestSupport.SectionedRow row : UiTestSupport.sectionedActionRows(picker.rowsForTest())) {
             if (row.title.equals(title)) {
-                return row;
+                return row.position;
             }
         }
         throw new AssertionError("no row labelled " + title);

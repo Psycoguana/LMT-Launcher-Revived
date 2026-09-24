@@ -1,21 +1,24 @@
 package com.noname81.lmt;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import java.util.LinkedList;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Picks which action a slot fires.
@@ -24,107 +27,66 @@ import java.util.Map;
  * for action types that need one, collects the payload — an app, an activity, a URL, a script, a
  * key code, or (Tasker) a task chosen from Tasker's own picker.
  */
-public class CommandSelectActivity extends Activity implements AdapterView.OnItemClickListener {
+public class CommandSelectActivity extends AppCompatActivity {
     private static final int REQUEST_TASKER_TASK_SELECT = 1;
+
+    Adapter mAdapter;
     private int mPos = 0;
 
-    @Override // android.app.Activity
+    @Override // androidx.fragment.app.FragmentActivity
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        LinkedList linkedList = new LinkedList();
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[1], Action.captions[1]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[2], Action.captions[2]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[3], Action.captions[3]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[4], Action.captions[4]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[5], Action.captions[5]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[6], Action.captions[6]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[7], Action.captions[7]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[8], Action.captions[8]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[9], Action.captions[9]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[10], Action.captions[10]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[11], Action.captions[11]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[12], Action.captions[12]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[13], Action.captions[13]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[14], Action.captions[14]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[15], Action.captions[15]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[16], Action.captions[16]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[17], Action.captions[17]));
-        linkedList.add(SeparatedListAdapter.createItem(Action.names[18], Action.captions[18]));
-        LinkedList linkedList2 = new LinkedList();
-        linkedList2.add(SeparatedListAdapter.createItem(Action.names[20], Action.captions[20]));
-        linkedList2.add(SeparatedListAdapter.createItem(Action.names[21], Action.captions[21]));
-        linkedList2.add(SeparatedListAdapter.createItem(Action.names[22], Action.captions[22]));
-        linkedList2.add(SeparatedListAdapter.createItem(Action.names[23], Action.captions[23]));
-        linkedList2.add(SeparatedListAdapter.createItem(Action.names[24], Action.captions[24]));
-        LinkedList linkedList3 = new LinkedList();
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[26], Action.captions[26]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[27], Action.captions[27]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[28], Action.captions[28]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[29], Action.captions[29]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[30], Action.captions[30]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[31], Action.captions[31]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[32], Action.captions[32]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[33], Action.captions[33]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[34], Action.captions[34]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[35], Action.captions[35]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[36], Action.captions[36]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[37], Action.captions[37]));
-        linkedList3.add(SeparatedListAdapter.createItem(Action.names[38], Action.captions[38]));
-        LinkedList linkedList4 = new LinkedList();
-        linkedList4.add(SeparatedListAdapter.createItem(Action.names[40], Action.captions[40]));
-        linkedList4.add(SeparatedListAdapter.createItem(Action.names[41], Action.captions[41]));
-        linkedList4.add(SeparatedListAdapter.createItem(Action.names[42], Action.captions[42]));
-        LinkedList linkedList5 = new LinkedList();
-        linkedList5.add(SeparatedListAdapter.createItem(Action.names[44], Action.captions[44]));
-        linkedList5.add(SeparatedListAdapter.createItem(Action.names[45], Action.captions[45]));
-        SeparatedListAdapter separatedListAdapter = new SeparatedListAdapter(this);
-        separatedListAdapter.addSection(
-                getString(R.string.commands_normal_commands),
-                new CommandSelectSimpleAdapter(this, linkedList, 0));
-        separatedListAdapter.addSection(
-                getString(R.string.commands_toogle_commands),
-                new CommandSelectSimpleAdapter(this, linkedList2, 19));
-        separatedListAdapter.addSection(
-                getString(R.string.commands_advanced_commands),
-                new CommandSelectSimpleAdapter(this, linkedList3, 25));
-        separatedListAdapter.addSection(
-                getString(R.string.commands_app_drawer_commands),
-                new CommandSelectSimpleAdapter(this, linkedList4, 39));
-        separatedListAdapter.addSection(
-                getString(R.string.commands_pie_action_commands),
-                new CommandSelectSimpleAdapter(this, linkedList5, 43));
-        ListView listView = new ListView(this);
-        listView.setAdapter((ListAdapter) separatedListAdapter);
-        listView.setOnItemClickListener(this);
-        listView.setDividerHeight(0);
-        setContentView(listView);
+
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+
+        AppBarLayout appBarLayout = new AppBarLayout(this);
+        MaterialToolbar toolbar = new MaterialToolbar(this);
+        appBarLayout.addView(
+                toolbar,
+                new AppBarLayout.LayoutParams(
+                        AppBarLayout.LayoutParams.MATCH_PARENT,
+                        AppBarLayout.LayoutParams.WRAP_CONTENT));
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(getString(R.string.app_name));
+        root.addView(
+                appBarLayout,
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        RecyclerView recyclerView = new RecyclerView(this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        this.mAdapter = new Adapter();
+        recyclerView.setAdapter(this.mAdapter);
+        root.addView(
+                recyclerView,
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        setContentView(root);
     }
 
-    @Override // android.widget.AdapterView.OnItemClickListener
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        this.mPos = position;
-        if (position == 2) {
+    private void handleRowClick(int actionType) {
+        this.mPos = actionType;
+        if (actionType == 2) {
             MultiSelectActivity.AppSelectMode = 0;
-            startActivityForResult(
-                    new Intent(view.getContext(), (Class<?>) MultiSelectActivity.class), 0);
+            startActivityForResult(new Intent(this, MultiSelectActivity.class), 0);
             finish();
             return;
         }
-        if (position == 27) {
+        if (actionType == 27) {
             MultiSelectActivity.AppSelectMode = 1;
-            startActivityForResult(
-                    new Intent(view.getContext(), (Class<?>) MultiSelectActivity.class), 0);
+            startActivityForResult(new Intent(this, MultiSelectActivity.class), 0);
             finish();
             return;
         }
-        if (position == 33) {
+        if (actionType == 33) {
             MultiSelectActivity.AppSelectMode = 5;
-            startActivityForResult(
-                    new Intent(view.getContext(), (Class<?>) MultiSelectActivity.class), 0);
+            startActivityForResult(new Intent(this, MultiSelectActivity.class), 0);
             finish();
             return;
         }
-        if (position == Action.TaskerTask) {
+        if (actionType == Action.TaskerTask) {
             Intent picker = TaskerIntents.selectTaskIntent();
             if (getPackageManager().resolveActivity(picker, 0) != null) {
                 startActivityForResult(picker, REQUEST_TASKER_TASK_SELECT);
@@ -132,9 +94,8 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
             }
             // No Tasker installed: fall through to typing the name, as before.
         }
-        if ((position > 25 && position < 30) || position == 32) {
-            Action currentAction =
-                    SettingsValues.getInstance(getApplicationContext()).getCurrentAction();
+        if ((actionType > 25 && actionType < 30) || actionType == 32) {
+            Action currentAction = SettingsValues.getInstance(getApplicationContext()).getCurrentAction();
             String string = currentAction.getType() == this.mPos ? currentAction.getString() : "";
             new InputDialog(
                     this,
@@ -163,7 +124,16 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
         onBackPressed();
     }
 
-    @Override // android.app.Activity
+    /** Test-only entry point: reproduces a real tap on the row at this flat position. */
+    void clickRowForTest(int flatPosition) {
+        handleRowClick(this.mAdapter.mRows.rowAt(flatPosition));
+    }
+
+    SectionedRows<Integer> rowsForTest() {
+        return this.mAdapter.mRows;
+    }
+
+    @Override // androidx.fragment.app.FragmentActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != REQUEST_TASKER_TASK_SELECT || resultCode != RESULT_OK) {
@@ -178,53 +148,92 @@ public class CommandSelectActivity extends Activity implements AdapterView.OnIte
         onBackPressed();
     }
 
-    class CommandSelectSimpleAdapter extends SimpleAdapter {
-        private final int mOffset;
+    final class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        final SectionedRows<Integer> mRows = new SectionedRows<>();
 
-        CommandSelectSimpleAdapter(
-                Context context, List<? extends Map<String, ?>> items, int resource) {
-            super(
-                    context,
-                    items,
-                    R.layout.listitem_icondescriptionicon,
-                    new String[] {"title", "caption"},
-                    new int[] {
-                        R.id.listitem_icondescriptionicon_text,
-                        R.id.listitem_icondescriptionicon_caption
-                    });
-            this.mOffset = resource;
+        Adapter() {
+            this.mRows.addSection(getString(R.string.commands_normal_commands), range(1, 18));
+            this.mRows.addSection(getString(R.string.commands_toogle_commands), range(20, 24));
+            this.mRows.addSection(getString(R.string.commands_advanced_commands), range(26, 38));
+            this.mRows.addSection(getString(R.string.commands_app_drawer_commands), range(40, 42));
+            this.mRows.addSection(getString(R.string.commands_pie_action_commands), range(44, 45));
         }
 
-        @Override // android.widget.SimpleAdapter, android.widget.Adapter
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            View row = super.getView(position, convertView, parent);
-            ImageView imageView =
-                    (ImageView) row.findViewById(R.id.listitem_icondescriptionicon_icon);
-            ImageView imageView2 =
-                    (ImageView) row.findViewById(R.id.listitem_icondescriptionicon_icon2);
-            IconUtils.setMaxSizeForImageView(
-                    CommandSelectActivity.this.getApplicationContext(), imageView);
-            new AsyncDrawableTask(imageView, R.drawable.none) { // from class:
-                // com.noname81.lmt.CommandSelectActivity.CommandSelectSimpleAdapter.1
-                @Override // com.noname81.lmt.AsyncDrawableTask, android.os.AsyncTask
-                protected Drawable doInBackground(Void... voidArr) {
-                    return IconUtils.getIconForAction(
-                            CommandSelectActivity.this.getApplicationContext(),
-                            new Action(CommandSelectSimpleAdapter.this.mOffset + position + 1),
-                            null);
-                }
-            }.execute(new Void[0]);
-            if (this.mOffset + position + 1
-                    == SettingsValues.getInstance(
-                                    CommandSelectActivity.this.getApplicationContext())
-                            .getCurrentAction()
-                            .getType()) {
-                imageView2.setImageDrawable(
-                        IconUtils.getIconForOK(CommandSelectActivity.this.getApplicationContext()));
-            } else {
-                imageView2.setImageDrawable(null);
+        private List<Integer> range(int from, int to) {
+            List<Integer> types = new ArrayList<>();
+            for (int type = from; type <= to; type++) {
+                types.add(type);
             }
-            return row;
+            return types;
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public int getItemCount() {
+            return this.mRows.getItemCount();
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public int getItemViewType(int position) {
+            return this.mRows.getItemViewType(position);
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public RecyclerView.ViewHolder onCreateViewHolder(
+                @NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            if (viewType == SectionedRows.VIEW_TYPE_HEADER) {
+                return new HeaderViewHolder(inflater.inflate(R.layout.listheader, parent, false));
+            }
+            return new RowViewHolder(
+                    inflater.inflate(R.layout.listitem_icondescriptionicon, parent, false));
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            if (holder instanceof HeaderViewHolder) {
+                ((HeaderViewHolder) holder).text.setText(this.mRows.headerAt(position));
+                return;
+            }
+            RowViewHolder rowHolder = (RowViewHolder) holder;
+            int actionType = this.mRows.rowAt(position);
+            rowHolder.title.setText(Action.names[actionType]);
+            rowHolder.caption.setText(Action.captions[actionType]);
+            IconUtils.setMaxSizeForImageView(getApplicationContext(), rowHolder.icon);
+            IconLoader.load(
+                    rowHolder.icon,
+                    R.drawable.none,
+                    () -> IconUtils.getIconForAction(getApplicationContext(), new Action(actionType), null));
+            if (actionType
+                    == SettingsValues.getInstance(getApplicationContext()).getCurrentAction().getType()) {
+                rowHolder.icon2.setImageDrawable(IconUtils.getIconForOK(getApplicationContext()));
+            } else {
+                rowHolder.icon2.setImageDrawable(null);
+            }
+            rowHolder.itemView.setOnClickListener(v -> handleRowClick(actionType));
+        }
+    }
+
+    private static final class HeaderViewHolder extends RecyclerView.ViewHolder {
+        final TextView text;
+
+        HeaderViewHolder(@NonNull View itemView) {
+            super(itemView);
+            this.text = (TextView) itemView;
+        }
+    }
+
+    private static final class RowViewHolder extends RecyclerView.ViewHolder {
+        final TextView title;
+        final TextView caption;
+        final ImageView icon;
+        final ImageView icon2;
+
+        RowViewHolder(@NonNull View itemView) {
+            super(itemView);
+            this.title = itemView.findViewById(R.id.listitem_icondescriptionicon_text);
+            this.caption = itemView.findViewById(R.id.listitem_icondescriptionicon_caption);
+            this.icon = itemView.findViewById(R.id.listitem_icondescriptionicon_icon);
+            this.icon2 = itemView.findViewById(R.id.listitem_icondescriptionicon_icon2);
         }
     }
 }

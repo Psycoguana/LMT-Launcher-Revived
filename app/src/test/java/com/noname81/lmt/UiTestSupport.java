@@ -217,4 +217,22 @@ final class UiTestSupport {
         }
         return result;
     }
+
+    /**
+     * Same as {@link #sectionedRows}, for a {@link SectionedRows} whose row payload is an {@link
+     * Action} type constant (CommandSelectActivity) rather than a {@link SectionedRows.Labeled} -
+     * title/caption come from {@code Action.names}/{@code Action.captions}.
+     */
+    static List<SectionedRow> sectionedActionRows(SectionedRows<Integer> rows) {
+        List<SectionedRow> result = new ArrayList<>();
+        for (int position = 0; position < rows.getItemCount(); position++) {
+            if (!rows.isHeader(position)) {
+                String section = rows.headerAt(position);
+                int type = rows.rowAt(position);
+                result.add(
+                        new SectionedRow(section, Action.names[type], Action.captions[type], position));
+            }
+        }
+        return result;
+    }
 }
