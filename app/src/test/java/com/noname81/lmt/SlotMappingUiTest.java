@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
-import android.view.View;
-import android.widget.ListView;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ApplicationProvider;
@@ -62,11 +60,11 @@ public class SlotMappingUiTest {
     @Test
     public void everyPieRowEditsTheSlotItsLabelNames() throws Exception {
         PieFragment fragment = new PieFragment();
-        ListView list = UiTestSupport.show(host, fragment);
+        UiTestSupport.showRecyclerView(host, fragment);
         TreeSet<Integer> seen = new TreeSet<>();
-        for (UiTestSupport.Row row : UiTestSupport.rows(list)) {
+        for (UiTestSupport.SectionedRow row : UiTestSupport.sectionedRows(fragment.rowsForTest())) {
             int expected = pieSlotFromLabel(row);
-            UiTestSupport.click(list, row);
+            fragment.clickRowForTest(row.position);
             int actual =
                     UiTestSupport.privateInt(
                             SettingsValues.getInstance(context),
@@ -83,11 +81,9 @@ public class SlotMappingUiTest {
     @Test
     public void everyPieRowsIconButtonEditsThatSlotsIconFile() throws Exception {
         PieFragment fragment = new PieFragment();
-        ListView list = UiTestSupport.show(host, fragment);
-        for (UiTestSupport.Row row : UiTestSupport.rows(list)) {
-            View rowView = UiTestSupport.rowView(list, row);
-            View iconButton = rowView.findViewById(R.id.listitem_icondescriptionicon_icon2);
-            iconButton.performClick();
+        UiTestSupport.showRecyclerView(host, fragment);
+        for (UiTestSupport.SectionedRow row : UiTestSupport.sectionedRows(fragment.rowsForTest())) {
+            fragment.clickIconForTest(row.position);
             UiTestSupport.idle();
             int actual = UiTestSupport.privateInt(fragment, PieFragment.class, "mCurrentPos");
             // The file PieControl loads for slot N is IconUtils.getNamePie(N).
@@ -142,7 +138,7 @@ public class SlotMappingUiTest {
         }
     }
 
-    private static int pieSlotFromLabel(UiTestSupport.Row row) {
+    private static int pieSlotFromLabel(UiTestSupport.SectionedRow row) {
         Matcher level = PIE_LEVEL.matcher(row.section);
         Matcher item = PIE_ITEM.matcher(row.title);
         if (!level.matches() || !item.matches()) {
