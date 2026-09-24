@@ -60,6 +60,10 @@ public class IsasFragment extends Fragment {
         final SectionedRows<SectionedRows.Labeled> mRows = new SectionedRows<>();
 
         Adapter() {
+            // Rows never move, so a position is a stable id. With it, onResume's
+            // notifyDataSetChanged rebinds each row into the holder that already shows it, and
+            // IconLoader keeps the icon instead of fading it in again.
+            setHasStableIds(true);
             this.mRows.addSection(
                     getString(R.string.isas_isa_areas_bottom),
                     labeled(
@@ -93,6 +97,11 @@ public class IsasFragment extends Fragment {
             rows.add(new SectionedRows.Labeled(t2, c2));
             rows.add(new SectionedRows.Labeled(t3, c3));
             return rows;
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public long getItemId(int position) {
+            return position;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter

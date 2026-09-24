@@ -60,6 +60,10 @@ public class GesturesFragment extends Fragment {
         final SectionedRows<SectionedRows.Labeled> mRows = new SectionedRows<>();
 
         Adapter() {
+            // Rows never move, so a position is a stable id. With it, onResume's
+            // notifyDataSetChanged rebinds each row into the holder that already shows it, and
+            // IconLoader keeps the icon instead of fading it in again.
+            setHasStableIds(true);
             this.mRows.addSection(
                     getString(R.string.gestures_single_touch_gestures), labeled(0, 3));
             this.mRows.addSection(getString(R.string.gestures_swipe_gestures), labeled(3, 11));
@@ -74,6 +78,11 @@ public class GesturesFragment extends Fragment {
                                 TouchServiceResult.names[i], TouchServiceResult.captions[i]));
             }
             return rows;
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public long getItemId(int position) {
+            return position;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter

@@ -109,6 +109,10 @@ public class PieFragment extends Fragment {
         final SectionedRows<SectionedRows.Labeled> mRows = new SectionedRows<>();
 
         Adapter() {
+            // Rows never move, so a position is a stable id. With it, onResume's
+            // notifyDataSetChanged rebinds each row into the holder that already shows it, and
+            // IconLoader keeps the icon instead of fading it in again.
+            setHasStableIds(true);
             this.mRows.addSection(getString(R.string.pie_level_1), level1Rows());
             this.mRows.addSection(getString(R.string.pie_level_2), level2Rows());
             this.mRows.addSection(getString(R.string.pie_level_3), level3Rows());
@@ -203,6 +207,11 @@ public class PieFragment extends Fragment {
                     new SectionedRows.Labeled(
                             "Pie item 7 longpress", getString(R.string.pie_level_3_item_7_longpress)));
             return rows;
+        }
+
+        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        public long getItemId(int position) {
+            return position;
         }
 
         @Override // androidx.recyclerview.widget.RecyclerView.Adapter
