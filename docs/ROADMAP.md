@@ -247,6 +247,21 @@ Done in three phases, each verified on-device before the next:
   become `AppCompatActivity` with their own `MaterialToolbar`. Dialogs stay on
   plain `AlertDialog.Builder`, same reasoning as phase 2 — confirmed
   `MaterialAlertDialogBuilder` has the identical `ShadowAlertDialog` problem.
+- **Polish round** (`c8b1566`, `d87472e`, 2026-09-24): the phases above made the
+  app M3-*themed*; this made it look M3. The dialog blocker above turned out to
+  be wrong — `ShadowAlertDialog.getLatestDialog()` is the inherited
+  `ShadowDialog` static, which tracks any `Dialog` — so `ColorDialog`/
+  `InputDialog` and the inline confirms now use `MaterialAlertDialogBuilder`
+  (M3 Sliders, outlined text fields); tests read dialog fields from the shown
+  view tree instead of shadow accessors. The app picker's search is an inline
+  pill field in the toolbar (no "LMT" title, no autofocus) and "show system
+  apps" is a filter `Chip` instead of an overflow menu item. Settings switches
+  are `MaterialSwitch`. Every list screen's section titles and rows now match
+  the Settings tab's M3 category/row styling (sentence case, no all-caps), and
+  the `layout-v17` copies that silently shadowed `layout/` are gone. Also fixed
+  a real race it surfaced: `IconLoader` worker threads could build a second
+  `SettingsValues` and lose the selected slot (was the flaky
+  `SlotMappingUiTest` ISA test).
 
 The pie overlay itself is custom `Canvas` drawing and was unaffected throughout.
 
