@@ -51,6 +51,29 @@ Test dependencies do not reach the release APK; the oracle stays `EQUIVALENT`.
   `expandTriggerArea` branch where the outermost ring goes unbounded — which is
   exactly what a third ring re-points. Mutation-verified: flipping
   `getLevel() == mLevels` to `!=` and `<` to `<=` each fail the intended tests.
+- ~~**UI safety net before the Material 3 rewrite (1.6)**~~ — **done.** Robolectric
+  drives the real screens *by visible label*, so the expectations outlive the
+  rewrite; only the driver (`UiTestSupport`) knows about today's ListView.
+  - `SettingsScreenUiTest`: all 49 Settings rows (TSMode 1 shows every section).
+    Each row is clicked on a fresh screen. The test answers whatever it opens
+    (value, choice, colour, confirmation), toggles its switch, and diffs the
+    stored settings. Frozen as a label → keys/started-intents table. The widget
+    type is deliberately left out of the contract, so a choice dialog may become a
+    switch in the new UI. Swapping two rows' `pos*` wiring fails with a message
+    naming the crossed rows.
+  - `SlotMappingUiTest`: every Pie/Gesture/ISA row edits the slot its label names.
+    Expected slots come from how the *engine* reads them (`PieControl` rings,
+    `TouchServiceResult.names`, `getIsaAction` zones), not from the fragments'
+    header-skipping arithmetic. Pie icon buttons are covered too, since they use a
+    separate offset table. Both mutations tried were caught.
+  - `ActionPickerUiTest`: the row labelled `Action.names[t]` assigns action t,
+    opens the app picker in the right mode (App 0, Activity 1, Shortcut 5), or
+    asks for its payload. Every real action is offered; `Offset*` markers never
+    are.
+  - `MainTabsUiTest`: which tabs each TSMode shows.
+  - `SettingsValues` caches slots in a static, so these tests must reset it after
+    themselves. The first full run showed `SettingsSlotSchemaTest` inheriting
+    action 45 from the picker test.
 - **Instrumented smoke test** — service starts, pie opens, three rings render.
   This is currently done by hand via argent; `argent-qa-flows` could record it.
 - **`inputcontext/` has no automated coverage at all** (865 lines) and, being an
@@ -526,7 +549,7 @@ finished beyond the pointer.
 This also makes 2.1's `GLOBAL_ACTION_TAKE_SCREENSHOT` more valuable than it first
 appeared: it is not a convenience, it is the only way Screenshot works at all on Android 15.
 
-### 3.2 🟡 Latent out-of-bounds in `Action.toString()`
+### 3.2 ✅ FIXED — Latent out-of-bounds in `Action.toString()` (bound changed to `<`; see accepted-deviations.json)
 
 ```java
 if (mType > 0 && mType <= names.length) { typeName = names[mType]; }
@@ -609,14 +632,23 @@ outstanding warnings are still there before doing either.
 
 ---
 
+### 3.7 🟡 Auto configuration computes a touchscreen factor of 0 (upstream, gestures/ISA mode only)
+
+`SettingsViewHelper`'s Auto configuration row computes
+`Math.round((maxFromGetevent / screenWidth) * 100.0f)` with two `int`s, so the
+division truncates *before* the scaling. The common case is a touchscreen whose max
+coordinate is `width − 1`, and that yields `0 / … * 100 = 0`. The `<= -1` guard
+doesn't catch it, and a factor of 0 then divides `getIsaAction`'s coordinates to
+infinity. The fix is a float division; the same applies to Y. Found while writing
+`SettingsScreenUiTest`, not fixed yet: it needs root to exercise, and pie-only
+users (the default) never reach it.
+
+---
+
 ## Part 4 — Reconstruction cleanup still outstanding
 
-- **347 `int i*`, 123 `String str*`, 69 `boolean z*`, 64 `float f*`** and similar
-  decompiler-generated names. `docs/original-names.json` holds the 14 names
-  recovered from the reference dex's `val$` capture fields — the reference
-  preserves the original author's local names wherever a lambda or anonymous class
-  captured one, so check there before inventing a name.
-- **39 `JADX INFO` comments** still in the sources.
+- ~~Decompiler-generated names (`int i*`, `String str*`, …) and `JADX INFO`
+  comments~~ — **done** in the readability pass (1.3); both counts are now 0.
 - **minSdk 15 → 21**, deleting the now-dead `SDK_INT < 21` branches. This changes
   bytecode by design, so run the oracle in "explain every diff" mode for that
   commit rather than expecting `EQUIVALENT`.

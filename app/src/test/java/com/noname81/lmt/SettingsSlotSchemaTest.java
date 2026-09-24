@@ -36,8 +36,10 @@ public class SettingsSlotSchemaTest {
     private SettingsValues settings;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         Context context = ApplicationProvider.getApplicationContext();
+        // A fresh singleton: tests elsewhere may have cached slots in the static instance.
+        UiTestSupport.resetSingletons(context);
         settings = SettingsValues.getInstance(context);
     }
 
