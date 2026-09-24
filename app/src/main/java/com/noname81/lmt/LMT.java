@@ -49,7 +49,8 @@ public class LMT extends AppCompatActivity {
                         AppBarLayout.LayoutParams.WRAP_CONTENT));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(false);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        getSupportActionBar().setTitle("LMT Launcher");
 
         this.mTabLayout = new TabLayout(this);
         appBarLayout.addView(
