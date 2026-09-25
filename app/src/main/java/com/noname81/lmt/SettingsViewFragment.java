@@ -127,22 +127,37 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 "Autostart",
                 true);
 
-        addChoiceDialog(
-                general,
-                "Set active features",
-                "Configure LMT's feature set",
-                "Define feature set",
-                new String[] {
-                    "Gestures [Root] and ISAS [Root] ",
-                    "Gestures [Root] , ISAS [Root] and Pie",
-                    "Pie"
-                },
-                this.mSettings::loadTouchServiceMode,
-                v -> {
-                    this.mSettings.saveTouchServiceMode(v);
-                    this.mSettings.restartServiceIfRequired();
-                    requireActivity().recreate();
-                });
+        // Gestures and ISAs read the touchscreen through su: grey them out without root.
+        String[] features = {
+            "Gestures [Root] and ISAS [Root] ", "Gestures [Root] , ISAS [Root] and Pie", "Pie"
+        };
+        RootContext rootContext = RootContext.getInstance(requireContext().getApplicationContext());
+        Preference featuresPreference =
+                addAction(
+                        general,
+                        "Set active features",
+                        featuresSummary(rootContext),
+                        preference -> {
+                            boolean root = !rootContext.isRootDenied();
+                            new InputDialog(
+                                    requireActivity(),
+                                    "Define feature set",
+                                    features,
+                                    String.valueOf(this.mSettings.loadTouchServiceMode()),
+                                    new boolean[] {root, root, true}) {
+                                @Override // com.noname81.lmt.InputDialog
+                                public boolean onOkClicked(String value) {
+                                    SettingsViewFragment.this.mSettings.saveTouchServiceMode(
+                                            Integer.parseInt(value));
+                                    SettingsViewFragment.this.mSettings.restartServiceIfRequired();
+                                    requireActivity().recreate();
+                                    return true;
+                                }
+                            }.show();
+                            return true;
+                        });
+        rootContext.whenRootKnown(
+                () -> featuresPreference.setSummary(featuresSummary(rootContext)));
 
         addAction(
                 general,
@@ -911,7 +926,14 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         category.addPreference(preference);
     }
 
-    private void addAction(
+    private String featuresSummary(RootContext rootContext) {
+        if (this.mSettings.loadTouchServiceMode() < 2 && rootContext.isRootDenied()) {
+            return "Gestures and ISAs need root, which isn't granted";
+        }
+        return "Configure LMT's feature set";
+    }
+
+    private Preference addAction(
             PreferenceCategory category,
             String title,
             String caption,
@@ -923,6 +945,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(onClick);
         category.addPreference(preference);
+        return preference;
     }
 
     private void addChoiceDialog(

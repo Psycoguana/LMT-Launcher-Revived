@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,9 +31,12 @@ import java.util.List;
  */
 public class CommandSelectActivity extends ThemedActivity {
     private static final int REQUEST_TASKER_TASK_SELECT = 1;
+    /** Material's opacity for disabled content. */
+    static final float DISABLED_ALPHA = 0.38f;
 
     Adapter mAdapter;
     private int mPos = 0;
+    boolean mRootDenied;
 
     @Override // androidx.fragment.app.FragmentActivity
     public void onCreate(Bundle bundle) {
@@ -60,6 +64,15 @@ public class CommandSelectActivity extends ThemedActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         this.mAdapter = new Adapter();
         recyclerView.setAdapter(this.mAdapter);
+        RootContext rootContext = RootContext.getInstance(getApplicationContext());
+        this.mRootDenied = rootContext.isRootDenied();
+        rootContext.whenRootKnown(
+                () -> {
+                    if (!isDestroyed() && this.mRootDenied != rootContext.isRootDenied()) {
+                        this.mRootDenied = rootContext.isRootDenied();
+                        this.mAdapter.notifyDataSetChanged();
+                    }
+                });
         root.addView(
                 recyclerView,
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
@@ -217,7 +230,21 @@ public class CommandSelectActivity extends ThemedActivity {
             } else {
                 rowHolder.icon2.setImageDrawable(null);
             }
-            rowHolder.itemView.setOnClickListener(v -> handleRowClick(actionType));
+            // Root-only actions can't work while su is missing or denied (ROADMAP 1.13).
+            boolean blocked = CommandSelectActivity.this.mRootDenied && Action.needsRoot(actionType);
+            rowHolder.itemView.setAlpha(blocked ? DISABLED_ALPHA : 1f);
+            rowHolder.itemView.setOnClickListener(
+                    v -> {
+                        if (blocked) {
+                            Toast.makeText(
+                                            CommandSelectActivity.this,
+                                            "This action needs root, which isn't granted",
+                                            Toast.LENGTH_SHORT)
+                                    .show();
+                        } else {
+                            handleRowClick(actionType);
+                        }
+                    });
         }
     }
 

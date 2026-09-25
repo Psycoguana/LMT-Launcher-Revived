@@ -169,6 +169,28 @@ class Action {
         "Activate Pie Recent Apps [Root|UsageStats]"
     };
 
+    /**
+     * Whether an action only works with root on this device: none of the ways its caption lists
+     * ({@code [Root|Accessibility|None|...]}) applies here without root. A version-gated
+     * accessibility route counts only when {@link Launcher#accessibilityFallback} supports it.
+     */
+    static boolean needsRoot(int type) {
+        String caption = captions[type];
+        int open = caption.lastIndexOf('[');
+        int close = caption.lastIndexOf(']');
+        if (open < 0 || close < open || !caption.contains("Root")) {
+            return false;
+        }
+        for (String way : caption.substring(open + 1, close).split("\\|")) {
+            boolean gatedAccessibility =
+                    way.startsWith("Accessibility (") && Launcher.accessibilityFallback(type) == 0;
+            if (!way.equals("Root") && !gatedAccessibility) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     Action(int type) {
         this.mType = type;
     }

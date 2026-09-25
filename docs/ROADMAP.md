@@ -577,6 +577,16 @@ A review pass over the whole app, looking for:
 - **Settings UI:** cold start ~520 ms / warm ~80 ms on the test phone; tab switching and scrolling
   miss the odd frame by 11-25 ms, in framework code that's still interpreted (`nterp`).
   A baseline profile (`androidx.profileinstaller`) would help there. Not done.
+- **Root that isn't there, fixed at the source:** `RootContext` treated "su started" as root,
+  but Magisk can still deny it (the test phone does). It now sends `id` to its already-open root
+  shell once, on a worker thread, and records granted (`uid=0`) or denied (EOF). One extra
+  command per process start, no polling. With root denied or missing:
+  `isRootAvailable()` returns false (root paths fall back to accessibility where they have one);
+  the gesture thread isn't started at all (toast: gestures need root); "Set active features"
+  greys out the two Gestures options and says why; the action picker greys out actions whose
+  caption offers no way other than root on this Android version (`Action.needsRoot`) and
+  explains with a toast on tap. The saved feature set is kept, so granting root later brings
+  gestures back. Accessibility-capable actions stay selectable even while the service is off.
 - `<profileable android:shell="true"/>` added to the manifest so Perfetto gets call stacks
   from release builds.
 

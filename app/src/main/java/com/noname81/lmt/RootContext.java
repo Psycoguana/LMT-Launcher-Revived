@@ -2,6 +2,8 @@ package com.noname81.lmt;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -10,6 +12,8 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Owns the two root channels and the helper process.
@@ -38,6 +42,17 @@ public class RootContext {
     private Process mRootProcess;
     private String mShell;
 
+    /**
+     * Whether su actually granted root (ROADMAP 1.13). Starting su only proves the binary exists:
+     * Magisk can still deny it, and the shell then exits. Checked once, in the background, by
+     * sending {@code id} to the root shell that is already open.
+     */
+    static final int ROOT_UNKNOWN = 0;
+    static final int ROOT_GRANTED = 1;
+    static final int ROOT_DENIED = 2;
+    private volatile int mRootState = ROOT_UNKNOWN;
+    private final List<Runnable> mRootStateListeners = new ArrayList<>();
+
     private RootContext(Context context) {
         this.mInitialized = false;
         try {
@@ -51,8 +66,10 @@ public class RootContext {
             e.printStackTrace();
         }
         if (this.mInitialized) {
+            startRootCheck();
             return;
         }
+        this.mRootState = ROOT_DENIED;
         Toast.makeText(context, "Failed to get root permissions!", 0).show();
         Log.e(TAG, "Failed to get root permissions!");
     }
@@ -67,12 +84,76 @@ public class RootContext {
         return instance;
     }
 
+    /** True until su is known to be missing or denied; the check may still be running. */
     boolean isRootAvailable(boolean log) {
-        if (log && !this.mInitialized) {
+        boolean available = this.mInitialized && this.mRootState != ROOT_DENIED;
+        if (log && !available) {
             Toast.makeText(this.mContext, "This feature needs root permissions!", 0).show();
             Log.e(TAG, "This feature needs root permissions!");
         }
-        return this.mInitialized;
+        return available;
+    }
+
+    /** su is missing or was denied. */
+    boolean isRootDenied() {
+        return !this.mInitialized || this.mRootState == ROOT_DENIED;
+    }
+
+    /** Runs {@code callback} on the main thread once the root check has an answer. */
+    void whenRootKnown(Runnable callback) {
+        synchronized (this.mRootStateListeners) {
+            if (this.mRootState == ROOT_UNKNOWN && this.mInitialized) {
+                this.mRootStateListeners.add(callback);
+                return;
+            }
+        }
+        new Handler(Looper.getMainLooper()).post(callback);
+    }
+
+    /**
+     * Sends {@code id} to the root shell and waits for its answer on a worker thread, since Magisk
+     * may first ask the user. A denied su exits, so the reply is EOF (or "Permission denied").
+     */
+    private void startRootCheck() {
+        final DataOutputStream out = this.mRootOutputStream;
+        final DataInputStream in = this.mRootInputStream;
+        new Thread(
+                        () -> {
+                            int state = ROOT_DENIED;
+                            try {
+                                out.write("id\n".getBytes("ASCII"));
+                                out.flush();
+                                String line;
+                                while ((line = in.readLine()) != null) {
+                                    if (line.contains("uid=0(")) {
+                                        state = ROOT_GRANTED;
+                                        break;
+                                    }
+                                    if (line.contains("uid=")) {
+                                        break;
+                                    }
+                                }
+                            } catch (Exception e) {
+                                Log.w(TAG, "Root check failed: " + e);
+                            }
+                            setRootState(state);
+                        },
+                        "RootCheck")
+                .start();
+    }
+
+    private void setRootState(int state) {
+        List<Runnable> listeners;
+        synchronized (this.mRootStateListeners) {
+            this.mRootState = state;
+            listeners = new ArrayList<>(this.mRootStateListeners);
+            this.mRootStateListeners.clear();
+        }
+        Log.d(TAG, state == ROOT_GRANTED ? "Root granted" : "Root denied");
+        Handler handler = new Handler(Looper.getMainLooper());
+        for (Runnable listener : listeners) {
+            handler.post(listener);
+        }
     }
 
     void setDebug(int mode) {

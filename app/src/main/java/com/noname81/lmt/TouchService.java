@@ -52,6 +52,7 @@ public class TouchService extends Service {
     private static final long SPIN_CHECK_MS = 60000;
     private long mSpinCpuTicks = -1;
     private long mSpinUptime;
+    private boolean mDestroyed;
     private final Runnable mSpinCheck =
             new Runnable() {
                 @Override
@@ -146,33 +147,8 @@ public class TouchService extends Service {
         Log.d(TAG, "App version " + this.mSettings.getVersion());
         this.mSettings.rotate();
         if (this.mSettings.loadTouchServiceMode() < 2) {
-            if (this.mTouchServiceThread == null) {
-                this.mTouchServiceThread = new TouchServiceThread("TouchServiceThread");
-            }
-            if (this.mTouchServiceNative == null) {
-                this.mTouchServiceNative = TouchServiceNative.getInstance(this);
-            }
-            if (!this.mTouchServiceThread.isAlive()
-                    && this.mTouchServiceNative.setInputDeviceUnlock(
-                                    this.mSettings.loadInputDeviceString())
-                            >= 0) {
-                this.mTouchServiceNative.setSingleTouchGestureSupport(
-                        this.mSettings.loadSingleTouchGestureSupport());
-                this.mTouchServiceNative.setSingleSwipesBBox(this.mSettings.loadSingleSwipesBBox());
-                this.mTouchServiceNative.setMinScore(this.mSettings.loadMinScore());
-                this.mTouchServiceNative.setMinPathLength(this.mSettings.loadMinPathLength());
-                this.mTouchServiceNative.setOrientation(
-                        this.mSettings.getOrientation(),
-                        (int)
-                                (this.mSettings.getScreenWidth()
-                                        * this.mSettings.loadTouchscreenScreenFactorX()),
-                        (int)
-                                (this.mSettings.getScreenHeight()
-                                        * this.mSettings.loadTouchscreenScreenFactorY()));
-                this.mTouchServiceThread.start();
-                this.mSpinCpuTicks = -1;
-                this.mMessageHandler.postDelayed(this.mSpinCheck, SPIN_BASELINE_MS);
-            }
+            // Gestures read the touchscreen through su: without root the reader just spins.
+            RootContext.getInstance(this).whenRootKnown(this::startGestures);
         }
         if (this.mSettings.loadTouchServiceMode() > 0
                 && PermissionChecker.getInstance().hasDrawOverAppsPermission(this, false)) {
@@ -197,6 +173,44 @@ public class TouchService extends Service {
         Log.d(TAG, sb.toString());
         this.mSettings.setServiceState(1);
         startForeground(777, createNotification());
+    }
+
+    private void startGestures() {
+        if (this.mDestroyed) {
+            return;
+        }
+        if (!RootContext.getInstance(this).isRootAvailable(false)) {
+            Log.w(TAG, "No root, gestures and ISAs stay off");
+            Toast.makeText(this, "LMT gestures need root, which isn't granted", 1).show();
+            return;
+        }
+        if (this.mTouchServiceThread == null) {
+            this.mTouchServiceThread = new TouchServiceThread("TouchServiceThread");
+        }
+        if (this.mTouchServiceNative == null) {
+            this.mTouchServiceNative = TouchServiceNative.getInstance(this);
+        }
+        if (!this.mTouchServiceThread.isAlive()
+                && this.mTouchServiceNative.setInputDeviceUnlock(
+                                this.mSettings.loadInputDeviceString())
+                        >= 0) {
+            this.mTouchServiceNative.setSingleTouchGestureSupport(
+                    this.mSettings.loadSingleTouchGestureSupport());
+            this.mTouchServiceNative.setSingleSwipesBBox(this.mSettings.loadSingleSwipesBBox());
+            this.mTouchServiceNative.setMinScore(this.mSettings.loadMinScore());
+            this.mTouchServiceNative.setMinPathLength(this.mSettings.loadMinPathLength());
+            this.mTouchServiceNative.setOrientation(
+                    this.mSettings.getOrientation(),
+                    (int)
+                            (this.mSettings.getScreenWidth()
+                                    * this.mSettings.loadTouchscreenScreenFactorX()),
+                    (int)
+                            (this.mSettings.getScreenHeight()
+                                    * this.mSettings.loadTouchscreenScreenFactorY()));
+            this.mTouchServiceThread.start();
+            this.mSpinCpuTicks = -1;
+            this.mMessageHandler.postDelayed(this.mSpinCheck, SPIN_BASELINE_MS);
+        }
     }
 
     private void checkTouchServiceThread() {
@@ -303,6 +317,7 @@ public class TouchService extends Service {
     public void onDestroy() {
         Toast.makeText(this, "LMT stopped", 0).show();
         Log.d(TAG, "TouchService stopped");
+        this.mDestroyed = true;
         this.mMessageHandler.removeCallbacks(this.mSpinCheck);
         TouchServiceNative touchServiceNative = this.mTouchServiceNative;
         if (touchServiceNative != null) {

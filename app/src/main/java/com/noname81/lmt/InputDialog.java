@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -45,6 +47,16 @@ abstract class InputDialog extends MaterialAlertDialogBuilder implements DialogI
     }
 
     InputDialog(Context context, String title, String[] choices, String selectedValue) {
+        this(context, title, choices, selectedValue, null);
+    }
+
+    /** A single choice where {@code enabled[i] == false} greys out and blocks choice i. */
+    InputDialog(
+            Context context,
+            String title,
+            String[] choices,
+            String selectedValue,
+            boolean[] enabled) {
         super(context);
         this.mContext = context;
         setTitle(title);
@@ -54,7 +66,34 @@ abstract class InputDialog extends MaterialAlertDialogBuilder implements DialogI
         } catch (NumberFormatException unused) {
             selectedIndex = -1;
         }
-        setSingleChoiceItems(choices, selectedIndex, this);
+        if (enabled == null) {
+            setSingleChoiceItems(choices, selectedIndex, this);
+        } else {
+            setSingleChoiceItems(
+                    new ArrayAdapter<String>(
+                            getContext(), R.layout.dialog_singlechoice_item, android.R.id.text1, choices) {
+                        @Override
+                        public boolean areAllItemsEnabled() {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isEnabled(int position) {
+                            return enabled[position];
+                        }
+
+                        @Override
+                        public View getView(int position, View convertView, ViewGroup parent) {
+                            View view = super.getView(position, convertView, parent);
+                            view.setEnabled(enabled[position]);
+                            view.setAlpha(
+                                    enabled[position] ? 1f : CommandSelectActivity.DISABLED_ALPHA);
+                            return view;
+                        }
+                    },
+                    selectedIndex,
+                    this);
+        }
         this.mInput = null;
     }
 

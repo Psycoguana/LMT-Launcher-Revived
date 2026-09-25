@@ -394,12 +394,22 @@
     {
       "class": "TouchService.smali",
       "method": "public onCreate()V",
-      "reason": "After starting the gesture thread, resets the watchdog and posts its first check (a baseline after 2 s, the verdict 10 s later, then every 60 s on uptime, so it never wakes the phone). If the thread uses over half a core in a window, checkTouchServiceThread quits it and the native loop, and shows a toast."
+      "reason": "ROADMAP 1.13: the gesture setup moved unchanged into startGestures(), which runs through RootContext.whenRootKnown once the background root check has an answer, and only when root is really granted (otherwise a toast says gestures need root). Without root the native reader spins on a dead 'su getevent' pipe. startGestures also resets the spin watchdog and posts its first check (a baseline after 2 s, the verdict 10 s later, then every 60 s on uptime, so it never wakes the phone). If the thread uses over half a core in a window, checkTouchServiceThread quits it and the native loop, and shows a toast."
     },
     {
       "class": "TouchService.smali",
       "method": "public onDestroy()V",
       "reason": "Also removes the pending watchdog check."
+    },
+    {
+      "class": "RootContext.smali",
+      "method": "constructor private <init>(Landroid/content/Context;)V",
+      "reason": "ROADMAP 1.13: starting su only proves the binary exists; Magisk can still deny it (the test phone test device does), and every root command then fails silently while isRootAvailable() said true. After the shells start, startRootCheck() sends `id` to the already-open root shell on a worker thread and records GRANTED (uid=0) or DENIED (EOF / other uid). If su can't start at all, the state is DENIED right away. Initialises the state and listener list."
+    },
+    {
+      "class": "RootContext.smali",
+      "method": "isRootAvailable(Z)Z",
+      "reason": "ROADMAP 1.13: starting su only proves the binary exists; Magisk can still deny it (the test phone test device does), and every root command then fails silently while isRootAvailable() said true. Now also false once the check says DENIED; while it is still running it answers as before, so nothing that worked is blocked by the check."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -495,6 +505,14 @@
     {
       "class": "TouchService$TouchServiceThread.smali",
       "reason": "ROADMAP 1.13: tid field for the watchdog."
+    },
+    {
+      "class": "RootContext.smali",
+      "reason": "ROADMAP 1.13: verified root state - ROOT_* constants, mRootState, mRootStateListeners, isRootDenied, whenRootKnown, startRootCheck, setRootState."
+    },
+    {
+      "class": "Action.smali",
+      "reason": "ROADMAP 1.13: needsRoot(int), derived from the caption tags, so the action picker can grey out root-only actions when root is missing or denied."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -786,6 +804,14 @@
     {
       "class": "TouchService$ANON.smali",
       "reason": "ROADMAP 1.13: the watchdog's Runnable (mSpinCheck)."
+    },
+    {
+      "class": "InputDialog$ANON.smali",
+      "reason": "ROADMAP 1.13: the ArrayAdapter that greys out and blocks disabled single-choice rows (used for the Gestures options in Set active features without root)."
+    },
+    {
+      "class": "RootContext$ANON.smali",
+      "reason": "ROADMAP 1.13: the background root check's Runnable."
     }
   ],
   "removed_classes": [
