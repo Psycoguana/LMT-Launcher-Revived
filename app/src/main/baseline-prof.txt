@@ -1,0 +1,6 @@
+# ROADMAP 1.13: compile all of LMT's own code ahead of time (AndroidX libraries ship their own
+# rules, which AGP merges in). LMT is small, so a wildcard costs little space, and the pie runs
+# in a long-lived service where everything is hot anyway. Applied by ProfileInstaller, which
+# AppCompat already brings in, also for sideloaded installs.
+HSPLcom/noname81/lmt/**;->**(**)**
+Lcom/noname81/lmt/**;

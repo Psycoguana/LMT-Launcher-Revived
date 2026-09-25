@@ -576,7 +576,13 @@ A review pass over the whole app, looking for:
 - **Idle:** no leaked `Timer` threads, no wakeups with the pie closed.
 - **Settings UI:** cold start ~520 ms / warm ~80 ms on the test phone; tab switching and scrolling
   miss the odd frame by 11-25 ms, in framework code that's still interpreted (`nterp`).
-  A baseline profile (`androidx.profileinstaller`) would help there. Not done.
+  **Baseline profile, done:** `app/src/main/baseline-prof.txt` marks all of LMT's code
+  hot, and `profileinstaller` is pinned to 1.4.1. The 1.3.1 that AppCompat brought in
+  logged `RESULT_UNSUPPORTED_ART_VERSION` on Android 15+, so no profile, not even
+  AndroidX's own, was ever applied there. Cold start on the test phone (median of 6): verify
+  598 ms, speed-profile 572 ms, full `speed` compile 547 ms (the ceiling). About 4%: startup is
+  mostly framework work (theme, inflation), not LMT's code. The compile happens in the
+  phone's idle maintenance after install.
 - **Root that isn't there, fixed at the source:** `RootContext` treated "su started" as root,
   but Magisk can still deny it (the test phone does). It now sends `id` to its already-open root
   shell once, on a worker thread, and records granted (`uid=0`) or denied (EOF). One extra
