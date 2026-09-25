@@ -45,6 +45,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     private RootContext mRootContext;
     private TouchServiceNative mTouchServiceNative;
     private SwitchPreferenceCompat mActivateLmtPreference;
+    private Preference mFeaturesPreference;
 
     private interface IntGetter {
         int get();
@@ -95,6 +96,14 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     @Override // androidx.fragment.app.Fragment
     public void onResume() {
         super.onResume();
+        if (this.mFeaturesPreference != null && this.mSettings.loadTouchServiceMode() < 2) {
+            // Coming back from Magisk after granting root: ask su again (only after a "no").
+            RootContext rootContext = RootContext.getInstance(requireContext().getApplicationContext());
+            rootContext.recheckRoot();
+            Preference featuresPreference = this.mFeaturesPreference;
+            rootContext.whenRootKnown(
+                    () -> featuresPreference.setSummary(featuresSummary(rootContext)));
+        }
         if (this.mActivateLmtPreference != null) {
             this.mActivateLmtPreference.setChecked(this.mSettings.getServiceState() > 0);
         }
@@ -138,24 +147,10 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                         "Set active features",
                         featuresSummary(rootContext),
                         preference -> {
-                            boolean root = !rootContext.isRootDenied();
-                            new InputDialog(
-                                    requireActivity(),
-                                    "Define feature set",
-                                    features,
-                                    String.valueOf(this.mSettings.loadTouchServiceMode()),
-                                    new boolean[] {root, root, true}) {
-                                @Override // com.noname81.lmt.InputDialog
-                                public boolean onOkClicked(String value) {
-                                    SettingsViewFragment.this.mSettings.saveTouchServiceMode(
-                                            Integer.parseInt(value));
-                                    SettingsViewFragment.this.mSettings.restartServiceIfRequired();
-                                    requireActivity().recreate();
-                                    return true;
-                                }
-                            }.show();
+                            showFeaturesDialog(features, !rootContext.isRootDenied());
                             return true;
                         });
+        this.mFeaturesPreference = featuresPreference;
         rootContext.whenRootKnown(
                 () -> featuresPreference.setSummary(featuresSummary(rootContext)));
 
@@ -924,6 +919,23 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         preference.setIconSpaceReserved(false);
         preference.setWidgetLayoutResource(R.layout.preference_widget_material_switch);
         category.addPreference(preference);
+    }
+
+    private void showFeaturesDialog(String[] features, boolean root) {
+        new InputDialog(
+                requireActivity(),
+                "Define feature set",
+                features,
+                String.valueOf(this.mSettings.loadTouchServiceMode()),
+                new boolean[] {root, root, true}) {
+            @Override // com.noname81.lmt.InputDialog
+            public boolean onOkClicked(String value) {
+                SettingsViewFragment.this.mSettings.saveTouchServiceMode(Integer.parseInt(value));
+                SettingsViewFragment.this.mSettings.restartServiceIfRequired();
+                requireActivity().recreate();
+                return true;
+            }
+        }.show();
     }
 
     private String featuresSummary(RootContext rootContext) {

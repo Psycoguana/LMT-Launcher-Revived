@@ -148,7 +148,9 @@ public class TouchService extends Service {
         this.mSettings.rotate();
         if (this.mSettings.loadTouchServiceMode() < 2) {
             // Gestures read the touchscreen through su: without root the reader just spins.
-            RootContext.getInstance(this).whenRootKnown(this::startGestures);
+            RootContext rootContext = RootContext.getInstance(this);
+            rootContext.recheckRoot(); // root may have been granted since the last answer
+            rootContext.whenRootKnown(this::startGestures);
         }
         if (this.mSettings.loadTouchServiceMode() > 0
                 && PermissionChecker.getInstance().hasDrawOverAppsPermission(this, false)) {

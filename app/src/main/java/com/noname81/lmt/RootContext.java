@@ -102,12 +102,55 @@ public class RootContext {
     /** Runs {@code callback} on the main thread once the root check has an answer. */
     void whenRootKnown(Runnable callback) {
         synchronized (this.mRootStateListeners) {
-            if (this.mRootState == ROOT_UNKNOWN && this.mInitialized) {
+            if (this.mRootState == ROOT_UNKNOWN) {
                 this.mRootStateListeners.add(callback);
                 return;
             }
         }
         new Handler(Looper.getMainLooper()).post(callback);
+    }
+
+    /**
+     * Asks su again after a "no" - the user may have granted root in Magisk since. Restarts both
+     * shells on a worker thread; callers wait with {@link #whenRootKnown}. Does nothing while root
+     * is granted or a check is running, so it costs one su start per call only while denied.
+     */
+    void recheckRoot() {
+        synchronized (this.mRootStateListeners) {
+            if (!isRootDenied() || !suExists()) {
+                return; // Granted, still checking, or no su to ask (unrooted phone): keep the answer.
+            }
+            this.mRootState = ROOT_UNKNOWN;
+        }
+        new Thread(
+                        () -> {
+                            try {
+                                initRemote();
+                                initRoot();
+                                this.mInitialized = true;
+                            } catch (Exception e) {
+                                Log.w(TAG, "su still unavailable: " + e);
+                                setRootState(ROOT_DENIED);
+                                return;
+                            }
+                            startRootCheck();
+                        },
+                        "RootRecheck")
+                .start();
+    }
+
+    /** Whether an su binary is on the PATH at all; a file check, no process. */
+    static boolean suExists() {
+        String path = System.getenv("PATH");
+        if (path == null) {
+            return false;
+        }
+        for (String dir : path.split(":")) {
+            if (new File(dir, "su").exists()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

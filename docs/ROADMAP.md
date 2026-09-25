@@ -518,7 +518,7 @@ and `onDraw` clips the hole out with `clipOutPath`, since outlines can only clip
 Confirmed by hand on the Samsung flagship. Verified on the test phone with synthetic touches (`adb shell input motionevent DOWN/UP` on the pie
 strip; the pie *does* accept them) and see-through pie colors (`#99000000,#cb000000,,#ffa70000,,,`).
 
-### 1.12 Red theme color makes text look washed out  ✅ done (awaiting Samsung flagship confirmation)
+### 1.12 Red theme color makes text look washed out  ✅ done
 
 Cause, measured on the test phone: in dark mode M3 puts `colorPrimary` (and `colorSecondary`) at
 **tone 80**, and at that lightness red can only reach chroma ~29 (`#ffb4a9`, salmon). The
@@ -586,11 +586,34 @@ A review pass over the whole app, looking for:
   greys out the two Gestures options and says why; the action picker greys out actions whose
   caption offers no way other than root on this Android version (`Action.needsRoot`) and
   explains with a toast on tap. The saved feature set is kept, so granting root later brings
-  gestures back. Accessibility-capable actions stay selectable even while the service is off.
+  gestures back: after a "no", `recheckRoot()` asks su again when the service starts and when
+  the Settings screen resumes with gestures selected (coming back from Magisk). It skips phones
+  with no su on the PATH, and pie-only users are never asked again. Accessibility-capable actions stay selectable even while the service is off.
 - `<profileable android:shell="true"/>` added to the manifest so Perfetto gets call stacks
   from release builds.
 
 ---
+
+### 1.14 Shizuku integration — possible future feature
+
+Gestures and ISAs need root only because `libTouchServiceNative.so` runs
+`su -c "cat /dev/input/eventN"` (decoded from its `Logic::setInputDeviceGetevent`: the
+command is built from immediates, the `Pure` direct-open mode is never called). A normal app
+can't read `/dev/input`, but Android's **shell** user can: on the test phone, `adb shell` is uid 2000
+with the `input` group, and `cat /dev/input/event4` works without root. Shizuku runs a
+process as that user, so gestures could work root-free through it:
+
+- Needs our own event reader in place of the library's `su` pipe (the library hardcodes `su`),
+  which ties in with 1.9 (replace or delete the library).
+- Shizuku could also stand in for other root-only actions that shell can do (`input keyevent`,
+  `am force-stop`, `svc data`, ...) — see Part 2.4.
+- Costs: the Shizuku dependency and its permission flow; Shizuku must be restarted after
+  each reboot on unrooted phones (wireless debugging).
+- Not an accessibility route: `AccessibilityServiceInfo.setMotionEventSources` (API 34)
+  *consumes* the events it listens to, so the phone would stop getting touches.
+- ISAs alone could go root-free without Shizuku, as invisible overlay strips like the pie's.
+
+Low priority: the user only uses the pie.
 
 ## Part 2 — Accessibility fallbacks for root-only actions
 
