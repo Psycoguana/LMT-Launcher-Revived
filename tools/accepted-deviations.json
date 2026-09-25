@@ -292,6 +292,11 @@
       "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
     },
     {
+      "class": "PermissionChecker.smali",
+      "method": "hasUsageStatsPermission(Landroid/content/Context;Z)Z",
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+    },
+    {
       "class": "PieContainer.smali",
       "method": "rotate()V",
       "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
@@ -364,12 +369,12 @@
     {
       "class": "PieMenu.smali",
       "method": "private init(Landroid/content/Context;)V",
-      "reason": "ROADMAP 1.11: creates the PieBlur view that draws a blurred accessibility screenshot behind the pie. See the PieBlur.smali new_classes entry."
+      "reason": "ROADMAP 1.11: creates the PieBlur view that draws a blurred accessibility screenshot behind the pie. See the PieBlur.smali new_classes entry. ROADMAP 1.17 brightness dial: also creates the PieBrightness extension with the pointer color."
     },
     {
       "class": "PieMenu.smali",
       "method": "public onTouchEvent(Landroid/view/MotionEvent;)Z",
-      "reason": "ROADMAP 1.11: on touch-down, after show(true), starts PieBlur.open with the pie's centre, outer radius (inner radius + rings + outline) and inner radius (left unblurred in behind-pie mode) on Android 12+; on release and cancel, after show(false), calls PieBlur.close. With the blur setting at None (the default) open returns immediately, so the pie behaves as before."
+      "reason": "ROADMAP 1.11: on touch-down, after show(true), starts PieBlur.open with the pie's centre, outer radius (inner radius + rings + outline) and inner radius (left unblurred in behind-pie mode) on Android 12+; on release and cancel, after show(false), calls PieBlur.close. With the blur setting at None (the default) open returns immediately, so the pie behaves as before. ROADMAP 1.17 brightness dial: on move and up the brightness dial gets the touch before the pointer; a dial drag ends on up without firing a slice."
     },
     {
       "class": "TouchService$TouchServiceThread.smali",
@@ -455,6 +460,16 @@
       "class": "Launcher.smali",
       "method": "fireAction(Lcom/noname81/lmt/Action;)V",
       "reason": "ROADMAP 2.6: three new cases, Flashlight (Torch.toggle), KeepScreenOn (KeepScreenOn.toggle) and PopUpWindow (PopUpWindow.open)."
+    },
+    {
+      "class": "PieMenu.smali",
+      "method": "protected onDraw(Landroid/graphics/Canvas;)V",
+      "reason": "ROADMAP 1.17 brightness dial: draws the dial in the foreground before the pointer."
+    },
+    {
+      "class": "PieMenu.smali",
+      "method": "public onShrink()V",
+      "reason": "ROADMAP 1.17 brightness dial: resets the dial."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -562,6 +577,10 @@
     {
       "class": "IconUtils.smali",
       "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike. saveImage writes through IconFolder."
+    },
+    {
+      "class": "PermissionChecker.smali",
+      "reason": "ROADMAP 1.17 brightness dial: static checkAndRequestWriteSettingsPermission opens Settings.ACTION_MANAGE_WRITE_SETTINGS for LMT when Modify system settings isn't granted."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -937,6 +956,10 @@
     {
       "class": "ShizukuShell$ANON.smali",
       "reason": "ROADMAP 2.6: the thread that waits for ShizukuShell's process."
+    },
+    {
+      "class": "PieBrightness.smali",
+      "reason": "ROADMAP 1.17 brightness dial: PieView extension, armed by hovering its slice; past the rim the finger's angle sets Settings.System.SCREEN_BRIGHTNESS (gamma 2.2) and draws the dial."
     }
   ],
   "removed_classes": [

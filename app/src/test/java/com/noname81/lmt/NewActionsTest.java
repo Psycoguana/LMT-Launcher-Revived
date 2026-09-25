@@ -17,7 +17,7 @@ import org.robolectric.annotation.Config;
 import java.util.HashMap;
 import java.util.Map;
 
-/** ROADMAP 2.6: Flashlight, Keep screen on and Pop-up window. */
+/** ROADMAP 2.6 and 1.17: Flashlight, Keep screen on, Pop-up window and the Brightness dial. */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 33)
 public class NewActionsTest {
@@ -27,7 +27,8 @@ public class NewActionsTest {
         assertEquals(Action.PieRecentApps + 1, Action.Flashlight);
         assertEquals(Action.Flashlight + 1, Action.KeepScreenOn);
         assertEquals(Action.KeepScreenOn + 1, Action.PopUpWindow);
-        assertEquals(Action.PopUpWindow + 1, Action.names.length);
+        assertEquals(Action.PopUpWindow + 1, Action.BrightnessDial);
+        assertEquals(Action.BrightnessDial + 1, Action.names.length);
         assertEquals("Flashlight", Action.names[Action.Flashlight]);
         assertEquals("KeepScreenOn", Action.names[Action.KeepScreenOn]);
         assertEquals("PopUpWindow", Action.names[Action.PopUpWindow]);
@@ -49,6 +50,9 @@ public class NewActionsTest {
         assertEquals(toggles, sectionOf.get("Flashlight"));
         assertEquals(toggles, sectionOf.get("KeepScreenOn"));
         assertEquals(advanced, sectionOf.get("PopUpWindow"));
+        assertEquals(
+                context.getString(R.string.commands_pie_action_commands),
+                sectionOf.get("BrightnessDial"));
     }
 
     @Test
@@ -56,6 +60,7 @@ public class NewActionsTest {
         assertFalse(Action.needsRoot(Action.Flashlight));
         assertFalse(Action.needsRoot(Action.KeepScreenOn));
         assertFalse(Action.needsRoot(Action.PopUpWindow));
+        assertFalse(Action.needsRoot(Action.BrightnessDial));
     }
 
     @Test

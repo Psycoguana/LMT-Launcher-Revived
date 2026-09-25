@@ -62,6 +62,7 @@ class PieMenu extends FrameLayout {
     private int mOutlineGradient;
     private Paint mOutlinePaint;
     private PieView mPiePointer;
+    private PieBrightness mBrightness;
     private int mPointerColor;
     private int mRadius;
     private int mRadiusInc;
@@ -368,6 +369,7 @@ class PieMenu extends FrameLayout {
             }
         }
         this.mPiePointer = new PiePointer(this, context, this.mPointerColor);
+        this.mBrightness = new PieBrightness(context, this.mPointerColor);
         if (this.mSettings.loadPieShowStatusInfos() > 0) {
             this.mStatusInfo =
                     new PieStatusInfo(
@@ -394,6 +396,11 @@ class PieMenu extends FrameLayout {
 
     public void activatePiePointer() {
         this.mPiePointer.activate();
+    }
+
+    /** The Brightness slice is hovered (ROADMAP 1.17). */
+    void armBrightness(PieItem slice) {
+        this.mBrightness.arm(slice);
     }
 
     public void clearItems() {
@@ -429,6 +436,15 @@ class PieMenu extends FrameLayout {
     }
 
     public void show(boolean show, boolean animate) {
+        this.mBrightness.layout(
+                show,
+                this.mCenter,
+                this.mRadius,
+                this.mRadiusInc,
+                this.mLevels,
+                onTheLeft(),
+                onTheBottom(),
+                animate);
         if (show) {
             animateOpen();
             layoutPie();
@@ -716,6 +732,7 @@ class PieMenu extends FrameLayout {
                     drawItem(canvas, pieItem);
                 }
             }
+            this.mBrightness.drawForeground(canvas);
             PieView pieView4 = this.mPiePointer;
             if ((pieView4 != null ? pieView4.drawForeground(canvas) : false)
                     || (pieView = this.mStatusInfo) == null) {
@@ -827,16 +844,25 @@ class PieMenu extends FrameLayout {
             if (this.mOpen) {
                 PointF polar = getPolar(rawX, rawY);
                 PieView pieView3 = this.mPiePointer;
+                // A brightness drag ends here: the value is already set, fire no slice.
+                boolean dialing =
+                        this.mBrightness.onTouchEvent(
+                                actionMasked,
+                                rawX,
+                                rawY,
+                                this.mWindow.left,
+                                this.mWindow.top,
+                                polar);
                 boolean zOnTouchEvent =
-                        pieView3 != null
-                                ? pieView3.onTouchEvent(
-                                        actionMasked,
-                                        rawX,
-                                        rawY,
-                                        this.mWindow.left,
-                                        this.mWindow.top,
-                                        polar)
-                                : false;
+                        dialing
+                                || (pieView3 != null
+                                        && pieView3.onTouchEvent(
+                                                actionMasked,
+                                                rawX,
+                                                rawY,
+                                                this.mWindow.left,
+                                                this.mWindow.top,
+                                                polar));
                 if (!zOnTouchEvent && (pieView2 = this.mStatusInfo) != null) {
                     pieView2.onTouchEvent(
                             actionMasked, rawX, rawY, this.mWindow.left, this.mWindow.top, polar);
@@ -862,15 +888,21 @@ class PieMenu extends FrameLayout {
             PointF polar2 = getPolar(rawX, rawY);
             PieView pieView4 = this.mPiePointer;
             boolean zOnTouchEvent2 =
-                    pieView4 != null
-                            ? pieView4.onTouchEvent(
+                    this.mBrightness.onTouchEvent(
                                     actionMasked,
                                     rawX,
                                     rawY,
                                     this.mWindow.left,
                                     this.mWindow.top,
                                     polar2)
-                            : false;
+                            || (pieView4 != null
+                                    && pieView4.onTouchEvent(
+                                            actionMasked,
+                                            rawX,
+                                            rawY,
+                                            this.mWindow.left,
+                                            this.mWindow.top,
+                                            polar2));
             if (!zOnTouchEvent2 && (pieView = this.mStatusInfo) != null) {
                 zOnTouchEvent2 =
                         pieView.onTouchEvent(
@@ -899,6 +931,7 @@ class PieMenu extends FrameLayout {
     }
 
     public void onShrink() {
+        this.mBrightness.onShrink();
         PieView pieView = this.mPiePointer;
         if (pieView != null) {
             pieView.onShrink();

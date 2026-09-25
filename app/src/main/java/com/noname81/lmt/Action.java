@@ -24,6 +24,7 @@ class Action {
     static final int App = 2;
     static final int Assistant = 37;
     static final int Back = 7;
+    static final int BrightnessDial = 49;
     static final int BackLongpress = 8;
     static final int BluetoothToggle = 22;
     static final int DataToggle = 21;
@@ -123,7 +124,8 @@ class Action {
         // CommandSelectActivity files them under their section (ROADMAP 2.6).
         "Flashlight",
         "KeepScreenOn",
-        "PopUpWindow"
+        "PopUpWindow",
+        "BrightnessDial"
     };
     static final String[] captions = {
         "OffsetNormalCommands",
@@ -174,7 +176,8 @@ class Action {
         "Activate Pie Recent Apps [Root|UsageStats]",
         "Toggle the flashlight [None]",
         "Keep the screen on until toggled off or the screen is turned off [None]",
-        "Open the current app in a pop-up window [Root|Shizuku]"
+        "Open the current app in a pop-up window [Root|Shizuku]",
+        "Set the brightness on a dial around the pie; tap to toggle adaptive brightness [None]"
     };
 
     /**
@@ -361,6 +364,10 @@ class Action {
                 PermissionChecker.getInstance().checkAndRequestPhoneCallPermission(activity, true);
                 return;
             }
+            return;
+        }
+        if (type == BrightnessDial && log) {
+            PermissionChecker.checkAndRequestWriteSettingsPermission(activity);
             return;
         }
         // Both fall back to UsageStats without root (ROADMAP 2.5).

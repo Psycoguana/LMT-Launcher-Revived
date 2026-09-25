@@ -163,4 +163,26 @@ class PermissionChecker {
         activity.startActivityForResult(intent, USAGE_STATS_REQUEST_CODE);
         return false;
     }
+
+    /**
+     * "Modify system settings", for the Brightness dial (ROADMAP 1.17). Opens the system screen for
+     * LMT when it isn't granted; works from any context, the pie included.
+     */
+    static boolean checkAndRequestWriteSettingsPermission(Context context) {
+        if (PieBrightness.canWrite(context)) {
+            return true;
+        }
+        Toast.makeText(
+                        context,
+                        "Allow LMT to modify system settings to set the brightness",
+                        Toast.LENGTH_LONG)
+                .show();
+        Intent intent =
+                new Intent(
+                        Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                        Uri.parse("package:" + context.getPackageName()));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+        return false;
+    }
 }

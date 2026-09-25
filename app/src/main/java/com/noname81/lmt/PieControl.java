@@ -249,13 +249,19 @@ class PieControl extends PieControlBase
         for (int index = 0; index < this.mPieItemActions.size(); index++) {
             if (this.mPieItemActions.get(index).mPieItem.getView() == view) {
                 if (keyCode == 36) {
-                    if (this.mPieItemActions.get(index).mClickAction.getType() == 44) {
+                    if (this.mPieItemActions.get(index).mClickAction.getType()
+                            == Action.BrightnessDial) {
+                        this.mPie.armBrightness(this.mPieItemActions.get(index).mPieItem);
+                    } else if (this.mPieItemActions.get(index).mClickAction.getType() == 44) {
                         this.mPie.activatePiePointer();
                     } else if (this.mPieItemActions.get(index).mClickAction.getType() == 45) {
                         activatePieRecentApps();
                     }
                 } else if (keyCode == 40) {
-                    if (this.mPieItemActions.get(index).mLongClickAction.getType() == 44) {
+                    if (this.mPieItemActions.get(index).mLongClickAction.getType()
+                            == Action.BrightnessDial) {
+                        this.mPie.armBrightness(this.mPieItemActions.get(index).mPieItem);
+                    } else if (this.mPieItemActions.get(index).mLongClickAction.getType() == 44) {
                         this.mPie.activatePiePointer();
                     } else if (this.mPieItemActions.get(index).mLongClickAction.getType() == 45) {
                         activatePieRecentApps();

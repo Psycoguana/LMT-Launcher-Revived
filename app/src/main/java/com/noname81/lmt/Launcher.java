@@ -168,6 +168,12 @@ class Launcher {
             case Action.PopUpWindow:
                 PopUpWindow.open(this.mContext, this.mRootContext);
                 break;
+            case Action.BrightnessDial:
+                // Released on the slice without dialing (ROADMAP 1.17).
+                if (PermissionChecker.checkAndRequestWriteSettingsPermission(this.mContext)) {
+                    PieBrightness.toggleAdaptive(this.mContext);
+                }
+                break;
             case Action.Nova:
                 doOpenNova();
                 break;

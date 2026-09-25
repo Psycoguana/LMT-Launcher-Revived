@@ -241,7 +241,9 @@ public class CommandSelectActivity extends ThemedActivity {
             advanced.add(Action.PopUpWindow);
             this.mRows.addSection(getString(R.string.commands_advanced_commands), advanced);
             this.mRows.addSection(getString(R.string.commands_app_drawer_commands), range(40, 42));
-            this.mRows.addSection(getString(R.string.commands_pie_action_commands), range(44, 45));
+            List<Integer> pieActions = range(44, 45);
+            pieActions.add(Action.BrightnessDial);
+            this.mRows.addSection(getString(R.string.commands_pie_action_commands), pieActions);
         }
 
         private List<Integer> range(int from, int to) {

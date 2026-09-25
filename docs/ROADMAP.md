@@ -705,7 +705,7 @@ None of these were built upstream.
 - **Pie folders / sub-pies**: asked for several times ("long press opens a second pie", like
   the AOSP browser pie and the Android 4.2 camera settings pie; "folders in pie positions").
   The author answered he might add it. Planned next (mockup A: outer ring).
-- **Brightness slider wrapped around the pie**. Planned first (fits the pointer's hook).
+- **Brightness slider wrapped around the pie**. Done in 1.17.
 - **Pie stays open after lifting the finger**, about 1.5 s or until the next touch outside
   the trigger areas, since Back often needs several presses in a row.
 - **Icon pack support** for the slice icons.
@@ -714,6 +714,19 @@ None of these were built upstream.
 - **App slices show the app's name or icon** instead of the generic "APP".
 - **Bottom pie** with a short swipe up to open it (bottom positions exist now).
 - **Keep the Back slice on screen for a short while** (same need as the delayed hide above).
+
+### 1.17 Brightness dial  ✅ done (verified on the test phone)
+
+From 1.16, before the pie folders: it fits the pie pointer's extension hook.
+
+- **49 BrightnessDial** (`PieBrightness`, a `PieMenu.PieView`): hovering its slice arms it;
+  sliding out past the pie's rim within the slice's angles takes the touch, and the angle
+  sets `Settings.System.SCREEN_BRIGHTNESS` live (1..255 on a 2.2 gamma curve, adaptive
+  switched off). Up is brighter for side pies, right for a bottom pie. Sliding back into the
+  centre hands the touch back; lifting fires nothing. Releasing on the slice without dialing
+  toggles adaptive brightness. Needs "Modify system settings"; picking the action or tapping
+  the slice opens that screen. Drawn as a white arc on a dark track with a knob and a
+  percentage, readable on any wallpaper.
 
 ## Part 2 — Accessibility fallbacks for root-only actions
 
