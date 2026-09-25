@@ -658,6 +658,15 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
+        addChoiceDialog(
+                category,
+                "Open pie folders",
+                "When a folder slice shows its actions around it, default = when hovered",
+                "Open pie folders",
+                new String[] {"When hovered", "After a long press"},
+                this.mSettings::loadPieFolderOpen,
+                this.mSettings::savePieFolderOpen);
+
         addSliderDialog(
                 category,
                 "Animation time",
@@ -1068,6 +1077,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 SettingsBackup.importZip(
                         this.mSettings, IconFolder.of(requireActivity()), srcStream);
         if (restored) {
+            this.mSettings.reloadFolders();
             this.mSettings.restartServiceIfRequired();
             Toast.makeText(requireActivity(), "Settings imported", Toast.LENGTH_SHORT).show();
         } else {

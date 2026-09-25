@@ -463,6 +463,21 @@
     },
     {
       "class": "PieMenu.smali",
+      "method": "constructor public <init>(Landroid/content/Context;)V",
+      "reason": "ROADMAP 1.17 pie folders: the field initializer for mFolderItems (new ArrayList) runs in every constructor."
+    },
+    {
+      "class": "PieMenu.smali",
+      "method": "constructor public <init>(Landroid/content/Context;Landroid/util/AttributeSet;)V",
+      "reason": "ROADMAP 1.17 pie folders: same mFolderItems field initializer."
+    },
+    {
+      "class": "PieMenu.smali",
+      "method": "constructor public <init>(Landroid/content/Context;Landroid/util/AttributeSet;I)V",
+      "reason": "ROADMAP 1.17 pie folders: same mFolderItems field initializer."
+    },
+    {
+      "class": "PieMenu.smali",
       "method": "protected onDraw(Landroid/graphics/Canvas;)V",
       "reason": "ROADMAP 1.17 brightness dial: draws the dial in the foreground before the pointer."
     },
@@ -470,6 +485,36 @@
       "class": "PieMenu.smali",
       "method": "public onShrink()V",
       "reason": "ROADMAP 1.17 brightness dial: resets the dial."
+    },
+    {
+      "class": "PieMenu.smali",
+      "method": "public show(ZZ)V",
+      "reason": "ROADMAP 1.17 pie folders closes an open folder first; ROADMAP 1.17 brightness dial: lays the dial out (and disarms it on hide)."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "getCurrentAction()Lcom/noname81/lmt/Action;",
+      "reason": "ROADMAP 1.17 pie folders: returns the folder item being edited when that is the target."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "setCurrentAction(Landroid/app/Activity;Lcom/noname81/lmt/Action;)V",
+      "reason": "ROADMAP 1.17 pie folders: a folder item target saves to PieFolder<slot>Item<i> Type/String/Icon and restarts the service."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "setCurrentGesture(I)V",
+      "reason": "ROADMAP 1.17 pie folders: clears the folder item target."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "setCurrentIsa(I)V",
+      "reason": "ROADMAP 1.17 pie folders: clears the folder item target."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "setCurrentPie(I)V",
+      "reason": "ROADMAP 1.17 pie folders: clears the folder item target."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -498,7 +543,7 @@
     },
     {
       "class": "SettingsValuesBase.smali",
-      "reason": "ROADMAP 1.4: loadShowSystemApps/saveShowSystemApps persist the app picker's 'show system apps' toggle. Missing from this file until ROADMAP 3.6 made one-sided methods actually fail the oracle - before that they only printed a warning. ROADMAP 1.10 adds load/save ThemeMode, ThemeFollowSystemColor, ThemeColor and ThemeCustomColor for the Appearance page."
+      "reason": "ROADMAP 1.4: loadShowSystemApps/saveShowSystemApps persist the app picker's 'show system apps' toggle. Missing from this file until ROADMAP 3.6 made one-sided methods actually fail the oracle - before that they only printed a warning. ROADMAP 1.10 adds load/save ThemeMode, ThemeFollowSystemColor, ThemeColor and ThemeCustomColor for the Appearance page. ROADMAP 1.17 pie folders: FOLDER_ITEMS, mCurrentFolderSlot/mCurrentFolderItem/mFolderActions, getFolderAction, folderPrefix, saveFolderName, setCurrentFolderItem, currentPieSlot, reloadFolders, loadPieFolderOpen/savePieFolderOpen."
     },
     {
       "class": "LMT.smali",
@@ -556,7 +601,7 @@
     },
     {
       "class": "PieMenu.smali",
-      "reason": "ROADMAP 1.11: adds the mBlur field holding the pie's PieBlur view."
+      "reason": "ROADMAP 1.11: adds the mBlur field holding the pie's PieBlur view. ROADMAP 1.17 pie folders and ROADMAP 1.17 brightness dial: mBrightness, mFolderParent/mFolderItems/mFolderBaseLevels, getLevels, getOpenFolder, openFolder, closeFolder, placeIcon, armBrightness, plus the fade lambda."
     },
     {
       "class": "TouchService.smali",
@@ -577,6 +622,16 @@
     {
       "class": "IconUtils.smali",
       "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike. saveImage writes through IconFolder."
+    },
+    {
+      "class": "PieControl.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.17 pie folders: the slice lookup moves into find(View), which also searches the open folder's items (mFolderItemActions), so onClick/onLongClick/onKey are rewritten around it. onKey opens a folder on hover (36) or long press (40) per PieFolderOpen, closes it via closeFolderUnlessOutside when a slice on the folder's ring or an inner one is hovered, and arms the brightness dial (ROADMAP 1.17 brightness dial) next to the existing pointer/recent-apps hooks. populateMenu passes each slice's settings slot to PieItemAction; openFolder builds the folder's PieItems one level beyond the outermost. Same click/long-click/hover behaviour for every existing action."
+    },
+    {
+      "class": "PieControl$PieItemAction.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.17 pie folders: adds mSlot (the short press's settings slot, -1 otherwise) and a constructor taking it; the original constructor now also sets the -1 default."
     },
     {
       "class": "PermissionChecker.smali",
@@ -956,6 +1011,26 @@
     {
       "class": "ShizukuShell$ANON.smali",
       "reason": "ROADMAP 2.6: the thread that waits for ShizukuShell's process."
+    },
+    {
+      "class": "FolderActivity.smali",
+      "reason": "ROADMAP 1.17 pie folders: the folder editor, a name field and 8 item rows that open the action picker for PieFolder<slot>Item<i>."
+    },
+    {
+      "class": "FolderActivity$Adapter.smali",
+      "reason": "ROADMAP 1.17 pie folders: FolderActivity's row adapter."
+    },
+    {
+      "class": "FolderActivity$Adapter$ANON.smali",
+      "reason": "ROADMAP 1.17 pie folders: the row click listener."
+    },
+    {
+      "class": "FolderActivity$Holder.smali",
+      "reason": "ROADMAP 1.17 pie folders: FolderActivity's row view holder."
+    },
+    {
+      "class": "FolderActivity$ANON.smali",
+      "reason": "ROADMAP 1.17 pie folders: the toolbar Up listener."
     },
     {
       "class": "PieBrightness.smali",

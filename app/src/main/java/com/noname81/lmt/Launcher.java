@@ -168,6 +168,9 @@ class Launcher {
             case Action.PopUpWindow:
                 PopUpWindow.open(this.mContext, this.mRootContext);
                 break;
+            case Action.Folder:
+                // Released on the folder slice itself: its items were the choice.
+                break;
             case Action.BrightnessDial:
                 // Released on the slice without dialing (ROADMAP 1.17).
                 if (PermissionChecker.checkAndRequestWriteSettingsPermission(this.mContext)) {

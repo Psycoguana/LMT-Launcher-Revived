@@ -704,7 +704,7 @@ None of these were built upstream.
 
 - **Pie folders / sub-pies**: asked for several times ("long press opens a second pie", like
   the AOSP browser pie and the Android 4.2 camera settings pie; "folders in pie positions").
-  The author answered he might add it. Planned next (mockup A: outer ring).
+  The author answered he might add it. Done in 1.17 (mockup A: outer ring).
 - **Brightness slider wrapped around the pie**. Done in 1.17.
 - **Pie stays open after lifting the finger**, about 1.5 s or until the next touch outside
   the trigger areas, since Back often needs several presses in a row.
@@ -715,9 +715,9 @@ None of these were built upstream.
 - **Bottom pie** with a short swipe up to open it (bottom positions exist now).
 - **Keep the Back slice on screen for a short while** (same need as the delayed hide above).
 
-### 1.17 Brightness dial  ✅ done (verified on the test phone)
+### 1.17 Brightness dial and pie folders  ✅ done (verified on the test phone)
 
-From 1.16, before the pie folders: it fits the pie pointer's extension hook.
+Both from 1.16. The dial came first because it fits the pie pointer's extension hook.
 
 - **49 BrightnessDial** (`PieBrightness`, a `PieMenu.PieView`): hovering its slice arms it;
   sliding out past the pie's rim within the slice's angles takes the touch, and the angle
@@ -727,6 +727,19 @@ From 1.16, before the pie folders: it fits the pie pointer's extension hook.
   toggles adaptive brightness. Needs "Modify system settings"; picking the action or tapping
   the slice opens that screen. Drawn as a white arc on a dark track with a knob and a
   percentage, readable on any wallpaper.
+- **50 Folder** (mockup A, outer ring): a pie slot holds a folder of up to 8 actions
+  (`PieFolder<slot>Item<i> Type/String/Icon`, name in the slot's own string, backed up with
+  the rest). Picked from the action picker on pie slots only (not gestures, ISAs or inside
+  another folder), which then opens `FolderActivity` to name it and pick its items.
+  - The folder opens when its slice is hovered or after a long press, by the **Open pie
+    folders** setting (`PieFolderOpen`). A folder set as a slice's long-press action always
+    opens on the long press.
+  - `PieMenu.openFolder` puts the items one ring beyond the outermost, centred on the folder
+    slice (each at most the folder's sweep or 0.55 rad) and kept inside the half circle; they
+    fade in. Hovering a slice on the folder's ring or an inner one closes it, slices on rings
+    between are crossed on the way out and leave it open; closing the pie closes it too.
+  - After the long-press timer fires, PieMenu sends every hover as 40 instead of 36, so
+    both signals open and close folders.
 
 ## Part 2 — Accessibility fallbacks for root-only actions
 

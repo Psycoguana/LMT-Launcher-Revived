@@ -23,6 +23,13 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
     private int mCurrentGesture;
     private int mCurrentIsa;
     private int mCurrentPie;
+
+    /** Pie folders (ROADMAP 1.17): the folder item being edited, and loaded items by key. */
+    static final int FOLDER_ITEMS = 8;
+
+    private int mCurrentFolderSlot = -1;
+    private int mCurrentFolderItem = -1;
+    private final java.util.HashMap<Integer, Action> mFolderActions = new java.util.HashMap<>();
     private Vector<Action> mGestureActions;
     private Vector<Action> mIsaActions;
     private Vector<Action> mPieActions;
@@ -135,7 +142,57 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
         return new Action(1);
     }
 
+    /** Item {@code item} (0..7) of the folder on pie slot {@code slot}; None when empty. */
+    Action getFolderAction(int slot, int item) {
+        int key = slot * FOLDER_ITEMS + item;
+        Action action = this.mFolderActions.get(key);
+        if (action == null) {
+            String prefix = folderPrefix(slot, item);
+            action =
+                    new Action(
+                            loadInt(prefix + " Type", Action.None),
+                            loadString(prefix + " String", ""),
+                            loadString(prefix + " Icon", ""),
+                            this.mContext);
+            this.mFolderActions.put(key, action);
+        }
+        return action;
+    }
+
+    static String folderPrefix(int slot, int item) {
+        return "PieFolder" + slot + "Item" + item;
+    }
+
+    /** The folder's name, kept as its pie slot action's payload. */
+    void saveFolderName(int slot, String name) {
+        Action folder = getPieAction(slot);
+        folder.setString(name);
+        saveString("PieItem" + slot + " String", name, null);
+        restartServiceIfRequired();
+    }
+
+    void setCurrentFolderItem(int slot, int item) {
+        this.mCurrentGesture = -1;
+        this.mCurrentPie = -1;
+        this.mCurrentIsa = -1;
+        this.mCurrentFolderSlot = slot;
+        this.mCurrentFolderItem = item;
+    }
+
+    /** The pie slot the picker is choosing for, or -1; folders only go on pie slots. */
+    int currentPieSlot() {
+        return this.mCurrentPie;
+    }
+
+    /** Forgets loaded folder items, after a backup import rewrote them. */
+    void reloadFolders() {
+        this.mFolderActions.clear();
+    }
+
     Action getCurrentAction() {
+        if (this.mCurrentFolderSlot >= 0) {
+            return getFolderAction(this.mCurrentFolderSlot, this.mCurrentFolderItem);
+        }
         int gestureSlot = this.mCurrentGesture;
         if (gestureSlot >= 0) {
             return this.mGestureActions.get(gestureSlot);
@@ -152,18 +209,21 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
     }
 
     void setCurrentGesture(int slot) {
+        this.mCurrentFolderSlot = -1;
         this.mCurrentGesture = slot;
         this.mCurrentPie = -1;
         this.mCurrentIsa = -1;
     }
 
     void setCurrentPie(int slot) {
+        this.mCurrentFolderSlot = -1;
         this.mCurrentGesture = -1;
         this.mCurrentPie = slot;
         this.mCurrentIsa = -1;
     }
 
     void setCurrentIsa(int slot) {
+        this.mCurrentFolderSlot = -1;
         this.mCurrentGesture = -1;
         this.mCurrentPie = -1;
         this.mCurrentIsa = slot;
@@ -173,7 +233,16 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
         SharedPreferences.Editor editorCreateAndReturnSharedPreferencesEditor =
                 createAndReturnSharedPreferencesEditor();
         int gestureSlot = this.mCurrentGesture;
-        if (gestureSlot >= 0) {
+        if (this.mCurrentFolderSlot >= 0) {
+            String prefix = folderPrefix(this.mCurrentFolderSlot, this.mCurrentFolderItem);
+            SharedPreferences.Editor editor = editorCreateAndReturnSharedPreferencesEditor;
+            saveInt(prefix + " Type", action.getType(), editor);
+            saveString(prefix + " String", action.getString(), editor);
+            saveString(prefix + " Icon", IconUtils.convertDrawableToBase64String(action.getIcon()), editor);
+            this.mFolderActions.put(
+                    this.mCurrentFolderSlot * FOLDER_ITEMS + this.mCurrentFolderItem, action);
+            restartServiceIfRequired();
+        } else if (gestureSlot >= 0) {
             this.mGestureActions.setElementAt(action, gestureSlot);
             saveGestureAction(
                     this.mCurrentGesture, action, editorCreateAndReturnSharedPreferencesEditor);
@@ -245,28 +314,19 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
     private void saveGestureAction(int slot, Action action, SharedPreferences.Editor editor) {
         saveInt(TouchServiceResult.names[slot] + " Type", action.getType(), editor);
         saveString(TouchServiceResult.names[slot] + " String", action.getString(), editor);
-        saveString(
-                TouchServiceResult.names[slot] + " Icon",
-                IconUtils.convertDrawableToBase64String(action.getIcon()),
-                editor);
+        saveString(TouchServiceResult.names[slot] + " Icon", IconUtils.convertDrawableToBase64String(action.getIcon()), editor);
     }
 
     private void savePieAction(int slot, Action action, SharedPreferences.Editor editor) {
         saveInt("PieItem" + slot + " Type", action.getType(), editor);
         saveString("PieItem" + slot + " String", action.getString(), editor);
-        saveString(
-                "PieItem" + slot + " Icon",
-                IconUtils.convertDrawableToBase64String(action.getIcon()),
-                editor);
+        saveString("PieItem" + slot + " Icon", IconUtils.convertDrawableToBase64String(action.getIcon()), editor);
     }
 
     private void saveIsaAction(int slot, Action action, SharedPreferences.Editor editor) {
         saveInt("IsaItem" + slot + " Type", action.getType(), editor);
         saveString("IsaItem" + slot + " String", action.getString(), editor);
-        saveString(
-                "IsaItem" + slot + " Icon",
-                IconUtils.convertDrawableToBase64String(action.getIcon()),
-                editor);
+        saveString("IsaItem" + slot + " Icon", IconUtils.convertDrawableToBase64String(action.getIcon()), editor);
     }
 
     int loadFeedbackMode() {
@@ -761,5 +821,16 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
 
     void savePieBlurLive(int value) {
         saveInt("PieBlurLive", value, null);
+    }
+
+    /**
+     * When a pie folder opens (ROADMAP 1.17): 0 when its slice is hovered, 1 after a long press.
+     */
+    int loadPieFolderOpen() {
+        return loadInt("PieFolderOpen", 0);
+    }
+
+    void savePieFolderOpen(int value) {
+        saveInt("PieFolderOpen", value, null);
     }
 }

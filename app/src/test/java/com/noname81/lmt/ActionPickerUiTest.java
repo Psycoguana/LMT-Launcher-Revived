@@ -30,23 +30,24 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Pre-UI-rewrite safety net for the action picker: the row labelled {@code Action.names[t]}
- * must assign action t, or route to the right payload input.
+ * Pre-UI-rewrite safety net for the action picker: the row labelled {@code Action.names[t]} must
+ * assign action t, or route to the right payload input.
  *
- * <p>Today the list position <em>is</em> the action id (headers happen to sit exactly on the
- * {@code Offset*} ids), so a reordered or regrouped list would bind the wrong action with no
- * error. This test knows nothing about positions: it finds each row by label.
+ * <p>Today the list position <em>is</em> the action id (headers happen to sit exactly on the {@code
+ * Offset*} ids), so a reordered or regrouped list would bind the wrong action with no error. This
+ * test knows nothing about positions: it finds each row by label.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 33)
 public class ActionPickerUiTest {
 
-    /** Actions whose payload is typed into a text dialog. TaskerTask falls back to one when
-     * Tasker isn't installed, as it isn't here. */
+    /**
+     * Actions whose payload is typed into a text dialog. TaskerTask falls back to one when Tasker
+     * isn't installed, as it isn't here.
+     */
     private static final Set<Integer> TYPED_PAYLOAD =
             new HashSet<>(
-                    Arrays.asList(
-                            Action.Key, Action.WebPage, Action.Script, Action.TaskerTask));
+                    Arrays.asList(Action.Key, Action.WebPage, Action.Script, Action.TaskerTask));
 
     /** Actions whose payload comes from MultiSelectActivity, and the mode each opens it in. */
     private static final Map<Integer, Integer> APP_PICKER_MODE = new HashMap<>();
@@ -118,7 +119,8 @@ public class ActionPickerUiTest {
             } else {
                 AlertDialog unexpected = shown;
                 assertNull(
-                        row + " should not ask for a payload, but showed: "
+                        row
+                                + " should not ask for a payload, but showed: "
                                 + (unexpected == null ? "" : UiTestSupport.textsIn(unexpected)),
                         unexpected);
                 assertEquals(
@@ -135,13 +137,16 @@ public class ActionPickerUiTest {
     }
 
     private List<UiTestSupport.SectionedRow> rowsOfAFreshPicker() {
+        // Choosing for a pie slot, the one target that offers every action (folders included).
+        SettingsValues.getInstance(context).setCurrentPie(0);
         CommandSelectActivity picker =
                 Robolectric.buildActivity(CommandSelectActivity.class).setup().get();
         return UiTestSupport.sectionedActionRows(picker.rowsForTest());
     }
 
     private static int findRowPosition(CommandSelectActivity picker, String title) {
-        for (UiTestSupport.SectionedRow row : UiTestSupport.sectionedActionRows(picker.rowsForTest())) {
+        for (UiTestSupport.SectionedRow row :
+                UiTestSupport.sectionedActionRows(picker.rowsForTest())) {
             if (row.title.equals(title)) {
                 return row.position;
             }

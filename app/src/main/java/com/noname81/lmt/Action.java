@@ -30,6 +30,7 @@ class Action {
     static final int DataToggle = 21;
     static final int GPSToggle = 23;
     static final int Flashlight = 46;
+    static final int Folder = 50;
     static final int Holo = 42;
     static final int Home = 3;
     static final int HomeLongpress = 4;
@@ -125,7 +126,8 @@ class Action {
         "Flashlight",
         "KeepScreenOn",
         "PopUpWindow",
-        "BrightnessDial"
+        "BrightnessDial",
+        "Folder"
     };
     static final String[] captions = {
         "OffsetNormalCommands",
@@ -177,7 +179,8 @@ class Action {
         "Toggle the flashlight [None]",
         "Keep the screen on until toggled off or the screen is turned off [None]",
         "Open the current app in a pop-up window [Root|Shizuku]",
-        "Set the brightness on a dial around the pie; tap to toggle adaptive brightness [None]"
+        "Set the brightness on a dial around the pie; tap to toggle adaptive brightness [None]",
+        "Open a folder of actions around this slice [None]"
     };
 
     /**

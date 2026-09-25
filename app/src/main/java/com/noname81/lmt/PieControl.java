@@ -6,6 +6,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -30,13 +32,29 @@ class PieControl extends PieControlBase
         PieItem mPieItem;
         boolean mTempAction;
 
+        /** The settings slot of the short press, -1 for items not from a slot (ROADMAP 1.17). */
+        int mSlot = -1;
+
         PieItemAction(PieItem pieItem, Action shortPress, Action longPress, boolean isRecentApp) {
             this.mPieItem = pieItem;
             this.mClickAction = shortPress;
             this.mLongClickAction = longPress;
             this.mTempAction = isRecentApp;
         }
+
+        PieItemAction(
+                PieItem pieItem,
+                Action shortPress,
+                Action longPress,
+                boolean isRecentApp,
+                int slot) {
+            this(pieItem, shortPress, longPress, isRecentApp);
+            this.mSlot = slot;
+        }
     }
+
+    /** The open folder's items (ROADMAP 1.17); PieMenu holds them while the folder is open. */
+    private final Vector<PieItemAction> mFolderItemActions = new Vector<>();
 
     PieControl(Context context) {
         super(context);
@@ -74,7 +92,8 @@ class PieControl extends PieControlBase
                                         1),
                                 this.mSettings.getPieAction(slot1),
                                 this.mSettings.getPieAction(longSlot1),
-                                false));
+                                false,
+                                slot1));
             }
         }
         for (int slot2 = 10; slot2 < 23; slot2 += 2) {
@@ -102,7 +121,8 @@ class PieControl extends PieControlBase
                                         2),
                                 this.mSettings.getPieAction(slot2),
                                 this.mSettings.getPieAction(longSlot2),
-                                false));
+                                false,
+                                slot2));
             }
         }
         for (int slot3 = 24; slot3 < 37; slot3 += 2) {
@@ -130,7 +150,8 @@ class PieControl extends PieControlBase
                                         3),
                                 this.mSettings.getPieAction(slot3),
                                 this.mSettings.getPieAction(longSlot3),
-                                false));
+                                false,
+                                slot3));
             }
         }
         if (this.mPieItemActions.size() == 0) {
@@ -219,57 +240,119 @@ class PieControl extends PieControlBase
         super.attachToContainer(frameLayout);
     }
 
+    /** The slice or open-folder item whose view this is. */
+    private PieItemAction find(View view) {
+        for (PieItemAction action : this.mPieItemActions) {
+            if (action.mPieItem.getView() == view) {
+                return action;
+            }
+        }
+        for (PieItemAction action : this.mFolderItemActions) {
+            if (action.mPieItem.getView() == view) {
+                return action;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void onClick(View view) {
-        for (int index = 0; index < this.mPieItemActions.size(); index++) {
-            if (this.mPieItemActions.get(index).mPieItem.getView() == view) {
-                this.mLauncher.fireAction(this.mPieItemActions.get(index).mClickAction);
-                return;
-            }
+        PieItemAction action = find(view);
+        if (action != null) {
+            this.mLauncher.fireAction(action.mClickAction);
         }
     }
 
     @Override
     public boolean onLongClick(View view) {
-        for (int index = 0; index < this.mPieItemActions.size(); index++) {
-            if (this.mPieItemActions.get(index).mPieItem.getView() == view) {
-                if (this.mPieItemActions.get(index).mLongClickAction.getType() != 1) {
-                    this.mLauncher.fireAction(this.mPieItemActions.get(index).mLongClickAction);
-                    break;
-                }
-                this.mLauncher.fireAction(this.mPieItemActions.get(index).mClickAction);
-                break;
-            }
+        PieItemAction action = find(view);
+        if (action != null) {
+            this.mLauncher.fireAction(
+                    action.mLongClickAction.getType() != 1
+                            ? action.mLongClickAction
+                            : action.mClickAction);
         }
         return true;
     }
 
+    /**
+     * PieMenu's hover (36) and long press (40) on a slice: extensions arm, folders open or close.
+     */
     @Override
     public boolean onKey(View view, int keyCode, KeyEvent event) {
-        for (int index = 0; index < this.mPieItemActions.size(); index++) {
-            if (this.mPieItemActions.get(index).mPieItem.getView() == view) {
-                if (keyCode == 36) {
-                    if (this.mPieItemActions.get(index).mClickAction.getType()
-                            == Action.BrightnessDial) {
-                        this.mPie.armBrightness(this.mPieItemActions.get(index).mPieItem);
-                    } else if (this.mPieItemActions.get(index).mClickAction.getType() == 44) {
-                        this.mPie.activatePiePointer();
-                    } else if (this.mPieItemActions.get(index).mClickAction.getType() == 45) {
-                        activatePieRecentApps();
-                    }
-                } else if (keyCode == 40) {
-                    if (this.mPieItemActions.get(index).mLongClickAction.getType()
-                            == Action.BrightnessDial) {
-                        this.mPie.armBrightness(this.mPieItemActions.get(index).mPieItem);
-                    } else if (this.mPieItemActions.get(index).mLongClickAction.getType() == 44) {
-                        this.mPie.activatePiePointer();
-                    } else if (this.mPieItemActions.get(index).mLongClickAction.getType() == 45) {
-                        activatePieRecentApps();
-                    }
-                }
-            }
+        PieItemAction hovered = find(view);
+        if (hovered == null || this.mFolderItemActions.contains(hovered)) {
+            return true;
+        }
+        Action click = hovered.mClickAction;
+        Action longClick = hovered.mLongClickAction;
+        boolean openOnHover = this.mSettings.loadPieFolderOpen() == 0;
+        // After the long press timer fires every hover arrives as 40, so both close folders.
+        if (keyCode == 36 && click.getType() == Action.Folder && openOnHover) {
+            openFolder(hovered, hovered.mSlot);
+            return true;
+        }
+        if (keyCode == 40 && longClick.getType() == Action.Folder) {
+            openFolder(hovered, hovered.mSlot + 1);
+            return true;
+        }
+        if (keyCode == 40 && click.getType() == Action.Folder) {
+            openFolder(hovered, hovered.mSlot);
+            return true;
+        }
+        closeFolderUnlessOutside(hovered);
+        Action action = keyCode == 36 ? click : keyCode == 40 ? longClick : null;
+        if (action == null) {
+            return true;
+        }
+        if (action.getType() == Action.BrightnessDial) {
+            this.mPie.armBrightness(hovered.mPieItem);
+        } else if (action.getType() == 44) {
+            this.mPie.activatePiePointer();
+        } else if (action.getType() == 45) {
+            activatePieRecentApps();
         }
         return true;
+    }
+
+    /** Builds the folder on {@code slot}'s items and has PieMenu show them around the slice. */
+    private void openFolder(PieItemAction owner, int slot) {
+        if (slot < 0 || this.mPie.getOpenFolder() == owner.mPieItem) {
+            return;
+        }
+        this.mPie.closeFolder();
+        this.mFolderItemActions.clear();
+        int scaleUser = this.mSettings.loadPieShowScaleUserImages();
+        int scaleApp = this.mSettings.loadPieShowScaleAppImages();
+        int level = this.mPie.getLevels() + 1;
+        List<PieItem> items = new ArrayList<>();
+        for (int index = 0; index < SettingsValuesBase.FOLDER_ITEMS; index++) {
+            Action action = this.mSettings.getFolderAction(slot, index);
+            if (action.getType() <= Action.None) {
+                continue;
+            }
+            Drawable icon = action.getDrawable(this.mContext, null, scaleUser, scaleApp, false);
+            PieItem item = makeItem(icon, null, level);
+            setClickListener(this, item);
+            setLongClickListener(this, item);
+            setKeyListener(this, item);
+            this.mFolderItemActions.add(new PieItemAction(item, action, new Action(1), false));
+            items.add(item);
+        }
+        this.mPie.openFolder(owner.mPieItem, items);
+    }
+
+    /**
+     * Hovering a slice on the folder's ring or an inner one closes it; slices on rings between the
+     * folder and its items are crossed on the way out, so they leave it open.
+     */
+    private void closeFolderUnlessOutside(PieItemAction hovered) {
+        PieItem open = this.mPie.getOpenFolder();
+        if (open != null
+                && hovered.mPieItem != open
+                && hovered.mPieItem.getLevel() <= open.getLevel()) {
+            this.mPie.closeFolder();
+        }
     }
 
     private void createDefaultPieActions() {

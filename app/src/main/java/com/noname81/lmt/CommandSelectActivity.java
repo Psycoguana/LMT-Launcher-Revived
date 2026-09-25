@@ -86,6 +86,17 @@ public class CommandSelectActivity extends ThemedActivity {
 
     private void handleRowClick(int actionType) {
         this.mPos = actionType;
+        if (actionType == Action.Folder) {
+            // Keep the folder's name when a folder slot is picked again, then edit its items.
+            SettingsValues settings = SettingsValues.getInstance(getApplicationContext());
+            int slot = settings.currentPieSlot();
+            Action current = settings.getCurrentAction();
+            String name = current.getType() == Action.Folder ? current.getString() : "Folder";
+            settings.setCurrentAction(this, new Action(Action.Folder, name));
+            startActivity(FolderActivity.intent(this, slot));
+            finish();
+            return;
+        }
         if (actionType == 2) {
             MultiSelectActivity.AppSelectMode = 0;
             startActivityForResult(new Intent(this, MultiSelectActivity.class), 0);
@@ -243,6 +254,10 @@ public class CommandSelectActivity extends ThemedActivity {
             this.mRows.addSection(getString(R.string.commands_app_drawer_commands), range(40, 42));
             List<Integer> pieActions = range(44, 45);
             pieActions.add(Action.BrightnessDial);
+            // Folders hold other actions, so they go on pie slots only, not in a folder.
+            if (SettingsValues.getInstance(getApplicationContext()).currentPieSlot() >= 0) {
+                pieActions.add(Action.Folder);
+            }
             this.mRows.addSection(getString(R.string.commands_pie_action_commands), pieActions);
         }
 

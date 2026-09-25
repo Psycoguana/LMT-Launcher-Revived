@@ -87,6 +87,7 @@ class SettingsBackup {
         {"PieBlur", String.valueOf(PieBlur.MODE_NONE)},
         {"PieBlurRadius", "50"},
         {"PieBlurLive", "1"},
+        {"PieFolderOpen", "0"},
     };
 
     private static final String[][] STRING_DEFAULTS = {
@@ -114,6 +115,12 @@ class SettingsBackup {
         for (int slot = 0; slot < PIE_SLOTS; slot++) {
             exportSlot(json, prefs, "PieItem" + slot);
         }
+        // Pie folders (ROADMAP 1.17): each slot can hold a folder of up to 8 actions.
+        for (int slot = 0; slot < PIE_SLOTS; slot++) {
+            for (int item = 0; item < SettingsValuesBase.FOLDER_ITEMS; item++) {
+                exportSlot(json, prefs, SettingsValuesBase.folderPrefix(slot, item));
+            }
+        }
         for (int slot = 0; slot < ISA_SLOTS; slot++) {
             exportSlot(json, prefs, "IsaItem" + slot);
         }
@@ -140,6 +147,11 @@ class SettingsBackup {
         }
         for (int slot = 0; slot < PIE_SLOTS; slot++) {
             importSlot(json, prefs, "PieItem" + slot, editor);
+        }
+        for (int slot = 0; slot < PIE_SLOTS; slot++) {
+            for (int item = 0; item < SettingsValuesBase.FOLDER_ITEMS; item++) {
+                importSlot(json, prefs, SettingsValuesBase.folderPrefix(slot, item), editor);
+            }
         }
         for (int slot = 0; slot < ISA_SLOTS; slot++) {
             importSlot(json, prefs, "IsaItem" + slot, editor);

@@ -63,6 +63,12 @@ class PieMenu extends FrameLayout {
     private Paint mOutlinePaint;
     private PieView mPiePointer;
     private PieBrightness mBrightness;
+
+    /** Pie folders (ROADMAP 1.17): the open folder's slice, its items and the rings before. */
+    private PieItem mFolderParent;
+
+    private final List<PieItem> mFolderItems = new ArrayList<>();
+    private int mFolderBaseLevels;
     private int mPointerColor;
     private int mRadius;
     private int mRadiusInc;
@@ -398,6 +404,103 @@ class PieMenu extends FrameLayout {
         this.mPiePointer.activate();
     }
 
+    int getLevels() {
+        return this.mLevels;
+    }
+
+    PieItem getOpenFolder() {
+        return this.mFolderParent;
+    }
+
+    /**
+     * Shows a folder's items in a ring one level beyond the outermost, centred on the folder's
+     * slice and kept inside the pie's half circle (ROADMAP 1.17, mockup A). The items must have
+     * been made with level {@code getLevels() + 1}.
+     */
+    void openFolder(PieItem parent, List<PieItem> items) {
+        if (parent == this.mFolderParent || items.isEmpty()) {
+            return;
+        }
+        closeFolder();
+        this.mFolderParent = parent;
+        this.mFolderBaseLevels = this.mLevels;
+        int level = this.mLevels + 1;
+        this.mLevels = level;
+        float startGap = this.mSettings.loadPieStartGap() / 100.0f;
+        float minAngle = onTheBottom() ? (-1.5707964f) + startGap : startGap;
+        float range = (float) (Math.PI - startGap * 2.0f);
+        float sliceGap = this.mSettings.loadPieSliceGap() / 10.0f;
+        int sliceGapPx = (int) (5.0f * sliceGap);
+        int inner = this.mRadius + sliceGapPx + this.mRadiusInc * (level - 1);
+        int outer = this.mRadius + this.mRadiusInc - sliceGapPx + this.mRadiusInc * (level - 1);
+        int count = items.size();
+        float sweep = Math.min(parent.getSweep(), 0.55f);
+        if (sweep * count > range) {
+            sweep = range / count;
+        }
+        float start = parent.getStartAngle() + parent.getSweep() / 2.0f - sweep * count / 2.0f;
+        start = Math.max(minAngle, Math.min(start, minAngle + range - sweep * count));
+        Path path =
+                makeSlice(
+                        getDegrees(0.0d), getDegrees(sweep), outer, inner, this.mCenter, sliceGap);
+        for (PieItem item : items) {
+            placeIcon(item.getView(), start + sweep / 2.0f, inner, outer);
+            item.setGeometry(start, sweep, inner, outer, path);
+            item.setColor(this.mIconColor);
+            item.setAlpha(0);
+            this.mItems.add(item);
+            this.mFolderItems.add(item);
+            start += sweep;
+        }
+        ValueAnimator fade = ValueAnimator.ofFloat(0.0f, 1.0f);
+        fade.addUpdateListener(
+                animator -> {
+                    int alpha = (int) (animator.getAnimatedFraction() * 255.0f);
+                    for (PieItem item : items) {
+                        item.setAlpha(alpha);
+                    }
+                    invalidate();
+                });
+        fade.setDuration(Math.max(1, this.mAnimationTime * 2));
+        fade.start();
+        invalidate();
+    }
+
+    /** Takes the open folder's ring away again; hovering another slice or closing does this. */
+    void closeFolder() {
+        if (this.mFolderParent == null) {
+            return;
+        }
+        if (this.mFolderItems.contains(this.mCurrentItem)) {
+            this.mCurrentItem.setSelected(false);
+            this.mCurrentItem = null;
+        }
+        if (this.mFolderItems.contains(this.mLastItem)) {
+            this.mLastItem = null;
+        }
+        this.mItems.removeAll(this.mFolderItems);
+        this.mFolderItems.clear();
+        this.mLevels = this.mFolderBaseLevels;
+        this.mFolderParent = null;
+        invalidate();
+    }
+
+    /** Centres an item's icon two thirds out in its slice, the way layoutPie does. */
+    private void placeIcon(View view, float angle, int inner, int outer) {
+        if (view == null) {
+            return;
+        }
+        view.measure(view.getLayoutParams().width, view.getLayoutParams().height);
+        int width = view.getMeasuredWidth();
+        int height = view.getMeasuredHeight();
+        double distance = (((outer - inner) * 2) / 3) + inner;
+        int offset = (int) (distance * Math.sin(angle));
+        int top = (this.mCenter.y - ((int) (distance * Math.cos(angle)))) - (height / 2);
+        int x = onTheLeft() ? this.mCenter.x + offset : this.mCenter.x - offset;
+        int left = x - width / 2;
+        view.layout(left, top, left + width, top + height);
+    }
+
     /** The Brightness slice is hovered (ROADMAP 1.17). */
     void armBrightness(PieItem slice) {
         this.mBrightness.arm(slice);
@@ -436,6 +539,7 @@ class PieMenu extends FrameLayout {
     }
 
     public void show(boolean show, boolean animate) {
+        closeFolder();
         this.mBrightness.layout(
                 show,
                 this.mCenter,

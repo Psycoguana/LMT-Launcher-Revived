@@ -28,7 +28,8 @@ public class NewActionsTest {
         assertEquals(Action.Flashlight + 1, Action.KeepScreenOn);
         assertEquals(Action.KeepScreenOn + 1, Action.PopUpWindow);
         assertEquals(Action.PopUpWindow + 1, Action.BrightnessDial);
-        assertEquals(Action.BrightnessDial + 1, Action.names.length);
+        assertEquals(Action.BrightnessDial + 1, Action.Folder);
+        assertEquals(Action.Folder + 1, Action.names.length);
         assertEquals("Flashlight", Action.names[Action.Flashlight]);
         assertEquals("KeepScreenOn", Action.names[Action.KeepScreenOn]);
         assertEquals("PopUpWindow", Action.names[Action.PopUpWindow]);
@@ -53,6 +54,8 @@ public class NewActionsTest {
         assertEquals(
                 context.getString(R.string.commands_pie_action_commands),
                 sectionOf.get("BrightnessDial"));
+        assertEquals(
+                context.getString(R.string.commands_pie_action_commands), sectionOf.get("Folder"));
     }
 
     @Test
