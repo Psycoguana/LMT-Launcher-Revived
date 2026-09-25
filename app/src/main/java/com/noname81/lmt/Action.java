@@ -72,6 +72,10 @@ class Action {
     static final int WebPage = 28;
     static final int WifiToggle = 20;
     private Drawable mIcon;
+
+    /** A Material icon picked for this slot, e.g. a folder's (ROADMAP 1.17); null otherwise. */
+    private String mSymbol;
+
     private String mString;
     private int mType;
     static final String[] names = {
@@ -224,7 +228,25 @@ class Action {
     Action(int type, String value, String encodedIcon, Context context) {
         this.mType = type;
         this.mString = value;
-        this.mIcon = IconUtils.convertBase64StringToDrawable(context, encodedIcon);
+        this.mSymbol = MaterialIcons.nameOf(encodedIcon);
+        if (this.mSymbol == null) {
+            this.mIcon = IconUtils.convertBase64StringToDrawable(context, encodedIcon);
+        }
+    }
+
+    String getSymbol() {
+        return this.mSymbol;
+    }
+
+    void setSymbol(String name) {
+        this.mSymbol = name;
+    }
+
+    /** What the Icon field saves: the picked Material icon's name, else the image in base64. */
+    static String encodeIcon(Action action) {
+        return action.mSymbol != null
+                ? MaterialIcons.PREFIX + action.mSymbol
+                : IconUtils.convertDrawableToBase64String(action.getIcon());
     }
 
     int getType() {
@@ -304,6 +326,12 @@ class Action {
                 Log.e(TAG, "Failed to load available image " + name);
             }
         } catch (Exception unused) {
+        }
+        if (this.mSymbol != null) {
+            Drawable symbol = MaterialIcons.drawable(context, this.mSymbol);
+            if (symbol != null) {
+                return symbol;
+            }
         }
         Drawable drawable = this.mIcon;
         if (drawable != null) {

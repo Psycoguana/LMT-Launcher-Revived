@@ -63,6 +63,13 @@ final class PieBlur extends View {
     private View mPie;
     private int mGeneration;
 
+    /** The open blur's shape, so a pie folder can grow it (ROADMAP 1.17). */
+    private boolean mBehindPie;
+
+    private boolean mLive;
+    private int mCenterX;
+    private int mCenterY;
+
     PieBlur(Context context) {
         super(context);
         this.mSettings = SettingsValues.getInstance(context);
@@ -84,7 +91,11 @@ final class PieBlur extends View {
         if (mode == MODE_NONE) {
             return;
         }
-        if (SamsungBlur.isAvailable() && this.mSettings.loadPieBlurLive() != 0) {
+        this.mBehindPie = mode == MODE_BEHIND_PIE;
+        this.mCenterX = centerX;
+        this.mCenterY = centerY;
+        this.mLive = SamsungBlur.isAvailable() && this.mSettings.loadPieBlurLive() != 0;
+        if (this.mLive) {
             openLive((FrameLayout) pie.getParent(), mode, centerX, centerY, radius);
             return;
         }
@@ -187,6 +198,26 @@ final class PieBlur extends View {
             return;
         }
         container.addView(this, 0, params);
+    }
+
+    /**
+     * Grows or shrinks the disc behind the pie to {@code radius}, for a pie folder's ring opening
+     * or closing (ROADMAP 1.17). The screenshot covers the whole display, so only the view's bounds
+     * change; a live blur gets the new corner radius too.
+     */
+    void resize(int radius) {
+        if (!this.mBehindPie || !(getLayoutParams() instanceof FrameLayout.LayoutParams)) {
+            return;
+        }
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) getLayoutParams();
+        params.width = radius * 2;
+        params.height = radius * 2;
+        params.leftMargin = this.mCenterX - radius;
+        params.topMargin = this.mCenterY - radius;
+        setLayoutParams(params);
+        if (this.mLive) {
+            SamsungBlur.apply(this, this.mSettings.loadPieBlurRadius(), radius);
+        }
     }
 
     /** Removes the blur and frees the screenshot; safe to call when nothing is open. */

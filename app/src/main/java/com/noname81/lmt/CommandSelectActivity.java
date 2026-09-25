@@ -91,8 +91,10 @@ public class CommandSelectActivity extends ThemedActivity {
             SettingsValues settings = SettingsValues.getInstance(getApplicationContext());
             int slot = settings.currentPieSlot();
             Action current = settings.getCurrentAction();
-            String name = current.getType() == Action.Folder ? current.getString() : "Folder";
-            settings.setCurrentAction(this, new Action(Action.Folder, name));
+            boolean wasFolder = current.getType() == Action.Folder;
+            Action folder = new Action(Action.Folder, wasFolder ? current.getString() : "Folder");
+            folder.setSymbol(wasFolder ? current.getSymbol() : null);
+            settings.setCurrentAction(this, folder);
             startActivity(FolderActivity.intent(this, slot));
             finish();
             return;

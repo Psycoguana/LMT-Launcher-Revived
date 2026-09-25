@@ -171,6 +171,14 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
         restartServiceIfRequired();
     }
 
+    /** A folder's Material icon (null for the default folder icon), saved in its Icon field. */
+    void saveFolderSymbol(int slot, String symbol) {
+        Action folder = getPieAction(slot);
+        folder.setSymbol(symbol);
+        saveString("PieItem" + slot + " Icon", Action.encodeIcon(folder), null);
+        restartServiceIfRequired();
+    }
+
     void setCurrentFolderItem(int slot, int item) {
         this.mCurrentGesture = -1;
         this.mCurrentPie = -1;
@@ -238,7 +246,7 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
             SharedPreferences.Editor editor = editorCreateAndReturnSharedPreferencesEditor;
             saveInt(prefix + " Type", action.getType(), editor);
             saveString(prefix + " String", action.getString(), editor);
-            saveString(prefix + " Icon", IconUtils.convertDrawableToBase64String(action.getIcon()), editor);
+            saveString(prefix + " Icon", Action.encodeIcon(action), editor);
             this.mFolderActions.put(
                     this.mCurrentFolderSlot * FOLDER_ITEMS + this.mCurrentFolderItem, action);
             restartServiceIfRequired();
@@ -314,19 +322,19 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
     private void saveGestureAction(int slot, Action action, SharedPreferences.Editor editor) {
         saveInt(TouchServiceResult.names[slot] + " Type", action.getType(), editor);
         saveString(TouchServiceResult.names[slot] + " String", action.getString(), editor);
-        saveString(TouchServiceResult.names[slot] + " Icon", IconUtils.convertDrawableToBase64String(action.getIcon()), editor);
+        saveString(TouchServiceResult.names[slot] + " Icon", Action.encodeIcon(action), editor);
     }
 
     private void savePieAction(int slot, Action action, SharedPreferences.Editor editor) {
         saveInt("PieItem" + slot + " Type", action.getType(), editor);
         saveString("PieItem" + slot + " String", action.getString(), editor);
-        saveString("PieItem" + slot + " Icon", IconUtils.convertDrawableToBase64String(action.getIcon()), editor);
+        saveString("PieItem" + slot + " Icon", Action.encodeIcon(action), editor);
     }
 
     private void saveIsaAction(int slot, Action action, SharedPreferences.Editor editor) {
         saveInt("IsaItem" + slot + " Type", action.getType(), editor);
         saveString("IsaItem" + slot + " String", action.getString(), editor);
-        saveString("IsaItem" + slot + " Icon", IconUtils.convertDrawableToBase64String(action.getIcon()), editor);
+        saveString("IsaItem" + slot + " Icon", Action.encodeIcon(action), editor);
     }
 
     int loadFeedbackMode() {

@@ -31,6 +31,7 @@ public class FolderActivity extends ThemedActivity {
     private int mSlot;
     private Adapter mAdapter;
     private TextInputEditText mName;
+    private TextInputLayout mNameLayout;
 
     static Intent intent(Context context, int slot) {
         return new Intent(context, FolderActivity.class).putExtra(EXTRA_SLOT, slot);
@@ -66,6 +67,11 @@ public class FolderActivity extends ThemedActivity {
                 new TextInputLayout(
                         this, null, com.google.android.material.R.attr.textInputOutlinedStyle);
         nameLayout.setHint("Folder name");
+        // The folder's icon sits left of its name; tapping it picks another (ROADMAP 1.17).
+        this.mNameLayout = nameLayout;
+        showIcon(settings.getPieAction(this.mSlot).getSymbol());
+        nameLayout.setStartIconContentDescription("Folder icon");
+        nameLayout.setStartIconOnClickListener(v -> pickIcon());
         TextInputEditText name = new TextInputEditText(nameLayout.getContext());
         name.setId(R.id.folder_name);
         name.setSingleLine(true);
@@ -117,6 +123,26 @@ public class FolderActivity extends ThemedActivity {
         }
     }
 
+    private void showIcon(String symbol) {
+        this.mNameLayout.setStartIconDrawable(
+                MaterialIcons.uiDrawable(this, symbol != null ? symbol : "folder", 24));
+    }
+
+    private void pickIcon() {
+        SettingsValues settings = SettingsValues.getInstance(getApplicationContext());
+        IconPickerDialog.show(
+                this,
+                settings.getPieAction(this.mSlot).getSymbol(),
+                name -> {
+                    settings.saveFolderSymbol(this.mSlot, name);
+                    showIcon(name);
+                });
+    }
+
+    void pickIconForTest() {
+        pickIcon();
+    }
+
     void clickItemForTest(int item) {
         pick(item);
     }
@@ -124,6 +150,21 @@ public class FolderActivity extends ThemedActivity {
     private void pick(int item) {
         SettingsValues.getInstance(getApplicationContext()).setCurrentFolderItem(this.mSlot, item);
         startActivity(new Intent(this, CommandSelectActivity.class));
+    }
+
+    /** The Pie tab's caption for a folder slot: its name and how many actions it holds. */
+    static String summary(Context context, int slot) {
+        SettingsValues settings = SettingsValues.getInstance(context.getApplicationContext());
+        int count = 0;
+        for (int item = 0; item < SettingsValuesBase.FOLDER_ITEMS; item++) {
+            if (settings.getFolderAction(slot, item).getType() > Action.None) {
+                count++;
+            }
+        }
+        String name = settings.getPieAction(slot).getString();
+        String title =
+                name == null || name.isEmpty() ? "Folder" : "Folder \u201c" + name + "\u201d";
+        return title + ", " + count + (count == 1 ? " action" : " actions");
     }
 
     /** A row's caption: the app's name for apps, the action's description otherwise. */

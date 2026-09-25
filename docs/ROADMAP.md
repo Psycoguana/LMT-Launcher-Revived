@@ -740,6 +740,13 @@ Both from 1.16. The dial came first because it fits the pie pointer's extension 
     between are crossed on the way out and leave it open; closing the pie closes it too.
   - After the long-press timer fires, PieMenu sends every hover as 40 instead of 36, so
     both signals open and close folders.
+  - **Folder icons**: the icon left of the folder name opens a searchable grid of Google's
+    Material Icons (the font and its codepoints are bundled in `assets/`, Apache 2.0, about
+    2,200 icons; common folder-style icons first while the search is empty). The choice is
+    saved as `symbol:<name>` in the slot's Icon field, so backups carry it, and drawn white so
+    the pie tints it like its own icons.
+  - The blur behind the pie grows under an open folder's ring (`PieBlur.resize`) and
+    shrinks back when it closes. The Pie tab shows a folder slot as `Folder "Name", N actions`.
 
 ## Part 2 — Accessibility fallbacks for root-only actions
 

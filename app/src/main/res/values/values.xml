@@ -25,6 +25,8 @@
     <id name="color_next" />
     <id name="color_preview" />
     <id name="folder_name" />
+    <id name="icon_search" />
+    <id name="icon_grid" />
     <id name="color_string" />
     <id name="green_label" />
     <id name="green_layout" />

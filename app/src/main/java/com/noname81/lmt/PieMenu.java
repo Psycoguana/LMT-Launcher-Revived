@@ -463,7 +463,15 @@ class PieMenu extends FrameLayout {
                 });
         fade.setDuration(Math.max(1, this.mAnimationTime * 2));
         fade.start();
+        this.mBlur.resize(blurRadius());
         invalidate();
+    }
+
+    /** The blur disc's radius: out to the outermost ring and its outline. */
+    private int blurRadius() {
+        return this.mRadius
+                + (this.mRadiusInc * this.mLevels)
+                + this.mSettings.loadPieOutlineSize();
     }
 
     /** Takes the open folder's ring away again; hovering another slice or closing does this. */
@@ -482,6 +490,7 @@ class PieMenu extends FrameLayout {
         this.mFolderItems.clear();
         this.mLevels = this.mFolderBaseLevels;
         this.mFolderParent = null;
+        this.mBlur.resize(blurRadius());
         invalidate();
     }
 

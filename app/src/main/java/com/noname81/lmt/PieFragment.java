@@ -301,7 +301,12 @@ public class PieFragment extends Fragment {
             SectionedRows.Labeled row = this.mRows.rowAt(position);
             int absoluteIndex = this.mRows.absoluteRowIndex(position);
             rowHolder.title.setText(row.title);
-            rowHolder.caption.setText(row.caption);
+            Action slotAction =
+                    SettingsValues.getInstance(requireActivity()).getPieAction(absoluteIndex);
+            rowHolder.caption.setText(
+                    slotAction.getType() == Action.Folder
+                            ? FolderActivity.summary(requireActivity(), absoluteIndex)
+                            : row.caption);
             IconUtils.setMaxSizeForImageView(requireActivity(), rowHolder.icon);
             IconLoader.load(
                     rowHolder.icon,

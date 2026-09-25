@@ -129,4 +129,73 @@ public class PieFolderTest {
         assertEquals(0, json.getInt("PieFolderOpen"));
     }
 
+    @Test
+    public void iconSearchMatchesEveryWordInAnyOrder() {
+        IconPickerDialog.Adapter adapter = new IconPickerDialog.Adapter(context, null, n -> {});
+        assertTrue(adapter.getItemCount() > 2000);
+        adapter.filter("open folder");
+        assertTrue(adapter.shownForTest().contains("folder_open"));
+        for (String name : adapter.shownForTest()) {
+            assertTrue(name, name.contains("folder") && name.contains("open"));
+        }
+        adapter.filter("zzznothing");
+        assertEquals(0, adapter.getItemCount());
+    }
+
+    @Test
+    public void aPickedIconIsSavedAsItsNameAndSurvivesAReload() throws Exception {
+        SettingsValues settings = SettingsValues.getInstance(context);
+        settings.setCurrentPie(4);
+        settings.setCurrentAction(null, new Action(Action.Folder, "Media"));
+        settings.saveFolderSymbol(4, "music_note");
+        java.lang.reflect.Field instance = SettingsValues.class.getDeclaredField("instance");
+        instance.setAccessible(true);
+        instance.set(null, null);
+        Action folder = SettingsValues.getInstance(context).getPieAction(4);
+        assertEquals("music_note", folder.getSymbol());
+        assertEquals("symbol:music_note", Action.encodeIcon(folder));
+        assertTrue(folder.getDrawable(context, null, 1, 1, false) != null);
+        JSONObject json = SettingsBackup.exportSettingsToJson(SettingsValues.getInstance(context));
+        assertEquals("symbol:music_note", json.getString("PieItem4 Icon"));
+    }
+
+    @Test
+    public void theEditorsIconOpensThePickerAndSavesTheChoice() {
+        SettingsValues settings = SettingsValues.getInstance(context);
+        settings.setCurrentPie(4);
+        settings.setCurrentAction(null, new Action(Action.Folder, "Media"));
+        FolderActivity editor =
+                Robolectric.buildActivity(FolderActivity.class, FolderActivity.intent(context, 4))
+                        .setup()
+                        .get();
+        editor.pickIconForTest();
+        UiTestSupport.idle();
+        androidx.appcompat.app.AlertDialog dialog =
+                (androidx.appcompat.app.AlertDialog)
+                        org.robolectric.shadows.ShadowAlertDialog.getLatestDialog();
+        android.widget.EditText search = dialog.findViewById(R.id.icon_search);
+        search.setText("rocket launch");
+        UiTestSupport.idle();
+        androidx.recyclerview.widget.RecyclerView grid = dialog.findViewById(R.id.icon_grid);
+        IconPickerDialog.Adapter adapter = (IconPickerDialog.Adapter) grid.getAdapter();
+        assertEquals("rocket_launch", adapter.shownForTest().get(0));
+        grid.measure(0, 0);
+        grid.layout(0, 0, 1000, 1000);
+        grid.findViewHolderForAdapterPosition(0).itemView.performClick();
+        UiTestSupport.idle();
+        assertEquals("rocket_launch", settings.getPieAction(4).getSymbol());
+        assertFalse(dialog.isShowing());
+    }
+
+    @Test
+    public void thePieTabNamesAFolderAndCountsItsActions() {
+        SettingsValues settings = SettingsValues.getInstance(context);
+        settings.setCurrentPie(4);
+        settings.setCurrentAction(null, new Action(Action.Folder, "Media"));
+        settings.setCurrentFolderItem(4, 0);
+        settings.setCurrentAction(null, new Action(Action.Flashlight));
+        settings.setCurrentFolderItem(4, 5);
+        settings.setCurrentAction(null, new Action(Action.Home));
+        assertEquals("Folder \u201cMedia\u201d, 2 actions", FolderActivity.summary(context, 4));
+    }
 }

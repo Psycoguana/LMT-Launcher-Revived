@@ -515,6 +515,26 @@
       "class": "SettingsValuesBase.smali",
       "method": "setCurrentPie(I)V",
       "reason": "ROADMAP 1.17 pie folders: clears the folder item target."
+    },
+    {
+      "class": "Action.smali",
+      "method": "constructor <init>(ILjava/lang/String;Ljava/lang/String;Landroid/content/Context;)V",
+      "reason": "ROADMAP 1.17 folder icons: an Icon field holding symbol:<name> is a picked Material icon (mSymbol) instead of a base64 image."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "private saveGestureAction(ILcom/noname81/lmt/Action;Landroid/content/SharedPreferences$Editor;)V",
+      "reason": "ROADMAP 1.17 folder icons: the Icon field is written by Action.encodeIcon (symbol:<name> for a picked Material icon, else the base64 image as before)."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "private saveIsaAction(ILcom/noname81/lmt/Action;Landroid/content/SharedPreferences$Editor;)V",
+      "reason": "ROADMAP 1.17 folder icons: the Icon field is written by Action.encodeIcon (symbol:<name> for a picked Material icon, else the base64 image as before)."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "private savePieAction(ILcom/noname81/lmt/Action;Landroid/content/SharedPreferences$Editor;)V",
+      "reason": "ROADMAP 1.17 folder icons: the Icon field is written by Action.encodeIcon (symbol:<name> for a picked Material icon, else the base64 image as before)."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -543,7 +563,7 @@
     },
     {
       "class": "SettingsValuesBase.smali",
-      "reason": "ROADMAP 1.4: loadShowSystemApps/saveShowSystemApps persist the app picker's 'show system apps' toggle. Missing from this file until ROADMAP 3.6 made one-sided methods actually fail the oracle - before that they only printed a warning. ROADMAP 1.10 adds load/save ThemeMode, ThemeFollowSystemColor, ThemeColor and ThemeCustomColor for the Appearance page. ROADMAP 1.17 pie folders: FOLDER_ITEMS, mCurrentFolderSlot/mCurrentFolderItem/mFolderActions, getFolderAction, folderPrefix, saveFolderName, setCurrentFolderItem, currentPieSlot, reloadFolders, loadPieFolderOpen/savePieFolderOpen."
+      "reason": "ROADMAP 1.4: loadShowSystemApps/saveShowSystemApps persist the app picker's 'show system apps' toggle. Missing from this file until ROADMAP 3.6 made one-sided methods actually fail the oracle - before that they only printed a warning. ROADMAP 1.10 adds load/save ThemeMode, ThemeFollowSystemColor, ThemeColor and ThemeCustomColor for the Appearance page. ROADMAP 1.17 pie folders: FOLDER_ITEMS, mCurrentFolderSlot/mCurrentFolderItem/mFolderActions, getFolderAction, folderPrefix, saveFolderName, setCurrentFolderItem, currentPieSlot, reloadFolders, loadPieFolderOpen/savePieFolderOpen. ROADMAP 1.17 folder icons: saveFolderSymbol."
     },
     {
       "class": "LMT.smali",
@@ -1035,6 +1055,34 @@
     {
       "class": "PieBrightness.smali",
       "reason": "ROADMAP 1.17 brightness dial: PieView extension, armed by hovering its slice; past the rim the finger's angle sets Settings.System.SCREEN_BRIGHTNESS (gamma 2.2) and draws the dial."
+    },
+    {
+      "class": "MaterialIcons.smali",
+      "reason": "ROADMAP 1.17 folder icons: loads the bundled Material Icons font (Apache 2.0) and its codepoints, draws an icon by name."
+    },
+    {
+      "class": "IconPickerDialog.smali",
+      "reason": "ROADMAP 1.17 folder icons: the searchable icon grid dialog."
+    },
+    {
+      "class": "IconPickerDialog$OnPicked.smali",
+      "reason": "ROADMAP 1.17 folder icons: callback with the picked icon name."
+    },
+    {
+      "class": "IconPickerDialog$Adapter.smali",
+      "reason": "ROADMAP 1.17 folder icons: grid adapter with the word filter and suggested icons first."
+    },
+    {
+      "class": "IconPickerDialog$Adapter$Cell.smali",
+      "reason": "ROADMAP 1.17 folder icons: grid cell holder."
+    },
+    {
+      "class": "IconPickerDialog$Adapter$ANON.smali",
+      "reason": "ROADMAP 1.17 folder icons: cell click listener."
+    },
+    {
+      "class": "IconPickerDialog$ANON.smali",
+      "reason": "ROADMAP 1.17 folder icons: search TextWatcher and the dialog's listeners, merged by the fingerprinter."
     }
   ],
   "removed_classes": [
