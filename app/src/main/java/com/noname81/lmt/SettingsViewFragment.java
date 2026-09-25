@@ -633,8 +633,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                         category,
                         "Samsung Live Blur",
                         SamsungBlur.isAvailable()
-                                ? "Apply real time blur. Does not blur pie's inner radius."
-                                : "Apply real time blur. Does not blur pie's inner radius.\n"
+                                ? "Apply real time blur, the pie's center included."
+                                : "Apply real time blur, the pie's center included.\n"
                                         + "Not available on this device",
                         "PieBlurLive",
                         SamsungBlur.isAvailable())
