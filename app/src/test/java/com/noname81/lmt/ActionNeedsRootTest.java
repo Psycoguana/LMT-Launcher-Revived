@@ -30,6 +30,7 @@ public class ActionNeedsRootTest {
         assertFalse(Action.needsRoot(Action.App)); // [Root|None]
         assertFalse(Action.needsRoot(Action.Back)); // [Accessibility|Root]
         assertFalse(Action.needsRoot(Action.OpenKeyboard)); // [None]
+        assertFalse(Action.needsRoot(Action.LastApp)); // [Root|UsageStats], ROADMAP 2.5
     }
 
     @Test

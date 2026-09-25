@@ -775,11 +775,15 @@ Not verifiable by argent: the pie, gestures and ISAs only fire on a real finger
 `WRITE_SECURE_SETTINGS`) · `UnpinApp` · `KillAllApps` · `Script` · arbitrary
 non-media `Key`.
 
-### 2.5 Mislabelled in the picker
+### 2.5 Mislabelled in the picker  ✅ done (LastApp)
 
 **14 LastApp is tagged `[Root]` but already has a working non-root path** — it
 checks `isRootAvailable()` and falls back to UsageStats + `doAppAction()`. The
-picker tells users it needs root when it does not.
+picker told users it needs root when it does not, and since 1.13 greys root-only
+actions out, it even blocked it. Now tagged `[Root|UsageStats]`, and choosing it
+without root asks for usage access, like PieRecentApps. Verified on the test phone with
+Magisk denying root: Calendar → pie → last app switched back to Chrome.
+NextApp/PrevApp stay root-only: cycling through tasks has no UsageStats equivalent.
 
 More broadly: several actions have a rich pre-Lollipop non-root implementation
 followed by `if (SDK_INT >= 21) { root; return; }`. That legacy code is dead on

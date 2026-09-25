@@ -59,7 +59,7 @@
     {
       "class": "Action.smali",
       "method": "constructor static <clinit>()V",
-      "reason": "ROADMAP 2.3: TaskerTask no longer needs root (see the Launcher.smali::doTaskerAction entry below), so its caption tag changes from [Root] to [None]. ROADMAP 2.1 then retags Menu, Screenshot and the Nova/Apex/Holo drawers, which gained an accessibility path: e.g. [Root] becomes [Accessibility (Android 9+)|Root] for Screenshot."
+      "reason": "ROADMAP 2.3: TaskerTask no longer needs root (see the Launcher.smali::doTaskerAction entry below), so its caption tag changes from [Root] to [None]. ROADMAP 2.1 then retags Menu, Screenshot and the Nova/Apex/Holo drawers, which gained an accessibility path: e.g. [Root] becomes [Accessibility (Android 9+)|Root] for Screenshot. ROADMAP 2.5: LastApp's caption says [Root|UsageStats] (it already fell back to UsageStats without root)."
     },
     {
       "class": "Launcher.smali",
@@ -229,7 +229,7 @@
     {
       "class": "Action.smali",
       "method": "checkNeededPermissions(Landroid/app/Activity;Z)V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged. ROADMAP 2.5: LastApp (14) also asks for usage access without root, like PieRecentApps (45)."
     },
     {
       "class": "IconUtils.smali",

@@ -134,7 +134,7 @@ class Action {
         "Activate voice search [None]",
         "Switch to next active app [Root]",
         "Switch to previous active app [Root]",
-        "Switch to last active app [Root]",
+        "Switch to last active app [Root|UsageStats]",
         "Open the notification bar [Accessibility]",
         "Open the quick settings [Accessibility]",
         "Open the keyboard [None]",
@@ -369,7 +369,10 @@ class Action {
             }
             return;
         }
-        if (type == 45 && log && !RootContext.getInstance(activity).isRootAvailable(false)) {
+        // Both fall back to UsageStats without root (ROADMAP 2.5).
+        if ((type == 45 || type == LastApp)
+                && log
+                && !RootContext.getInstance(activity).isRootAvailable(false)) {
             PermissionChecker.getInstance().checkAndRequestUsageStatsPermission(activity, true);
         }
     }
