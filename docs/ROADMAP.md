@@ -591,6 +591,17 @@ A review pass over the whole app, looking for:
   with no su on the PATH, and pie-only users are never asked again. Accessibility-capable actions stay selectable even while the service is off.
 - `<profileable android:shell="true"/>` added to the manifest so Perfetto gets call stacks
   from release builds.
+- **Gestures on the wrong device (upstream):** the default gesture input, `event4`, is a
+  proximity sensor on the test phone (the touchscreen is `event3`), and nothing ran Auto configuration
+  for you, so gestures silently did nothing. Before the reader starts, the service now checks
+  the saved device reports touch positions (`getevent -p`) and otherwise switches to the
+  touchscreen `TouchscreenDetector` finds, with a toast. Auto configuration shares the detector,
+  which also fixes it reading only the last digit of the device number (`event10` → 0).
+- **Leaked root readers (upstream):** stopping a reader closed its pipe but never killed the
+  `cat /dev/input/eventN` running under su, so every service restart left one behind (6 on
+  the test phone). The same su call that lists the devices first runs `pkill -f '^cat /dev/input/event'`.
+  "Set gesture input" and Auto configuration no longer open the device themselves on top of
+  restarting the service (that made two readers).
 - **Code cleanup:**
   - Bytecode-neutral: the decompiler's `@Override // <class>` and `// from class:` comments,
     self-assignments (`x = x;`, 12 in `PieMenu.layoutPie`), a bare `hashCode()`, and magic

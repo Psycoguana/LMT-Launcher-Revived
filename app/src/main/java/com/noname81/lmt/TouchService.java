@@ -48,6 +48,10 @@ public class TouchService extends Service {
      * calling read() on the closed pipe and burns a whole core, forever. Checked on uptime, so it
      * never wakes a sleeping phone.
      */
+    /** Kills stale readers, then lists devices for {@link TouchscreenDetector}. */
+    private static final String PREPARE_INPUT =
+            "pkill -f '^cat /dev/input/event'; getevent -p | grep -E '(device|name|0035|0036)'";
+
     private static final long SPIN_BASELINE_MS = 2000;
 
     private static final long SPIN_FIRST_CHECK_MS = 10000;
@@ -189,6 +193,56 @@ public class TouchService extends Service {
                     .show();
             return;
         }
+        // One su call on a worker thread, before the reader starts: end readers that earlier runs
+        // left behind (stopping one closes its pipe but never kills the `cat` under su), and list
+        // the input devices to check the saved one is really the touchscreen.
+        RootContext rootContext = RootContext.getInstance(this);
+        new Thread(
+                        () -> {
+                            String getevent = rootContext.runCommandResult(PREPARE_INPUT, true);
+                            this.mMessageHandler.post(
+                                    () -> {
+                                        if (!this.mDestroyed) {
+                                            checkInputDevice(getevent);
+                                            startGestureThread();
+                                        }
+                                    });
+                        },
+                        "GestureInput")
+                .start();
+    }
+
+    /**
+     * Switches to the touchscreen when the saved device doesn't report touch positions - e.g. the
+     * default, event4, which is a proximity sensor on some phones.
+     */
+    private void checkInputDevice(String getevent) {
+        if (getevent == null
+                || TouchscreenDetector.reportsTouch(getevent, this.mSettings.loadInputDevice())) {
+            return;
+        }
+        boolean rotated = this.mSettings.getOrientation() % 2 == 1;
+        int width = rotated ? this.mSettings.getScreenHeight() : this.mSettings.getScreenWidth();
+        int height = rotated ? this.mSettings.getScreenWidth() : this.mSettings.getScreenHeight();
+        int[] touchscreen = TouchscreenDetector.detect(getevent, width, height);
+        if (touchscreen == null) {
+            Log.w(TAG, "No touchscreen found in getevent output");
+            return;
+        }
+        Log.i(
+                TAG,
+                "Input device "
+                        + this.mSettings.loadInputDevice()
+                        + " isn't a touchscreen,"
+                        + " using "
+                        + touchscreen[0]);
+        this.mSettings.saveInputDevice(touchscreen[0]);
+        this.mSettings.saveTouchscreenScreenFactorX(touchscreen[1]);
+        this.mSettings.saveTouchscreenScreenFactorY(touchscreen[2]);
+        Toast.makeText(this, "Input device configured automatically", Toast.LENGTH_LONG).show();
+    }
+
+    private void startGestureThread() {
         if (this.mTouchServiceThread == null) {
             this.mTouchServiceThread = new TouchServiceThread("TouchServiceThread");
         }

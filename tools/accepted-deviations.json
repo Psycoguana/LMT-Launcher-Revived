@@ -394,7 +394,7 @@
     {
       "class": "TouchService.smali",
       "method": "public onCreate()V",
-      "reason": "ROADMAP 1.13: the gesture setup moved unchanged into startGestures(), which runs through RootContext.whenRootKnown once the background root check has an answer, and only when root is really granted (otherwise a toast says gestures need root). Without root the native reader spins on a dead 'su getevent' pipe. startGestures also resets the spin watchdog and posts its first check (a baseline after 2 s, the verdict 10 s later, then every 60 s on uptime, so it never wakes the phone). If the thread uses over half a core in a window, checkTouchServiceThread quits it and the native loop, and shows a toast."
+      "reason": "ROADMAP 1.13: the gesture setup moved unchanged into startGestures(), which runs through RootContext.whenRootKnown once the background root check has an answer, and only when root is really granted (otherwise a toast says gestures need root). Without root the native reader spins on a dead 'su getevent' pipe. startGestures also resets the spin watchdog and posts its first check (a baseline after 2 s, the verdict 10 s later, then every 60 s on uptime, so it never wakes the phone). If the thread uses over half a core in a window, checkTouchServiceThread quits it and the native loop, and shows a toast. Before the reader starts, one su call on a worker thread kills readers earlier runs left behind (`cat /dev/input/eventN` survives its closed pipe under su) and lists the input devices; if the saved device doesn't report touch positions, the service switches to the touchscreen TouchscreenDetector finds and says so in a toast."
     },
     {
       "class": "TouchService.smali",
@@ -525,7 +525,7 @@
     },
     {
       "class": "TouchService.smali",
-      "reason": "ROADMAP 1.13: spinning gesture-thread watchdog - checkTouchServiceThread, isSpinning, threadCpuTicks, parseCpuTicks and the mSpin*/SPIN_* fields."
+      "reason": "ROADMAP 1.13: spinning gesture-thread watchdog - checkTouchServiceThread, isSpinning, threadCpuTicks, parseCpuTicks and the mSpin*/SPIN_* fields. Also startGestureThread (the unchanged reader start), checkInputDevice and PREPARE_INPUT (stale-reader cleanup and touchscreen check)."
     },
     {
       "class": "TouchService$TouchServiceThread.smali",
@@ -837,6 +837,10 @@
     {
       "class": "RootContext$ANON.smali",
       "reason": "ROADMAP 1.13: the background root check's Runnable."
+    },
+    {
+      "class": "TouchscreenDetector.smali",
+      "reason": "ROADMAP 1.13: finds the touchscreen in `getevent -p` output (moved out of Auto configuration, now shared with TouchService), reading the whole device number instead of its last character."
     }
   ],
   "removed_classes": [

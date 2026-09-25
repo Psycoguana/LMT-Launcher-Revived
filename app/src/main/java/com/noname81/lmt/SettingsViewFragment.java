@@ -188,9 +188,9 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 inputDevices,
                 this.mSettings::loadInputDevice,
                 v -> {
+                    // The service opens the device when it restarts; opening it here as well
+                    // left a second reader running under su (ROADMAP 1.13).
                     this.mSettings.saveInputDevice(v);
-                    this.mTouchServiceNative.setInputDeviceUnlock(
-                            this.mSettings.loadInputDeviceString());
                     this.mSettings.restartServiceIfRequired();
                 });
 
@@ -762,64 +762,20 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         int inputDevice = -1;
         int factorX = -1;
         int factorY = -1;
-        try {
-            String[] geteventLines =
-                    this.mRootContext
-                            .runCommandResult(
-                                    "getevent -p | grep -E '(device|name|0035|0036)'", true)
-                            .split("\n");
-            int deviceIndex = -1;
-            factorX = -1;
-            factorY = -1;
-            for (int line = 0; line < geteventLines.length - 1; line++) {
-                if (geteventLines[line].contains("0035")) {
-                    int nextLine = line + 1;
-                    if (geteventLines[nextLine].contains("0036")) {
-                        for (int back = line - 1; back >= 0; back--) {
-                            if (geteventLines[back].contains("/dev/input")) {
-                                String deviceLine = geteventLines[back];
-                                deviceIndex =
-                                        Integer.parseInt(
-                                                deviceLine.substring(deviceLine.length() - 1));
-                                break;
-                            }
-                        }
-                        WindowManager windowManager =
-                                (WindowManager)
-                                        requireActivity().getSystemService(Context.WINDOW_SERVICE);
-                        DisplayMetrics displayMetrics = new DisplayMetrics();
-                        windowManager.getDefaultDisplay().getRealMetrics(displayMetrics);
-                        int screenWidth = displayMetrics.widthPixels;
-                        int screenHeight = displayMetrics.heightPixels;
-                        int maxAt = geteventLines[line].indexOf("max");
-                        factorX =
-                                Math.round(
-                                        (Integer.parseInt(
-                                                                geteventLines[line].substring(
-                                                                        maxAt + 4,
-                                                                        geteventLines[line].indexOf(
-                                                                                ",", maxAt)))
-                                                        / (float) screenWidth)
-                                                * 100.0f);
-                        int maxAt2 = geteventLines[nextLine].indexOf("max");
-                        factorY =
-                                Math.round(
-                                        (Integer.parseInt(
-                                                                geteventLines[nextLine].substring(
-                                                                        maxAt2 + 4,
-                                                                        geteventLines[nextLine]
-                                                                                .indexOf(
-                                                                                        ",",
-                                                                                        maxAt2)))
-                                                        / (float) screenHeight)
-                                                * 100.0f);
-                    }
-                }
-            }
-            inputDevice = deviceIndex;
-        } catch (Exception unused) {
-            factorX = -1;
-            factorY = -1;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((WindowManager) requireActivity().getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay()
+                .getRealMetrics(displayMetrics);
+        int[] touchscreen =
+                TouchscreenDetector.detect(
+                        this.mRootContext.runCommandResult(
+                                "getevent -p | grep -E '(device|name|0035|0036)'", true),
+                        displayMetrics.widthPixels,
+                        displayMetrics.heightPixels);
+        if (touchscreen != null) {
+            inputDevice = touchscreen[0];
+            factorX = touchscreen[1];
+            factorY = touchscreen[2];
         }
         final int inputDeviceFinal = inputDevice;
         final int factorXFinal = factorX;
@@ -846,8 +802,6 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                             this.mSettings.saveInputDevice(inputDeviceFinal);
                             this.mSettings.saveTouchscreenScreenFactorX(factorXFinal);
                             this.mSettings.saveTouchscreenScreenFactorY(factorYFinal);
-                            this.mTouchServiceNative.setInputDeviceUnlock(
-                                    this.mSettings.loadInputDeviceString());
                             this.mSettings.restartServiceIfRequired();
                         })
                 .setNegativeButton(
