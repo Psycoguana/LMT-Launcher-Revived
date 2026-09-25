@@ -619,6 +619,10 @@ A review pass over the whole app, looking for:
   Every row's summary now ends in "Currently: ..." (slider rows: "500 ms (default)" or
   "300 ms, default 500 ms"), updated as soon as it changes. Both "Clear ... blacklist" rows ask
   first and show how many apps are excluded; with none they only say so.
+  The pie color editor previews a real pie slice (`PieTileView`, pointing right like the app
+  icon) instead of a color swatch: fill and outline with their gradients, shift stroke and a
+  tinted icon, at the user's radii and sizes, over a checkerboard for transparency. It shows
+  the slice selected while "selected color" is edited, and a typed color string updates it.
 - **Code cleanup:**
   - Bytecode-neutral: the decompiler's `@Override // <class>` and `// from class:` comments,
     self-assignments (`x = x;`, 12 in `PieMenu.layoutPie`), a bare `hashCode()`, and magic

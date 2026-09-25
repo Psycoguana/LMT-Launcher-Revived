@@ -3,6 +3,8 @@ package com.noname81.lmt;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +43,9 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
     private Slider mGreenSeek;
     private TextView mGreenValue;
     private TextView mRedLabel;
+    private PieTileView mPieTile;
+    private TextView mColorLabel;
+    private boolean mUpdating;
     private Slider mRedSeek;
     private TextView mRedValue;
 
@@ -90,6 +95,32 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
         EditText editText = (EditText) viewInflate.findViewById(R.id.color_string);
         this.mColorString = editText;
         editText.setText(colorString);
+        // Pie colors (seven parts) preview as a pie slice; the others keep the swatch.
+        if (labels.length == PieTileView.COLOR_COUNT) {
+            this.mPieTile = viewInflate.findViewById(R.id.pie_tile);
+            this.mColorLabel = viewInflate.findViewById(R.id.color_label);
+            this.mPieTile.setVisibility(View.VISIBLE);
+            this.mColorLabel.setVisibility(View.VISIBLE);
+            button.setVisibility(View.GONE);
+        }
+        // A color string typed or pasted by hand updates the sliders and the preview too.
+        editText.addTextChangedListener(
+                new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(
+                            CharSequence s, int start, int count, int after) {}
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if (!ColorDialog.this.mUpdating && s.toString().contains("#")) {
+                            parseColorString(s.toString());
+                            updateColorPreviews();
+                        }
+                    }
+                });
         this.mColorSelectionCurrent = 0;
         this.mColorSelectionStrings = labels;
         this.mColorSelectionValues = new int[labels.length];
@@ -196,6 +227,20 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
     }
 
     private void updateColorPreviews() {
+        this.mUpdating = true;
+        try {
+            showColors();
+        } finally {
+            this.mUpdating = false;
+        }
+        if (this.mPieTile != null) {
+            // Editing "selected color" shows the slice selected.
+            this.mPieTile.setColors(this.mColorSelectionValues, this.mColorSelectionCurrent == 1);
+            this.mColorLabel.setText(this.mColorSelectionStrings[this.mColorSelectionCurrent]);
+        }
+    }
+
+    private void showColors() {
         int color = this.mColorSelectionValues[this.mColorSelectionCurrent];
         if (color == -2) {
             this.mAlphaSeek.setValue(255f);
@@ -238,7 +283,8 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
                 anyTransparent = true;
             }
         }
-        if (anyTransparent) {
+        // Only when it changed: rewriting what is being typed would move the cursor.
+        if (anyTransparent && !sb.toString().equals(this.mColorString.getText().toString())) {
             this.mColorString.setText(sb.toString());
         }
     }

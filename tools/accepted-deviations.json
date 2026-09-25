@@ -868,6 +868,14 @@
     {
       "class": "IconFolder.smali",
       "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike."
+    },
+    {
+      "class": "PieTileView.smali",
+      "reason": "ROADMAP 1.13: the pie color editor's preview, one slice drawn the way PieMenu draws the pie (fill and outline with their gradients, shift stroke, tinted icon) at the user's sizes."
+    },
+    {
+      "class": "ColorDialog$ANON.smali",
+      "reason": "ROADMAP 1.13: TextWatcher so a color string typed or pasted into the editor updates the sliders and the preview."
     }
   ],
   "removed_classes": [
