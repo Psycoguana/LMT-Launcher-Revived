@@ -28,11 +28,13 @@ class Action {
     static final int BluetoothToggle = 22;
     static final int DataToggle = 21;
     static final int GPSToggle = 23;
+    static final int Flashlight = 46;
     static final int Holo = 42;
     static final int Home = 3;
     static final int HomeLongpress = 4;
     static final int ImmersiveModeToggle = 24;
     static final int Key = 26;
+    static final int KeepScreenOn = 47;
     static final int KillAllApps = 31;
     static final int KillApp = 30;
     static final int LastApp = 14;
@@ -53,6 +55,7 @@ class Action {
     static final int OpenQuickSettings = 16;
     static final int PiePointer = 44;
     static final int PieRecentApps = 45;
+    static final int PopUpWindow = 48;
     static final int PrevApp = 13;
     static final int RecentApps = 9;
     static final int Screenshot = 34;
@@ -115,7 +118,12 @@ class Action {
         "HoloLauncher",
         "OffsetPieActions",
         "PiePointer",
-        "PieRecentApps"
+        "PieRecentApps",
+        // Appended: ids are saved in settings and backups, so new actions go at the end and
+        // CommandSelectActivity files them under their section (ROADMAP 2.6).
+        "Flashlight",
+        "KeepScreenOn",
+        "PopUpWindow"
     };
     static final String[] captions = {
         "OffsetNormalCommands",
@@ -163,7 +171,10 @@ class Action {
         "Open AppDrawer from HoloLauncher [Root|Accessibility (Android 12+)]",
         "OffsetPieActions",
         "Activate pie pointer extension [Accessibility|Root]",
-        "Activate Pie Recent Apps [Root|UsageStats]"
+        "Activate Pie Recent Apps [Root|UsageStats]",
+        "Toggle the flashlight [None]",
+        "Keep the screen on until toggled off or the screen is turned off [None]",
+        "Open the current app in a pop-up window [Root|Shizuku]"
     };
 
     /**

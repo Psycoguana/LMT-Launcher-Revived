@@ -382,6 +382,7 @@ public class TouchService extends Service {
         Log.d(TAG, "TouchService stopped");
         this.mDestroyed = true;
         this.mMessageHandler.removeCallbacks(this.mSpinCheck);
+        KeepScreenOn.stop(this);
         TouchServiceNative touchServiceNative = this.mTouchServiceNative;
         if (touchServiceNative != null) {
             touchServiceNative.quit();

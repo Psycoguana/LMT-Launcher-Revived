@@ -232,8 +232,14 @@ public class CommandSelectActivity extends ThemedActivity {
 
         Adapter() {
             this.mRows.addSection(getString(R.string.commands_normal_commands), range(1, 18));
-            this.mRows.addSection(getString(R.string.commands_toogle_commands), range(20, 24));
-            this.mRows.addSection(getString(R.string.commands_advanced_commands), range(26, 38));
+            // Actions added later have ids past the last section; each joins its section here.
+            List<Integer> toggles = range(20, 24);
+            toggles.add(Action.Flashlight);
+            toggles.add(Action.KeepScreenOn);
+            this.mRows.addSection(getString(R.string.commands_toogle_commands), toggles);
+            List<Integer> advanced = range(26, 38);
+            advanced.add(Action.PopUpWindow);
+            this.mRows.addSection(getString(R.string.commands_advanced_commands), advanced);
             this.mRows.addSection(getString(R.string.commands_app_drawer_commands), range(40, 42));
             this.mRows.addSection(getString(R.string.commands_pie_action_commands), range(44, 45));
         }

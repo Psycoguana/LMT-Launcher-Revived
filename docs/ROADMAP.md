@@ -850,6 +850,36 @@ replacement for exactly that.
 `Action.captions[]` carries the `[Root]` / `[Accessibility]` tags shown in the
 picker, so every de-rooting must update its caption or the UI will lie.
 
+### 2.6 New actions  ✅ done (Flashlight, Keep screen on, Pop-up window)
+
+Ids are saved in settings and backups, so new actions are appended (46, 47, 48) and
+`CommandSelectActivity` adds each to its section by id instead of by range.
+
+- **46 Flashlight** [None]: `CameraManager.setTorchMode` on the first back camera with a flash.
+  A `TorchCallback`, registered when `Launcher` is created, follows the state, so a torch turned
+  on from quick settings goes off on the next toggle. Verified on the test phone.
+- **47 KeepScreenOn** [None]: a 1-pixel, untouchable `TYPE_APPLICATION_OVERLAY` window with
+  `FLAG_KEEP_SCREEN_ON`. Toggling again, turning the screen off or stopping the service removes
+  it. Verified on the test phone (`dumpsys window` shows `mHoldScreenWindow` on LMT's window, then
+  `null` after screen off). Its toast is suppressed on the test phone because LMT's notifications are
+  off there.
+- **48 PopUpWindow** [Root|Shizuku]: relaunches the app on screen with
+  `am start --windowingMode 5 -n <launcher activity>`, which moves its running task into a
+  freeform window (Samsung pop-up view). The app comes from the accessibility service, which
+  now also subscribes to `TYPE_WINDOW_STATE_CHANGED` at runtime and keeps the package of the
+  last activity window (`AccessibilityHandler.foregroundPackage`).
+  - `ActivityOptions.setLaunchWindowingMode` is blocked for apps
+    (`blocked,test-api, reflection, denied`); the attempt stays for phones that allow it.
+  - Root goes through `runCommandRoot` (the su shell). `runCommandRemote` (InputContext)
+    starts the activity its own way and drops `--windowingMode`.
+  - Without root: Shizuku (`dev.rikka.shizuku:api/provider:13.1.5`, `ShizukuShell`). The
+    first use shows Shizuku's permission prompt; `newProcess` is private in 13.x and is called
+    by reflection. Verified on the test phone with root denied (Chrome went freeform from uid 2000).
+  - Apps with `singleInstancePerTask` (Chrome) open a second task in the pop-up; without
+    bounds Samsung picks a near full-size pop-up.
+  - Shizuku's libraries declare minSdk 23; `tools:overrideLibrary` keeps LMT's 21 since they
+    are only reached through the pop-up action, behind `pingBinder`.
+
 ---
 
 ## Part 3 — Bugs and hazards found

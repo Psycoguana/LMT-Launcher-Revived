@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.GestureDescription;
 import android.app.Notification;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -36,8 +37,19 @@ public class AccessibilityHandler extends AccessibilityService {
     private static boolean mInitialized;
     private NotificationDataHelper mNotificationDataHelper;
 
+    /** The app whose activity came up last, for the pop-up window action (ROADMAP 2.6). */
+    private static volatile String sForegroundPackage;
+
+    static String foregroundPackage() {
+        return sForegroundPackage;
+    }
+
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+        if (accessibilityEvent.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            trackForeground(accessibilityEvent);
+            return;
+        }
         Notification notification;
         ApplicationInfo applicationInfo;
         Drawable drawable;
@@ -91,12 +103,32 @@ public class AccessibilityHandler extends AccessibilityService {
             return;
         }
         AccessibilityServiceInfo accessibilityServiceInfo = new AccessibilityServiceInfo();
-        accessibilityServiceInfo.eventTypes = 64;
+        accessibilityServiceInfo.eventTypes = 64 | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
         accessibilityServiceInfo.feedbackType = 16;
         setServiceInfo(accessibilityServiceInfo);
         this.mNotificationDataHelper = NotificationDataHelper.getInstance();
         instance = this;
         mInitialized = true;
+    }
+
+    /**
+     * Remembers the package of an activity window that came up. Dialogs, the keyboard, the
+     * notification shade and LMT's own windows are not activities of another app, so they don't
+     * replace it.
+     */
+    private void trackForeground(AccessibilityEvent event) {
+        CharSequence pkg = event.getPackageName();
+        CharSequence cls = event.getClassName();
+        if (pkg == null || cls == null || pkg.toString().equals(getPackageName())) {
+            return;
+        }
+        try {
+            getPackageManager()
+                    .getActivityInfo(new ComponentName(pkg.toString(), cls.toString()), 0);
+            sForegroundPackage = pkg.toString();
+        } catch (PackageManager.NameNotFoundException notAnActivity) {
+            // A dialog, a view or a window that is not an activity.
+        }
     }
 
     // "Stop your current feedback" - sent to every bound service whenever anything calls

@@ -292,11 +292,6 @@
       "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
     },
     {
-      "class": "PermissionChecker.smali",
-      "method": "hasUsageStatsPermission(Landroid/content/Context;Z)Z",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
-    },
-    {
       "class": "PieContainer.smali",
       "method": "rotate()V",
       "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
@@ -414,7 +409,7 @@
     {
       "class": "PieMenu.smali",
       "method": "private layoutPie()V",
-      "reason": "ROADMAP 1.13 cleanup: removed a bare `Double.isNaN(x);` statement. Its result was discarded and isNaN has no side effects, so it did nothing; it came from the original build's int-to-double conversions and survived decompilation as noise. Nothing else in the method changed."
+      "reason": "ROADMAP 1.13 cleanup: removed a bare `Double.isNaN(x);` statement. Its result was discarded and isNaN has no side effects, so it did nothing; it came from the original build's int-to-double conversions and survived decompilation as noise. Nothing else in the method changed. (unchanged by 1.17; folder rings are placed by openFolder/placeIcon.)"
     },
     {
       "class": "PiePointer.smali",
@@ -450,6 +445,16 @@
       "class": "SettingsValuesBase.smali",
       "method": "saveResourceSearchPath(Ljava/lang/String;)V",
       "reason": "ROADMAP 1.13: stores a picked content:// folder as-is (no trailing slash) and drops IconFolder's cached listing."
+    },
+    {
+      "class": "AccessibilityHandler.smali",
+      "method": "protected onServiceConnected()V",
+      "reason": "ROADMAP 2.6: also subscribes to TYPE_WINDOW_STATE_CHANGED (0x20), so trackForeground can remember which app's activity is on screen for the Pop-up window action."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "fireAction(Lcom/noname81/lmt/Action;)V",
+      "reason": "ROADMAP 2.6: three new cases, Flashlight (Torch.toggle), KeepScreenOn (KeepScreenOn.toggle) and PopUpWindow (PopUpWindow.open)."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -900,6 +905,38 @@
     {
       "class": "InputDialog$ItemStyle.smali",
       "reason": "ROADMAP 1.13: callback that styles a single-choice row, used to show each \"Pie status info font\" choice in its font."
+    },
+    {
+      "class": "Torch.smali",
+      "reason": "ROADMAP 2.6: the Flashlight action, CameraManager.setTorchMode on the back camera's flash, state followed with a TorchCallback."
+    },
+    {
+      "class": "Torch$ANON.smali",
+      "reason": "ROADMAP 2.6: Torch's TorchCallback."
+    },
+    {
+      "class": "Torch$$ExternalSyntheticApiModelOutline0.smali",
+      "reason": "ROADMAP 2.6: D8 API-model outline for Torch's Context.getSystemService(Class) call."
+    },
+    {
+      "class": "KeepScreenOn.smali",
+      "reason": "ROADMAP 2.6: the Keep screen on action, a 1-pixel untouchable overlay with FLAG_KEEP_SCREEN_ON, removed on toggle or screen off."
+    },
+    {
+      "class": "KeepScreenOn$ANON.smali",
+      "reason": "ROADMAP 2.6: KeepScreenOn's screen-off receiver."
+    },
+    {
+      "class": "PopUpWindow.smali",
+      "reason": "ROADMAP 2.6: the Pop-up window action, relaunches the foreground app with the freeform windowing mode (ActivityOptions by reflection, else am start --windowingMode 5 as root). Root goes through runCommandRoot; without root, through ShizukuShell."
+    },
+    {
+      "class": "ShizukuShell.smali",
+      "reason": "ROADMAP 2.6: runs one shell command through Shizuku (reflective newProcess) for the Pop-up window action on phones without root."
+    },
+    {
+      "class": "ShizukuShell$ANON.smali",
+      "reason": "ROADMAP 2.6: the thread that waits for ShizukuShell's process."
     }
   ],
   "removed_classes": [

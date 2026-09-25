@@ -37,6 +37,7 @@ class Launcher {
         this.mContext = context;
         this.mRootContext = RootContext.getInstance(context);
         this.mSettings = SettingsValues.getInstance(context);
+        Torch.watch(context);
     }
 
     static Launcher getInstance(Context context) {
@@ -157,6 +158,15 @@ class Launcher {
                 break;
             case Action.SplitScreen:
                 doSplitScreenAction();
+                break;
+            case Action.Flashlight:
+                Torch.toggle(this.mContext);
+                break;
+            case Action.KeepScreenOn:
+                KeepScreenOn.toggle(this.mContext);
+                break;
+            case Action.PopUpWindow:
+                PopUpWindow.open(this.mContext, this.mRootContext);
                 break;
             case Action.Nova:
                 doOpenNova();
