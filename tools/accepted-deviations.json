@@ -841,6 +841,10 @@
     {
       "class": "TouchscreenDetector.smali",
       "reason": "ROADMAP 1.13: finds the touchscreen in `getevent -p` output (moved out of Auto configuration, now shared with TouchService), reading the whole device number instead of its last character."
+    },
+    {
+      "class": "SettingsViewFragment$ANON$ANON.smali",
+      "reason": "ROADMAP 1.13 settings dialogs: the color editor (ColorDialog subclass) opened from the \"Custom...\" entry of a color choice dialog, nested in that dialog's InputDialog subclass."
     }
   ],
   "removed_classes": [

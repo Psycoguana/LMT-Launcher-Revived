@@ -24,10 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Drives the app's screens the way a user does - by visible row label - so the UI tests state
- * their expectations in terms that survive a rewrite. Only this driver is tied to any given
- * screen's widget structure (Preference tree, RecyclerView/SectionedRows model); the expectation
- * tables in the tests are not.
+ * Drives the app's screens the way a user does - by visible row label - so the UI tests state their
+ * expectations in terms that survive a rewrite. Only this driver is tied to any given screen's
+ * widget structure (Preference tree, RecyclerView/SectionedRows model); the expectation tables in
+ * the tests are not.
  */
 final class UiTestSupport {
 
@@ -48,8 +48,8 @@ final class UiTestSupport {
 
     /**
      * A bare host wearing the app's real theme, which Material components refuse to run without.
-     * The theme is applied in onCreate, as a manifest theme would be, so it survives the
-     * recreate() some settings rows trigger.
+     * The theme is applied in onCreate, as a manifest theme would be, so it survives the recreate()
+     * some settings rows trigger.
      */
     public static class ThemedHost extends FragmentActivity {
         @Override
@@ -80,6 +80,27 @@ final class UiTestSupport {
         StringBuilder texts = new StringBuilder();
         collectTexts(dialog.getWindow().getDecorView(), texts);
         return texts.toString().trim();
+    }
+
+    static com.google.android.material.slider.Slider sliderIn(Dialog dialog) {
+        return firstOf(
+                dialog.getWindow().getDecorView(), com.google.android.material.slider.Slider.class);
+    }
+
+    private static <T extends View> T firstOf(View view, Class<T> type) {
+        if (type.isInstance(view)) {
+            return type.cast(view);
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                T found = firstOf(group.getChildAt(i), type);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
     }
 
     private static EditText firstEditText(View view) {
@@ -147,9 +168,9 @@ final class UiTestSupport {
 
     /**
      * Every preference under every top-level {@link PreferenceGroup} (i.e. every row under every
-     * section), in screen order. {@code Preference.performClick()} drives a row exactly like a
-     * real tap would - including opening whatever dialog its listener shows - so there is no need
-     * to walk the rendered RecyclerView at all.
+     * section), in screen order. {@code Preference.performClick()} drives a row exactly like a real
+     * tap would - including opening whatever dialog its listener shows - so there is no need to
+     * walk the rendered RecyclerView at all.
      */
     static List<PreferenceRow> preferenceRows(PreferenceFragmentCompat fragment) {
         List<PreferenceRow> rows = new ArrayList<>();
@@ -161,14 +182,18 @@ final class UiTestSupport {
                 PreferenceGroup group = (PreferenceGroup) category;
                 for (int j = 0; j < group.getPreferenceCount(); j++) {
                     Preference preference = group.getPreference(j);
-                    rows.add(new PreferenceRow(section, String.valueOf(preference.getTitle()), preference));
+                    rows.add(
+                            new PreferenceRow(
+                                    section, String.valueOf(preference.getTitle()), preference));
                 }
             }
         }
         return rows;
     }
 
-    /** One visible RecyclerView row: its label, the section header above it, and its flat position. */
+    /**
+     * One visible RecyclerView row: its label, the section header above it, and its flat position.
+     */
     static final class SectionedRow {
         final String section;
         final String title;
@@ -225,7 +250,8 @@ final class UiTestSupport {
                 String section = rows.headerAt(position);
                 int type = rows.rowAt(position);
                 result.add(
-                        new SectionedRow(section, Action.names[type], Action.captions[type], position));
+                        new SectionedRow(
+                                section, Action.names[type], Action.captions[type], position));
             }
         }
         return result;

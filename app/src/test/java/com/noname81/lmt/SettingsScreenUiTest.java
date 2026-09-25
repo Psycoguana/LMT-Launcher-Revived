@@ -14,6 +14,8 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.google.android.material.slider.Slider;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,11 +33,10 @@ import java.util.TreeSet;
  * UI safety net for the Settings tab: what each row, found by its label, changes.
  *
  * <p>Each row is driven generically: click it (via {@link Preference#performClick()}), answer
- * whatever dialog appears (a number, the second choice, or a colour), then diff the stored
- * settings and note any activity or service it started. The resulting "label -&gt; effect" table
- * is the contract the Settings screen has to meet, independent of the widget backing a row
- * (ROADMAP 1.6 phase 2 rebuilt it as a {@code PreferenceFragmentCompat}; this table did not
- * change).
+ * whatever dialog appears (a number, the second choice, or a colour), then diff the stored settings
+ * and note any activity or service it started. The resulting "label -&gt; effect" table is the
+ * contract the Settings screen has to meet, independent of the widget backing a row (ROADMAP 1.6
+ * phase 2 rebuilt it as a {@code PreferenceFragmentCompat}; this table did not change).
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(
@@ -138,7 +139,10 @@ public class SettingsScreenUiTest {
         }
         StringBuilder observed = new StringBuilder("observed (raw):\n");
         for (Map.Entry<String, String> e : raw.entrySet()) {
-            observed.append("  ").append(e.getKey()).append(" -> ").append(e.getValue())
+            observed.append("  ")
+                    .append(e.getKey())
+                    .append(" -> ")
+                    .append(e.getValue())
                     .append('\n');
         }
         assertEquals(observed.toString(), expected, actual);
@@ -149,9 +153,11 @@ public class SettingsScreenUiTest {
         TreeSet<String> parts = new TreeSet<>();
         for (String token : effect.split(" ")) {
             if (token.startsWith("tap:") || token.startsWith("switch:")) {
-                parts.addAll(java.util.Arrays.asList(token.substring(token.indexOf(':') + 1)
-                        .split(",")));
-            } else if (token.startsWith("activity:") || token.startsWith("service:")
+                parts.addAll(
+                        java.util.Arrays.asList(
+                                token.substring(token.indexOf(':') + 1).split(",")));
+            } else if (token.startsWith("activity:")
+                    || token.startsWith("service:")
                     || token.startsWith("stopped:")) {
                 parts.add(token);
             }
@@ -204,8 +210,26 @@ public class SettingsScreenUiTest {
         return effect.length() == 0 ? "nothing" : effect.toString().trim();
     }
 
-    /** Answers a dialog the way a user would, and says what kind it was. */
+    /**
+     * Answers a dialog the way a user would, and says what kind it was. A choice can open a second
+     * dialog ("Custom..." leads to a slider or the color editor), which is answered too.
+     */
     private static String answer(AlertDialog dialog) {
+        StringBuilder kinds = new StringBuilder();
+        for (int round = 0; round < 3 && dialog != null; round++) {
+            kinds.append(answerOne(dialog));
+            Object latest = ShadowAlertDialog.getLatestDialog();
+            dialog =
+                    latest != dialog
+                                    && latest instanceof AlertDialog
+                                    && ((AlertDialog) latest).isShowing()
+                            ? (AlertDialog) latest
+                            : null;
+        }
+        return kinds.toString();
+    }
+
+    private static String answerOne(AlertDialog dialog) {
         if (dialog.getListView() != null && dialog.getListView().getCount() > 1) {
             // Pick an option other than the current one, or nothing would change.
             int count = dialog.getListView().getCount();
@@ -213,6 +237,16 @@ public class SettingsScreenUiTest {
             dialog.getListView().performItemClick(null, pick, pick);
             UiTestSupport.idle();
             return "[choice] ";
+        }
+        Slider slider = UiTestSupport.sliderIn(dialog);
+        if (slider != null) {
+            // Move it off the current value, or nothing would change.
+            float current = slider.getValue();
+            slider.setValue(
+                    current != slider.getValueFrom() ? slider.getValueFrom() : slider.getValueTo());
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
+            UiTestSupport.idle();
+            return "[slider] ";
         }
         EditText input = UiTestSupport.editTextIn(dialog);
         if (input != null) {

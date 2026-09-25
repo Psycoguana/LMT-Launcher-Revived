@@ -8,9 +8,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
@@ -18,6 +22,7 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.slider.Slider;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -194,19 +199,29 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Touchscreen to screen factor X",
                 "Resolution factor in %, default = 100%",
                 "Touchscreen to screen factor X",
+                "%",
+                50,
+                300,
+                1,
+                100,
                 () -> (int) (this.mSettings.loadTouchscreenScreenFactorX() * 100.0f),
                 this.mSettings::saveTouchscreenScreenFactorX);
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Touchscreen to screen factor Y",
                 "Resolution factor in %, default = 100%",
                 "Touchscreen to screen factor Y",
+                "%",
+                50,
+                300,
+                1,
+                100,
                 () -> (int) (this.mSettings.loadTouchscreenScreenFactorY() * 100.0f),
                 this.mSettings::saveTouchscreenScreenFactorY);
     }
@@ -221,11 +236,16 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 this.mSettings::loadFeedbackMode,
                 v -> Toaster.getInstance(requireContext()).setMode(v));
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Vibration Time",
                 "Define the vibration time in ms, default = 30",
                 "Vibration time",
+                "ms",
+                0,
+                200,
+                5,
+                30,
                 this.mSettings::loadGestureVibrationTime,
                 this.mSettings::saveGestureVibrationTime);
 
@@ -236,22 +256,32 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 "STSupport",
                 true);
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Min gesture score",
                 "Min score in %, default = 70%",
                 "Min gesture score",
+                "%",
+                0,
+                100,
+                1,
+                70,
                 this.mSettings::loadMinScore,
                 v -> {
                     this.mSettings.saveMinScore(v);
                     this.mTouchServiceNative.setMinScore(v);
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Min gesture path length",
                 "Min number of touch points, default = 7",
                 "Min gesture path length",
+                "",
+                2,
+                50,
+                1,
+                7,
                 this.mSettings::loadMinPathLength,
                 v -> {
                     this.mSettings.saveMinPathLength(v);
@@ -279,23 +309,32 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     }
 
     private void buildIsasSection(PreferenceCategory category) {
-        addNumericDialog(
+        addCodedChoice(
                 category,
                 "Min bounding box size",
-                "Min bounding box size in pixel, 0 = disabled, 1 = enabled, >1 = enabled and size"
-                        + " in pixel, default = 1",
-                "Min bbox size",
+                "Smallest swipe that counts, default = enabled",
+                new String[] {"Disabled", "Enabled", "Custom size…"},
+                new int[] {0, 1},
+                "px",
+                2,
+                300,
+                50,
                 this.mSettings::loadSingleSwipesBBox,
                 v -> {
                     this.mSettings.saveSingleSwipesBBox(v);
                     this.mTouchServiceNative.setSingleSwipesBBox(v);
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Activation area thickness",
                 "Activation area width in pixel, default = 60",
                 "Activation area thickness",
+                "px",
+                10,
+                300,
+                1,
+                60,
                 this.mSettings::loadSingleSwipesAArea,
                 this.mSettings::saveSingleSwipesAArea);
     }
@@ -324,11 +363,16 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Activation area thickness",
                 "Activation area thickness in pixel, default = 50",
                 "Activation area thickness",
+                "px",
+                10,
+                300,
+                1,
+                50,
                 this.mSettings::loadPieAreaX,
                 v -> {
                     this.mSettings.savePieAreaX(v);
@@ -336,11 +380,16 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Activation area length",
                 "Activation area length in pixel, default = 600",
                 "Activation area length",
+                "px",
+                100,
+                screenLongSide(),
+                10,
+                600,
                 this.mSettings::loadPieAreaY,
                 v -> {
                     this.mSettings.savePieAreaY(v);
@@ -399,12 +448,21 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     }
 
     private void buildPieStyleSection(PreferenceCategory category) {
-        addColorDialog(
+        addColorChoice(
                 category,
                 "Pie colors",
-                "0 = blue, 1 = red, 2 = grey, 3 = none, 4 = white, 5 = magenta/yellow, 6 ="
-                        + " green/outline, 7 = red/outline, default = 0",
+                "Color scheme of the pie, default = " + defaultColorName("Blue"),
                 "Pie colors",
+                new String[] {
+                    defaultColorName("Blue"),
+                    "Red",
+                    "Grey",
+                    "Transparent",
+                    "White",
+                    "Magenta and yellow",
+                    "Green outline",
+                    "Red outline"
+                },
                 new String[] {
                     "normal color",
                     "selected color",
@@ -420,66 +478,96 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Pie inner radius",
                 "Radius in dip, default = 60",
                 "Pie inner radius",
+                "dp",
+                20,
+                200,
+                1,
+                60,
                 this.mSettings::loadPieInnerRadius,
                 v -> {
                     this.mSettings.savePieInnerRadius(v);
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Pie outer radius",
                 "Radius in dip, default = 80",
                 "Pie outer radius",
+                "dp",
+                20,
+                200,
+                1,
+                80,
                 this.mSettings::loadPieOuterRadius,
                 v -> {
                     this.mSettings.savePieOuterRadius(v);
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Pie shift size",
                 "Size of the pie shift effect in pixel, default = 0",
                 "Pie shift size",
+                "px",
+                0,
+                30,
+                1,
+                0,
                 this.mSettings::loadPieShiftSize,
                 v -> {
                     this.mSettings.savePieShiftSize(v);
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Pie outline size",
                 "Size of the outline in pixel, default = 3",
                 "Pie outline size",
+                "px",
+                0,
+                20,
+                1,
+                3,
                 this.mSettings::loadPieOutlineSize,
                 v -> {
                     this.mSettings.savePieOutlineSize(v);
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Pie slice gap",
                 "Size of the gap between two pie slices, default = 0",
                 "Pie slice gap",
+                "",
+                0,
+                50,
+                1,
+                0,
                 this.mSettings::loadPieSliceGap,
                 v -> {
                     this.mSettings.savePieSliceGap(v);
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Pie start gap",
                 "Size of the gap between pie and border, default = 0",
                 "Pie start gap",
+                "",
+                0,
+                50,
+                1,
+                0,
                 this.mSettings::loadPieStartGap,
                 v -> {
                     this.mSettings.savePieStartGap(v);
@@ -510,32 +598,47 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     }
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Blur amount",
                 "Blur radius in pixels, 1 to 150, default = 50",
                 "Blur amount",
+                "px",
+                1,
+                150,
+                1,
+                50,
                 this.mSettings::loadPieBlurRadius,
                 this.mSettings::savePieBlurRadius);
     }
 
     private void buildPieBehaviorSection(PreferenceCategory category) {
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Longpress time",
                 "Min time for longpress in ms, default = 500",
                 "Longpress time",
+                "ms",
+                100,
+                2000,
+                50,
+                500,
                 this.mSettings::loadPieLongpress,
                 v -> {
                     this.mSettings.savePieLongpress(v);
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Animation time",
                 "Time for the pie animation in ms, default = 80",
                 "Animation time",
+                "ms",
+                0,
+                500,
+                10,
+                80,
                 this.mSettings::loadPieAnimation,
                 v -> {
                     this.mSettings.savePieAnimation(v);
@@ -560,11 +663,16 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Vibration Time",
                 "Define the vibration time in ms, default = 30",
                 "Pie vibration time",
+                "ms",
+                0,
+                200,
+                5,
+                30,
                 this.mSettings::loadPieVibrationTime,
                 this.mSettings::savePieVibrationTime);
 
@@ -605,24 +713,44 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        // 1 and 2 both scale to 35 dp; 2 and custom sizes are tinted with the pie's icon color.
+        addCodedChoice(
                 category,
                 "Show and scale app images",
-                "0 = disabled, 1 = enabled (no filter), 2 = enabled, >2 = image size in pixel,"
-                        + " default = enabled",
-                "Show and scale app images",
+                "Show app icons on the pie slices, default = enabled, original colors",
+                new String[] {
+                    "Disabled",
+                    "Enabled, original colors",
+                    "Enabled, tinted with the icon color",
+                    "Custom size, tinted…"
+                },
+                new int[] {0, 1, 2},
+                "px",
+                3,
+                256,
+                96,
                 this.mSettings::loadPieShowScaleAppImages,
                 v -> {
                     this.mSettings.savePieShowScaleAppImages(v);
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addNumericDialog(
+        // 1 and 2 both scale to 35 dp; 2 and custom sizes are tinted with the pie's icon color.
+        addCodedChoice(
                 category,
                 "Show and scale user images",
-                "0 = disabled, 1 = enabled (no filter), 2 = enabled, >2 = image size in pixel,"
-                        + " default = disabled",
-                "Show and scale user images",
+                "Show your own images on the pie slices, default = disabled",
+                new String[] {
+                    "Disabled",
+                    "Enabled, original colors",
+                    "Enabled, tinted with the icon color",
+                    "Custom size, tinted…"
+                },
+                new int[] {0, 1, 2},
+                "px",
+                3,
+                256,
+                96,
                 this.mSettings::loadPieShowScaleUserImages,
                 v -> {
                     this.mSettings.savePieShowScaleUserImages(v);
@@ -652,23 +780,28 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 "PiePointerFromEdges",
                 false);
 
-        addNumericDialog(
+        addSliderDialog(
                 category,
                 "Pie pointer warp factor",
-                "Configure the warp factor for the pie pointer feature,\ndefault = 300%, min ="
-                        + " 200%, max = 1000%",
+                "Configure the warp factor for the pie pointer feature, default = 300%",
                 "Set pie pointer warp factor",
+                "%",
+                200,
+                1000,
+                10,
+                300,
                 this.mSettings::loadPiePointerWarpFactor,
                 v -> {
                     this.mSettings.savePiePointerWarpFactor(v);
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addColorDialog(
+        addColorChoice(
                 category,
                 "Pie pointer color",
-                "0 = blue, default = 0",
+                "Color of the pie pointer, default = " + defaultColorName("Blue"),
                 "Pie pointer colors",
+                new String[] {defaultColorName("Blue")},
                 new String[] {"pointer color"},
                 this.mSettings::loadPiePointerColor,
                 v -> {
@@ -693,11 +826,12 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addColorDialog(
+        addColorChoice(
                 category,
                 "Pie status info colors",
-                "0 = white, default = 0",
+                "Colors of the clock and notifications, default = White",
                 "Pie status info colors",
+                new String[] {"White"},
                 new String[] {"clock color", "notification color", "dim color"},
                 this.mSettings::loadPieStatusInfoColor,
                 v -> {
@@ -958,11 +1092,17 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 });
     }
 
-    private void addNumericDialog(
+    /** A number picked with a slider over [min, max]; a stored value outside widens it. */
+    private void addSliderDialog(
             PreferenceCategory category,
             String title,
             String caption,
             String dialogTitle,
+            String unit,
+            int min,
+            int max,
+            int step,
+            int defaultValue,
             IntGetter current,
             IntCallback onSaved) {
         addAction(
@@ -970,17 +1110,129 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 title,
                 caption,
                 preference -> {
-                    new InputDialog(
-                            requireActivity(),
+                    showSliderDialog(
                             dialogTitle,
-                            "Set new value",
-                            String.valueOf(current.get()),
-                            true) {
+                            unit,
+                            min,
+                            max,
+                            step,
+                            defaultValue,
+                            current.get(),
+                            onSaved);
+                    return true;
+                });
+    }
+
+    private void showSliderDialog(
+            String title,
+            String unit,
+            int min,
+            int max,
+            int step,
+            int defaultValue,
+            int value,
+            IntCallback onSaved) {
+        int from = Math.min(min, value);
+        int to = Math.max(max, value);
+        // The slider insists every value sits on the step grid; fall back to 1 when it wouldn't.
+        int stepSize =
+                (to - from) % step == 0
+                                && (value - from) % step == 0
+                                && (defaultValue - from) % step == 0
+                        ? step
+                        : 1;
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.slider_dialog, null);
+        TextView label = view.findViewById(R.id.slider_value);
+        Slider slider = view.findViewById(R.id.slider);
+        slider.setValueFrom(from);
+        slider.setValueTo(to);
+        slider.setStepSize(stepSize);
+        slider.setTickVisible(false); // dozens of step dots just clutter the track
+        slider.setValue(value);
+        slider.setLabelFormatter(v -> withUnit((int) v, unit));
+        label.setText(withUnit(value, unit));
+        slider.addOnChangeListener((s, v, fromUser) -> label.setText(withUnit((int) v, unit)));
+        AlertDialog dialog =
+                new MaterialAlertDialogBuilder(requireActivity())
+                        .setTitle(title)
+                        .setView(view)
+                        .setPositiveButton(
+                                R.string.dialog_ok, (d, w) -> onSaved.run((int) slider.getValue()))
+                        .setNegativeButton(R.string.dialog_cancel, null)
+                        .setNeutralButton("Default", null)
+                        .show();
+        // Set here so the button moves the slider instead of closing the dialog.
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                .setOnClickListener(
+                        v -> {
+                            if (defaultValue >= from && defaultValue <= to) {
+                                slider.setValue(defaultValue);
+                            }
+                        });
+    }
+
+    private static String withUnit(int value, String unit) {
+        if (unit.isEmpty()) {
+            return String.valueOf(value);
+        }
+        return unit.equals("%") ? value + "%" : value + " " + unit;
+    }
+
+    /** The screen's longer side in pixels, rounded up to 10: the most an activation area needs. */
+    private int screenLongSide() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        ((WindowManager) requireActivity().getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay()
+                .getRealMetrics(metrics);
+        return (Math.max(metrics.widthPixels, metrics.heightPixels) + 9) / 10 * 10;
+    }
+
+    /**
+     * A choice among fixed stored values, plus a last "Custom" entry that asks for a number with a
+     * slider. Replaces rows whose number mixed modes and sizes ("0 = disabled, 1 = ..., >2 =
+     * size").
+     */
+    private void addCodedChoice(
+            PreferenceCategory category,
+            String title,
+            String caption,
+            String[] choices,
+            int[] values,
+            String unit,
+            int customMin,
+            int customMax,
+            int customDefault,
+            IntGetter current,
+            IntCallback onSaved) {
+        addAction(
+                category,
+                title,
+                caption,
+                preference -> {
+                    int value = current.get();
+                    int checked = values.length;
+                    for (int i = 0; i < values.length; i++) {
+                        if (values[i] == value) {
+                            checked = i;
+                        }
+                    }
+                    new InputDialog(requireActivity(), title, choices, String.valueOf(checked)) {
                         @Override
-                        public boolean onOkClicked(String value) {
-                            try {
-                                onSaved.run(Integer.parseInt(value));
-                            } catch (NumberFormatException ignored) {
+                        public boolean onOkClicked(String picked) {
+                            int which = Integer.parseInt(picked);
+                            if (which < values.length) {
+                                onSaved.run(values[which]);
+                            } else {
+                                int start = value >= customMin ? value : customDefault;
+                                showSliderDialog(
+                                        title,
+                                        unit,
+                                        customMin,
+                                        customMax,
+                                        1,
+                                        customDefault,
+                                        start,
+                                        onSaved);
                             }
                             return true;
                         }
@@ -1013,27 +1265,65 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 });
     }
 
-    private void addColorDialog(
+    /**
+     * Preset color schemes by their stored code ("0", "1", ...), plus "Custom..." for the color
+     * editor, which stores a comma-separated color string instead.
+     */
+    private void addColorChoice(
             PreferenceCategory category,
             String title,
             String caption,
             String dialogTitle,
+            String[] presets,
             String[] labels,
             StringGetter current,
             StringCallback onSaved) {
+        String[] choices = new String[presets.length + 1];
+        System.arraycopy(presets, 0, choices, 0, presets.length);
+        choices[presets.length] = "Custom…";
         addAction(
                 category,
                 title,
                 caption,
                 preference -> {
-                    new ColorDialog(requireActivity(), dialogTitle, labels, current.get()) {
+                    String value = current.get();
+                    int checked = presets.length;
+                    for (int i = 0; i < presets.length; i++) {
+                        if (value.equals(String.valueOf(i))) {
+                            checked = i;
+                        }
+                    }
+                    boolean custom = checked == presets.length;
+                    new InputDialog(
+                            requireActivity(), dialogTitle, choices, String.valueOf(checked)) {
                         @Override
-                        public boolean onOkClicked(String value) {
-                            onSaved.run(value);
+                        public boolean onOkClicked(String picked) {
+                            int which = Integer.parseInt(picked);
+                            if (which < presets.length) {
+                                onSaved.run(String.valueOf(which));
+                            } else {
+                                // A preset code means nothing to the editor: start it empty.
+                                new ColorDialog(
+                                        requireActivity(),
+                                        dialogTitle,
+                                        labels,
+                                        custom ? value : "") {
+                                    @Override
+                                    public boolean onOkClicked(String colorString) {
+                                        onSaved.run(colorString);
+                                        return true;
+                                    }
+                                }.show();
+                            }
                             return true;
                         }
                     }.show();
                     return true;
                 });
+    }
+
+    /** Preset 0 follows the wallpaper's accent on Android 12+ (see PieMenu.init). */
+    private static String defaultColorName(String before12) {
+        return Build.VERSION.SDK_INT >= 31 ? "System accent" : before12;
     }
 }
