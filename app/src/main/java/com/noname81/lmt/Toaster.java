@@ -27,7 +27,7 @@ class Toaster {
     private Toaster(Context context) {
         this.mContext = context;
         this.mMode = SettingsValues.getInstance(context).loadFeedbackMode();
-        this.mVibrator = (Vibrator) this.mContext.getSystemService("vibrator");
+        this.mVibrator = (Vibrator) this.mContext.getSystemService(Context.VIBRATOR_SERVICE);
         this.mSettings = SettingsValues.getInstance(this.mContext);
     }
 
@@ -62,14 +62,16 @@ class Toaster {
     }
 
     private void showDebug(TouchServiceResult touchServiceResult) {
-        Toast.makeText(this.mContext, touchServiceResult.toString(), 0).show();
+        Toast.makeText(this.mContext, touchServiceResult.toString(), Toast.LENGTH_SHORT).show();
     }
 
     private void showImage(TouchServiceResult touchServiceResult) {
         if (touchServiceResult.getGesture() < 14) {
             try {
                 View viewInflate =
-                        ((LayoutInflater) this.mContext.getSystemService("layout_inflater"))
+                        ((LayoutInflater)
+                                        this.mContext.getSystemService(
+                                                Context.LAYOUT_INFLATER_SERVICE))
                                 .inflate(R.layout.toaster, (ViewGroup) null);
                 ((ImageView) viewInflate.findViewById(R.id.image))
                         .setImageResource(

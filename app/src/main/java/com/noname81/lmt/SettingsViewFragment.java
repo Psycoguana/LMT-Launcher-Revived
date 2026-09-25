@@ -25,17 +25,17 @@ import java.io.OutputStream;
 /**
  * The main settings tab.
  *
- * <p>Every row is a {@link Preference} identified by its actual preference key (or, for pure
- * action rows, none at all) - not by its position in a list, which is how the ~1572-line {@code
+ * <p>Every row is a {@link Preference} identified by its actual preference key (or, for pure action
+ * rows, none at all) - not by its position in a list, which is how the ~1572-line {@code
  * SettingsViewHelper}/position-dispatch predecessor of this class worked (ROADMAP 1.6 phase 2).
  *
  * <p>Only the 8 genuinely boolean-backed settings ({@link SettingsPreferenceDataStore}) are real
- * {@link SwitchPreferenceCompat} rows backed by a {@code PreferenceDataStore}. Everything else is
- * a non-persistent {@link Preference} whose click listener opens the exact same {@link
+ * {@link SwitchPreferenceCompat} rows backed by a {@code PreferenceDataStore}. Everything else is a
+ * non-persistent {@link Preference} whose click listener opens the exact same {@link
  * InputDialog}/{@link ColorDialog} the old dispatcher used and writes through {@link
- * SettingsValues} directly. Both dialog classes build on {@code MaterialAlertDialogBuilder};
- * {@code SettingsScreenUiTest} still sees them through {@code ShadowDialog.getLatestDialog()},
- * which tracks any shown {@code Dialog}, and reads their fields from the real view tree.
+ * SettingsValues} directly. Both dialog classes build on {@code MaterialAlertDialogBuilder}; {@code
+ * SettingsScreenUiTest} still sees them through {@code ShadowDialog.getLatestDialog()}, which
+ * tracks any shown {@code Dialog}, and reads their fields from the real view tree.
  */
 public class SettingsViewFragment extends PreferenceFragmentCompat {
     private static final int REQUEST_EXPORT_SETTINGS = 9001;
@@ -63,7 +63,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         void run(String value);
     }
 
-    @Override // androidx.preference.PreferenceFragmentCompat
+    @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         Context context = requireContext();
         this.mSettings = SettingsValues.getInstance(context);
@@ -93,12 +93,13 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         buildBackupSection(addCategory(screen, "Backup"));
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onResume() {
         super.onResume();
         if (this.mFeaturesPreference != null && this.mSettings.loadTouchServiceMode() < 2) {
             // Coming back from Magisk after granting root: ask su again (only after a "no").
-            RootContext rootContext = RootContext.getInstance(requireContext().getApplicationContext());
+            RootContext rootContext =
+                    RootContext.getInstance(requireContext().getApplicationContext());
             rootContext.recheckRoot();
             Preference featuresPreference = this.mFeaturesPreference;
             rootContext.whenRootKnown(
@@ -498,7 +499,10 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.savePieBlur(v);
                     if (v != PieBlur.MODE_NONE) {
                         if (!PieBlur.isSupported()) {
-                            Toast.makeText(requireContext(), "Blur needs Android 12 or newer", 0)
+                            Toast.makeText(
+                                            requireContext(),
+                                            "Blur needs Android 12 or newer",
+                                            Toast.LENGTH_SHORT)
                                     .show();
                         } else {
                             AccessibilityHandler.isAccessibilityAvailable(requireContext(), true);
@@ -582,7 +586,12 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     }
 
     private void buildPieIconsSection(PreferenceCategory category) {
-        addSwitch(category, "Rotate images", "Rotate icons based on pie angle", "PieRotateImages", true);
+        addSwitch(
+                category,
+                "Rotate images",
+                "Rotate icons based on pie angle",
+                "PieRotateImages",
+                true);
 
         addChoiceDialog(
                 category,
@@ -776,7 +785,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                             }
                         }
                         WindowManager windowManager =
-                                (WindowManager) requireActivity().getSystemService("window");
+                                (WindowManager)
+                                        requireActivity().getSystemService(Context.WINDOW_SERVICE);
                         DisplayMetrics displayMetrics = new DisplayMetrics();
                         windowManager.getDefaultDisplay().getRealMetrics(displayMetrics);
                         int screenWidth = displayMetrics.widthPixels;
@@ -828,7 +838,9 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                         "ok",
                         (DialogInterface dialogInterface, int parsed) -> {
                             dialogInterface.dismiss();
-                            if (inputDeviceFinal <= -1 || factorXFinal <= -1 || factorYFinal <= -1) {
+                            if (inputDeviceFinal <= -1
+                                    || factorXFinal <= -1
+                                    || factorYFinal <= -1) {
                                 return;
                             }
                             this.mSettings.saveInputDevice(inputDeviceFinal);
@@ -845,7 +857,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 .show();
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_OK || data == null) {
@@ -875,7 +887,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     }
 
     private void exportSettings(OutputStream destStream) throws Exception {
-        SettingsBackup.exportZip(this.mSettings, this.mSettings.loadResourceSearchPath(), destStream);
+        SettingsBackup.exportZip(
+                this.mSettings, this.mSettings.loadResourceSearchPath(), destStream);
         Toast.makeText(requireActivity(), "Settings exported", Toast.LENGTH_SHORT).show();
     }
 
@@ -928,7 +941,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 features,
                 String.valueOf(this.mSettings.loadTouchServiceMode()),
                 new boolean[] {root, root, true}) {
-            @Override // com.noname81.lmt.InputDialog
+            @Override
             public boolean onOkClicked(String value) {
                 SettingsViewFragment.this.mSettings.saveTouchServiceMode(Integer.parseInt(value));
                 SettingsViewFragment.this.mSettings.restartServiceIfRequired();
@@ -978,7 +991,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                             dialogTitle,
                             choices,
                             String.valueOf(current.get())) {
-                        @Override // com.noname81.lmt.InputDialog
+                        @Override
                         public boolean onOkClicked(String value) {
                             try {
                                 onPicked.run(Integer.parseInt(value));
@@ -1009,7 +1022,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                             "Set new value",
                             String.valueOf(current.get()),
                             true) {
-                        @Override // com.noname81.lmt.InputDialog
+                        @Override
                         public boolean onOkClicked(String value) {
                             try {
                                 onSaved.run(Integer.parseInt(value));
@@ -1036,7 +1049,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 preference -> {
                     new InputDialog(
                             requireActivity(), dialogTitle, "Set new value", current.get(), false) {
-                        @Override // com.noname81.lmt.InputDialog
+                        @Override
                         public boolean onOkClicked(String value) {
                             onSaved.run(value);
                             return true;
@@ -1060,7 +1073,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 caption,
                 preference -> {
                     new ColorDialog(requireActivity(), dialogTitle, labels, current.get()) {
-                        @Override // com.noname81.lmt.ColorDialog
+                        @Override
                         public boolean onOkClicked(String value) {
                             onSaved.run(value);
                             return true;

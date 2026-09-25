@@ -78,7 +78,7 @@ public class MultiSelectActivity extends ThemedActivity {
 
     private static final Executor LOADER = Executors.newSingleThreadExecutor();
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         this.mSettings = SettingsValues.getInstance(getApplicationContext());
@@ -97,7 +97,8 @@ public class MultiSelectActivity extends ThemedActivity {
         search.addTextChangedListener(
                 new TextWatcher() {
                     @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                    public void beforeTextChanged(
+                            CharSequence s, int start, int count, int after) {}
 
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {}
@@ -287,7 +288,7 @@ public class MultiSelectActivity extends ThemedActivity {
         this.mAdapter.update(header, rows);
     }
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
@@ -296,7 +297,7 @@ public class MultiSelectActivity extends ThemedActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Drawable drawable;
         if (requestCode == 1 && resultCode == RESULT_OK) {
@@ -333,7 +334,8 @@ public class MultiSelectActivity extends ThemedActivity {
     private void handleRowClick(Row row) {
         int mode = AppSelectMode;
         if (mode == SelectPackage) {
-            this.mSettings.setCurrentAction(this, new Action(2, ((PackageInfo) row.model).packageName));
+            this.mSettings.setCurrentAction(
+                    this, new Action(2, ((PackageInfo) row.model).packageName));
             onBackPressed();
             return;
         }
@@ -420,19 +422,18 @@ public class MultiSelectActivity extends ThemedActivity {
             notifyDataSetChanged();
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public int getItemCount() {
             return this.mSkeleton ? SKELETON_ROWS : this.mRows.getItemCount();
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public int getItemViewType(int position) {
             return this.mSkeleton ? VIEW_TYPE_SKELETON : this.mRows.getItemViewType(position);
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(
-                @NonNull ViewGroup parent, int viewType) {
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             if (viewType == VIEW_TYPE_SKELETON) {
                 return new SkeletonViewHolder(
@@ -445,7 +446,7 @@ public class MultiSelectActivity extends ThemedActivity {
                     inflater.inflate(R.layout.listitem_icondescription, parent, false));
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof SkeletonViewHolder) {
                 return;

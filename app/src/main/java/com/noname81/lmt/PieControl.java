@@ -45,7 +45,7 @@ class PieControl extends PieControlBase
         this.mSettings = SettingsValues.getInstance(context);
     }
 
-    @Override // com.noname81.lmt.PieControlBase
+    @Override
     protected void populateMenu() {
         int iLoadPieShowScaleUserImages = this.mSettings.loadPieShowScaleUserImages();
         int iLoadPieShowScaleAppImages = this.mSettings.loadPieShowScaleAppImages();
@@ -196,7 +196,7 @@ class PieControl extends PieControlBase
         }
     }
 
-    @Override // com.noname81.lmt.PieControlBase
+    @Override
     protected void attachToContainer(FrameLayout frameLayout) {
         int level = 0;
         boolean hasRecentApps = false;
@@ -219,7 +219,7 @@ class PieControl extends PieControlBase
         super.attachToContainer(frameLayout);
     }
 
-    @Override // android.view.View.OnClickListener
+    @Override
     public void onClick(View view) {
         for (int index = 0; index < this.mPieItemActions.size(); index++) {
             if (this.mPieItemActions.get(index).mPieItem.getView() == view) {
@@ -229,7 +229,7 @@ class PieControl extends PieControlBase
         }
     }
 
-    @Override // android.view.View.OnLongClickListener
+    @Override
     public boolean onLongClick(View view) {
         for (int index = 0; index < this.mPieItemActions.size(); index++) {
             if (this.mPieItemActions.get(index).mPieItem.getView() == view) {
@@ -244,7 +244,7 @@ class PieControl extends PieControlBase
         return true;
     }
 
-    @Override // android.view.View.OnKeyListener
+    @Override
     public boolean onKey(View view, int keyCode, KeyEvent event) {
         for (int index = 0; index < this.mPieItemActions.size(); index++) {
             if (this.mPieItemActions.get(index).mPieItem.getView() == view) {

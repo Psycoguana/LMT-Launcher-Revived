@@ -1,10 +1,8 @@
 package com.noname81.lmt;
 
-import android.app.ActivityManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
-import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
@@ -72,7 +70,8 @@ class SettingsValues extends SettingsValuesBase {
     }
 
     void rotate() {
-        WindowManager windowManager = (WindowManager) this.mContext.getSystemService("window");
+        WindowManager windowManager =
+                (WindowManager) this.mContext.getSystemService(Context.WINDOW_SERVICE);
         this.mOrientation = windowManager.getDefaultDisplay().getRotation();
         DisplayMetrics displayMetrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getRealMetrics(displayMetrics);
@@ -120,69 +119,52 @@ class SettingsValues extends SettingsValuesBase {
     String getPackageNamesOfRecentApps(int wanted) {
         String packageName;
         int returned = 0;
-        if (Build.VERSION.SDK_INT >= 21) {
-            if (this.mRootContext.isRootAvailable(false)) {
-                return this.mRootContext.runCommandRemoteResult(
-                        "am get-recent-app " + wanted, true);
-            }
-            UsageStatsManager usageStatsManagerM283m =
-                    ((UsageStatsManager) this.mContext.getSystemService("usagestats"));
-            long jCurrentTimeMillis = System.currentTimeMillis();
-            List listQueryUsageStats =
-                    usageStatsManagerM283m.queryUsageStats(
-                            0, jCurrentTimeMillis - TimeUnit.DAYS.toMillis(1L), jCurrentTimeMillis);
-            if (listQueryUsageStats == null || listQueryUsageStats.size() <= 0) {
-                return "";
-            }
-            if (wanted > 1) {
-                TreeMap<Long, UsageStats> treeMap = new TreeMap<>(Collections.reverseOrder());
-                Iterator it = listQueryUsageStats.iterator();
-                while (it.hasNext()) {
-                    UsageStats usageStatsM282m = ((UsageStats) it.next());
-                    treeMap.put(Long.valueOf(usageStatsM282m.getLastTimeUsed()), usageStatsM282m);
-                }
-                StringBuilder sb = new StringBuilder();
-                for (Map.Entry<Long, UsageStats> entry : treeMap.entrySet()) {
-                    if (returned != 0) {
-                        sb.append(" ");
-                    }
-                    sb.append(entry.getValue().getPackageName());
-                    if (returned >= wanted) {
-                        break;
-                    }
-                    returned++;
-                }
-                packageName = sb.toString();
-            } else {
-                long lastTimeUsed = 0;
-                int index = 0;
-                while (returned < listQueryUsageStats.size()) {
-                    if (((UsageStats) listQueryUsageStats.get(returned)).getLastTimeUsed()
-                            > lastTimeUsed) {
-                        lastTimeUsed =
-                                ((UsageStats) listQueryUsageStats.get(returned)).getLastTimeUsed();
-                        index = returned;
-                    }
-                    returned++;
-                }
-                packageName = ((UsageStats) listQueryUsageStats.get(index)).getPackageName();
-            }
-            return packageName;
+        if (this.mRootContext.isRootAvailable(false)) {
+            return this.mRootContext.runCommandRemoteResult("am get-recent-app " + wanted, true);
         }
-        List<ActivityManager.RunningTaskInfo> runningTasks =
-                this.mActivityManager.getRunningTasks(wanted);
-        if (runningTasks.size() <= 0) {
+        UsageStatsManager usageStatsManagerM283m =
+                ((UsageStatsManager) this.mContext.getSystemService(Context.USAGE_STATS_SERVICE));
+        long jCurrentTimeMillis = System.currentTimeMillis();
+        List listQueryUsageStats =
+                usageStatsManagerM283m.queryUsageStats(
+                        0, jCurrentTimeMillis - TimeUnit.DAYS.toMillis(1L), jCurrentTimeMillis);
+        if (listQueryUsageStats == null || listQueryUsageStats.size() <= 0) {
             return "";
         }
-        StringBuilder sb2 = new StringBuilder();
-        while (returned < runningTasks.size()) {
-            if (returned != 0) {
-                sb2.append(" ");
+        if (wanted > 1) {
+            TreeMap<Long, UsageStats> treeMap = new TreeMap<>(Collections.reverseOrder());
+            Iterator it = listQueryUsageStats.iterator();
+            while (it.hasNext()) {
+                UsageStats usageStatsM282m = ((UsageStats) it.next());
+                treeMap.put(Long.valueOf(usageStatsM282m.getLastTimeUsed()), usageStatsM282m);
             }
-            sb2.append(runningTasks.get(returned).topActivity.getPackageName());
-            returned++;
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<Long, UsageStats> entry : treeMap.entrySet()) {
+                if (returned != 0) {
+                    sb.append(" ");
+                }
+                sb.append(entry.getValue().getPackageName());
+                if (returned >= wanted) {
+                    break;
+                }
+                returned++;
+            }
+            packageName = sb.toString();
+        } else {
+            long lastTimeUsed = 0;
+            int index = 0;
+            while (returned < listQueryUsageStats.size()) {
+                if (((UsageStats) listQueryUsageStats.get(returned)).getLastTimeUsed()
+                        > lastTimeUsed) {
+                    lastTimeUsed =
+                            ((UsageStats) listQueryUsageStats.get(returned)).getLastTimeUsed();
+                    index = returned;
+                }
+                returned++;
+            }
+            packageName = ((UsageStats) listQueryUsageStats.get(index)).getPackageName();
         }
-        return sb2.toString();
+        return packageName;
     }
 
     boolean isNotBlacklisted() {

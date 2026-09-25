@@ -540,7 +540,7 @@ so onSurface text came out `#b89d99` instead of `#fadcd7`: every title looked gr
 or disabled. `ThemeHelper.systemContrast` now clamps at 0 (high contrast still applies). Uses Material's `@RestrictTo` color API,
 so re-check it on Material upgrades.
 
-### 1.13 Optimization pass: less verbose code, performance, battery  (battery + profiling done; code cleanup open)
+### 1.13 Optimization pass: less verbose code, performance, battery  ✅ done
 
 A review pass over the whole app, looking for:
 
@@ -591,6 +591,20 @@ A review pass over the whole app, looking for:
   with no su on the PATH, and pie-only users are never asked again. Accessibility-capable actions stay selectable even while the service is off.
 - `<profileable android:shell="true"/>` added to the manifest so Perfetto gets call stacks
   from release builds.
+- **Code cleanup:**
+  - Bytecode-neutral: the decompiler's `@Override // <class>` and `// from class:` comments,
+    self-assignments (`x = x;`, 12 in `PieMenu.layoutPie`), a bare `hashCode()`, and magic
+    numbers replaced by their constants (`Toast.LENGTH_*`, `Context.*_SERVICE`,
+    `MotionEvent.ACTION_*`, `TypedValue.COMPLEX_UNIT_DIP`, `PendingIntent.FLAG_IMMUTABLE`,
+    `Gravity.END`). The oracle output didn't change.
+  - Bare `Double.isNaN(x);` statements removed (3 methods, accepted deviations).
+  - Every `SDK_INT` check against 16-21 is gone with its dead branch: pre-Lollipop
+    recent/running-task code in Launcher (and the `ActivityManager` lookups, task-list
+    fields, `moveTaskToFront`/`startActivity`, the `Timer` kill paths),
+    `initRemoteProcess20`, the reflection mobile-data toggle, and more. About 260 lines fewer.
+  - Left alone: `this.` qualifiers (pure churn) and the long settings/action `if` ladders
+    (the oracle compares them method by method; rewriting them as tables would hide real
+    changes in the noise).
 
 ---
 
@@ -988,6 +1002,7 @@ Not exercised on-device (needs root plus gestures/ISA mode).
 
 - ~~Decompiler-generated names (`int i*`, `String str*`, …) and `JADX INFO`
   comments~~ — **done** in the readability pass (1.3); both counts are now 0.
-- **minSdk 15 → 21**, deleting the now-dead `SDK_INT < 21` branches. This changes
-  bytecode by design, so run the oracle in "explain every diff" mode for that
-  commit rather than expecting `EQUIVALENT`.
+- ~~**minSdk 15 → 21**, deleting the now-dead `SDK_INT < 21` branches~~ — **done**
+  (minSdk raised in 1.6; the branches went in the 1.13 cleanup). Removed methods and
+  fields are listed one by one under `removed_members` in `tools/accepted-deviations.json`,
+  a list `compare_fingerprints.py` now reads, so the rest of each class is still compared.

@@ -23,7 +23,6 @@ import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
 import android.view.animation.DecelerateInterpolator;
@@ -100,13 +99,13 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
     private final SettingsValues mSettings;
     private final int mTwentyFour;
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public void activate() {}
 
-    @Override // android.hardware.SensorEventListener
+    @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public void onShrink() {}
 
     PieStatusInfo(
@@ -132,7 +131,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mAnimationActive = true;
         this.mAnimationTime = settingsValues.loadPieAnimation();
         this.mSensorActivated = settingsValues.loadPieShowStatusInfos() == 3 ? true : false;
-        this.mSensorManager = (SensorManager) context.getSystemService("sensor");
+        this.mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.mSensorAnimator = new ValueAnimator();
         this.mSensorAnimation = 0.0f;
         this.mSensorAlpha = 0.8f;
@@ -140,9 +139,13 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mSensorGravity = new float[3];
         Resources resources = context.getResources();
         this.mRadiusOffset =
-                (int) TypedValue.applyDimension(1, 10.0f, resources.getDisplayMetrics());
+                (int)
+                        TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_DIP, 10.0f, resources.getDisplayMetrics());
         this.mPositionOffset =
-                (int) TypedValue.applyDimension(1, 5.0f, resources.getDisplayMetrics());
+                (int)
+                        TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_DIP, 5.0f, resources.getDisplayMetrics());
         int iLoadPieFont = settingsValues.loadPieFont();
         if (iLoadPieFont < 3) {
             textSizeBig = iLoadPieFont != 0 ? 65 : 45;
@@ -169,10 +172,18 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mClockAnimatorIn = new ValueAnimator();
         this.mClockAnimationIn = 0.0f;
         this.mClockTextSizeBig =
-                (int) TypedValue.applyDimension(1, textSizeBig, resources.getDisplayMetrics());
+                (int)
+                        TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_DIP,
+                                textSizeBig,
+                                resources.getDisplayMetrics());
         float smallTextSize = textSizeSmall;
         this.mClockTextSizeSmall =
-                (int) TypedValue.applyDimension(1, smallTextSize, resources.getDisplayMetrics());
+                (int)
+                        TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_DIP,
+                                smallTextSize,
+                                resources.getDisplayMetrics());
         Paint paint = new Paint();
         this.mClockTextPaint = paint;
         paint.setColor(colorClock);
@@ -189,7 +200,11 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mAIAnimationInOut = 0.0f;
         this.mAIAnimationInOutReversed = false;
         int iApplyDimension =
-                (int) TypedValue.applyDimension(1, smallTextSize, resources.getDisplayMetrics());
+                (int)
+                        TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_DIP,
+                                smallTextSize,
+                                resources.getDisplayMetrics());
         this.mAITextSize = iApplyDimension;
         Paint paint2 = new Paint();
         this.mAITextPaint = paint2;
@@ -211,7 +226,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         this.mDateFormat = new String(DateFormat.getDateFormatOrder(context));
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public void layout(
             boolean visible,
             Point center,
@@ -257,9 +272,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 ValueAnimator valueAnimatorOfFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.mClockAnimatorIn = valueAnimatorOfFloat;
                 valueAnimatorOfFloat.addUpdateListener(
-                        new ValueAnimator.AnimatorUpdateListener() { // from class:
-                            // com.noname81.lmt.PieStatusInfo.1
-                            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                        new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                 PieStatusInfo.this.mClockAnimationIn =
                                         valueAnimator.getAnimatedFraction();
@@ -282,9 +296,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 ValueAnimator valueAnimatorOfFloat2 = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.mAIAnimatorIn = valueAnimatorOfFloat2;
                 valueAnimatorOfFloat2.addUpdateListener(
-                        new ValueAnimator.AnimatorUpdateListener() { // from class:
-                            // com.noname81.lmt.PieStatusInfo.2
-                            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                        new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                 PieStatusInfo.this.mAIAnimationIn =
                                         valueAnimator.getAnimatedFraction();
@@ -303,9 +316,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 ValueAnimator valueAnimatorOfFloat3 = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.mAIAnimatorOutIn = valueAnimatorOfFloat3;
                 valueAnimatorOfFloat3.addUpdateListener(
-                        new ValueAnimator.AnimatorUpdateListener() { // from class:
-                            // com.noname81.lmt.PieStatusInfo.3
-                            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                        new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                 float fMax;
                                 if (valueAnimator.getAnimatedFraction() <= 0.2f) {
@@ -359,8 +371,9 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
             if (onTheRight) {
                 return;
             }
-            TimerTask timerTask = new TimerTask() { // from class: com.noname81.lmt.PieStatusInfo.4
-                        @Override // java.util.TimerTask, java.lang.Runnable
+            TimerTask timerTask =
+                    new TimerTask() {
+                        @Override
                         public void run() {
                             PieStatusInfo.this.fillAdditionalInfoStrings();
                             PieStatusInfo.this.mPieMenu.postInvalidate();
@@ -372,13 +385,13 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         }
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public boolean drawBackground(Canvas canvas) {
         canvas.drawPaint(this.mBackgroundPaint);
         return false;
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public boolean drawForeground(Canvas canvas) {
         float direction = this.mOnTheLeft ? -1.0f : 1.0f;
         this.mClockTextPaint.setTextSize(this.mClockTextSizeBig);
@@ -422,7 +435,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         return true;
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public boolean onTouchEvent(
             int action, float x, float y, float deltaX, float deltaY, PointF polar) {
         if (2 == action) {
@@ -759,7 +772,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
     private String getConnectivityString() {
         NetworkInfo activeNetworkInfo;
         ConnectivityManager connectivityManager =
-                (ConnectivityManager) this.mContext.getSystemService("connectivity");
+                (ConnectivityManager) this.mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager == null
                 || (activeNetworkInfo = connectivityManager.getActiveNetworkInfo()) == null) {
             return "Not connected";
@@ -771,7 +784,10 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         }
         if (activeNetworkInfo.getType() == 1) {
             WifiManager wifiManager =
-                    (WifiManager) this.mContext.getApplicationContext().getSystemService("wifi");
+                    (WifiManager)
+                            this.mContext
+                                    .getApplicationContext()
+                                    .getSystemService(Context.WIFI_SERVICE);
             if (wifiManager.getWifiState() != 3) {
                 return state;
             }
@@ -785,7 +801,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
     }
 
     private String getRingerModeString() {
-        AudioManager audioManager = (AudioManager) this.mContext.getSystemService("audio");
+        AudioManager audioManager =
+                (AudioManager) this.mContext.getSystemService(Context.AUDIO_SERVICE);
         if (audioManager == null) {
             return "";
         }
@@ -822,17 +839,14 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
 
     private String getMemInfo() {
         ActivityManager activityManager =
-                (ActivityManager) this.mContext.getSystemService("activity");
+                (ActivityManager) this.mContext.getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
         activityManager.getMemoryInfo(memoryInfo);
-        if (Build.VERSION.SDK_INT >= 16) {
-            return "Used "
-                    + ((memoryInfo.totalMem - memoryInfo.availMem) / (1024L * 1024L))
-                    + " MB | Free "
-                    + (memoryInfo.availMem / (1024L * 1024L))
-                    + " MB";
-        }
-        return "Free " + (memoryInfo.availMem / (1024L * 1024L)) + " MB";
+        return "Used "
+                + ((memoryInfo.totalMem - memoryInfo.availMem) / (1024L * 1024L))
+                + " MB | Free "
+                + (memoryInfo.availMem / (1024L * 1024L))
+                + " MB";
     }
 
     private void handleSensorListener(boolean enable) {
@@ -850,7 +864,7 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
         }
     }
 
-    @Override // android.hardware.SensorEventListener
+    @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if (sensorEvent.sensor.getType() == 1) {
             long jCurrentTimeMillis = System.currentTimeMillis();
@@ -886,9 +900,8 @@ public class PieStatusInfo implements SensorEventListener, PieMenu.PieView {
                 ValueAnimator valueAnimatorOfFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
                 this.mSensorAnimator = valueAnimatorOfFloat;
                 valueAnimatorOfFloat.addUpdateListener(
-                        new ValueAnimator.AnimatorUpdateListener() { // from class:
-                            // com.noname81.lmt.PieStatusInfo.5
-                            @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                        new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                 float animatedFraction = valueAnimator.getAnimatedFraction();
                                 PieStatusInfo.this.makePath(animatedFraction);

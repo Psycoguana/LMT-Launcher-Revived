@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.Log;
 
 import java.io.File;
@@ -370,10 +369,7 @@ class Action {
             }
             return;
         }
-        if (type == 45
-                && log
-                && Build.VERSION.SDK_INT >= 21
-                && !RootContext.getInstance(activity).isRootAvailable(false)) {
+        if (type == 45 && log && !RootContext.getInstance(activity).isRootAvailable(false)) {
             PermissionChecker.getInstance().checkAndRequestUsageStatsPermission(activity, true);
         }
     }

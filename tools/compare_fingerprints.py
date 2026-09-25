@@ -24,6 +24,7 @@ _dev_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "accepted-d
 ACCEPTED = {}
 NEW_MEMBERS = {}
 REWORKED = set()
+REMOVED_MEMBERS = set()
 if os.path.exists(_dev_path):
     _dev = json.load(open(_dev_path))
     for d in _dev["deviations"]:
@@ -33,6 +34,9 @@ if os.path.exists(_dev_path):
     NEW_MEMBERS = {d["class"]: d["reason"] for d in _dev.get("new_members", [])}
     # classes deliberately restructured, where removals are expected too
     REWORKED = {d["class"] for d in _dev.get("new_members", []) if d.get("reworked")}
+    # Single methods or fields deleted on purpose (dead code), each with its reason.
+    # Excuses exactly that member going missing; the rest of the class is still compared.
+    REMOVED_MEMBERS = {(d["class"], d["member"]) for d in _dev.get("removed_members", [])}
 verbose = "--verbose" in sys.argv
 
 # Whole classes expected only on our side, or only on the reference side - each with
@@ -92,6 +96,7 @@ missing = {n for n in ref_names - our_names
 added   = {n for n in our_names - ref_names if base(n) not in EXPECTED_NEW}
 
 real, reordered, synthetic_only, anon_shape, feature_additions, one_sided = [], [], [], [], [], []
+removed_members = []
 
 if missing:
     print(f"!! {len(missing)} class(es) missing from our build:")
@@ -117,6 +122,8 @@ for name in sorted(ref_names & our_names):
             # only additions are excused; a field going missing still counts
             only_ref = {f for f in only_ref if "synthetic" not in f}
             only_our = set()
+        # a field deleted on purpose, listed in removed_members by its declaration
+        only_ref = {f for f in only_ref if (base(name), f) not in REMOVED_MEMBERS}
         non_synthetic = [f for f in (only_ref | only_our) if "synthetic" not in f]
         # A named local class rewritten as an anonymous one turns its instance
         # field into a captured local: `private mPosition` -> `synthetic val$mPosition`.
@@ -162,6 +169,9 @@ for name in sorted(ref_names & our_names):
                 continue
             if base(name) in NEW_MEMBERS and sig in om and sig not in rm:
                 feature_additions.append((name, sig))
+                continue
+            if sig in rm and sig not in om and (base(name), sig) in REMOVED_MEMBERS:
+                removed_members.append((name, sig))
                 continue
             print(f"!! {name}: method on one side only: {sig}")
             one_sided.append((name, sig))
@@ -312,6 +322,7 @@ print(f"methods differing     : {len(real)}")
 print(f"  known-benign        : {len(benign)}")
 print(f"  accepted deviations : {len(accepted)}")
 print(f"  UNEXPLAINED         : {len(unexplained)}")
+print(f"removed members       : {len(removed_members)}   (dead methods deleted on purpose, see removed_members)")
 print(f"field diffs (synthetic only) : {len(field_diffs) - len(hard_field_diffs)}")
 print(f"field diffs (REAL)           : {len(hard_field_diffs)}")
 print(f"one-sided methods (REAL)     : {len(one_sided)}   (added/removed, not excused by accepted-deviations.json)")

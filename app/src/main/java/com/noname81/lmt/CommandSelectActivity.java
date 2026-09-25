@@ -31,6 +31,7 @@ import java.util.List;
  */
 public class CommandSelectActivity extends ThemedActivity {
     private static final int REQUEST_TASKER_TASK_SELECT = 1;
+
     /** Material's opacity for disabled content. */
     static final float DISABLED_ALPHA = 0.38f;
 
@@ -38,7 +39,7 @@ public class CommandSelectActivity extends ThemedActivity {
     private int mPos = 0;
     boolean mRootDenied;
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
@@ -109,7 +110,8 @@ public class CommandSelectActivity extends ThemedActivity {
             // No Tasker installed: fall through to typing the name, as before.
         }
         if ((actionType > 25 && actionType < 30) || actionType == 32) {
-            Action currentAction = SettingsValues.getInstance(getApplicationContext()).getCurrentAction();
+            Action currentAction =
+                    SettingsValues.getInstance(getApplicationContext()).getCurrentAction();
             String string = currentAction.getType() == this.mPos ? currentAction.getString() : "";
             new InputDialog(
                     this,
@@ -121,7 +123,7 @@ public class CommandSelectActivity extends ThemedActivity {
                             + getString(R.string.dialog_to_be_executed),
                     string,
                     false) {
-                @Override // com.noname81.lmt.InputDialog
+                @Override
                 public boolean onOkClicked(String value) {
                     SettingsValues.getInstance(CommandSelectActivity.this.getApplicationContext())
                             .setCurrentAction(
@@ -147,7 +149,7 @@ public class CommandSelectActivity extends ThemedActivity {
         return this.mAdapter.mRows;
     }
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != REQUEST_TASKER_TASK_SELECT || resultCode != RESULT_OK) {
@@ -181,19 +183,18 @@ public class CommandSelectActivity extends ThemedActivity {
             return types;
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public int getItemCount() {
             return this.mRows.getItemCount();
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public int getItemViewType(int position) {
             return this.mRows.getItemViewType(position);
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(
-                @NonNull ViewGroup parent, int viewType) {
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             if (viewType == SectionedRows.VIEW_TYPE_HEADER) {
                 return new HeaderViewHolder(inflater.inflate(R.layout.listheader, parent, false));
@@ -202,7 +203,7 @@ public class CommandSelectActivity extends ThemedActivity {
                     inflater.inflate(R.layout.listitem_icondescriptionicon, parent, false));
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof HeaderViewHolder) {
                 ((HeaderViewHolder) holder).text.setText(this.mRows.headerAt(position));
@@ -217,9 +218,13 @@ public class CommandSelectActivity extends ThemedActivity {
                     rowHolder.icon,
                     R.drawable.none,
                     actionType,
-                    () -> IconUtils.getIconForAction(getApplicationContext(), new Action(actionType), null));
+                    () ->
+                            IconUtils.getIconForAction(
+                                    getApplicationContext(), new Action(actionType), null));
             if (actionType
-                    == SettingsValues.getInstance(getApplicationContext()).getCurrentAction().getType()) {
+                    == SettingsValues.getInstance(getApplicationContext())
+                            .getCurrentAction()
+                            .getType()) {
                 rowHolder.icon2.setImageDrawable(IconUtils.getIconForOK(getApplicationContext()));
                 // ok.png is white; tint it so the selection mark shows on light themes too.
                 rowHolder.icon2.setImageTintList(
@@ -231,7 +236,8 @@ public class CommandSelectActivity extends ThemedActivity {
                 rowHolder.icon2.setImageDrawable(null);
             }
             // Root-only actions can't work while su is missing or denied (ROADMAP 1.13).
-            boolean blocked = CommandSelectActivity.this.mRootDenied && Action.needsRoot(actionType);
+            boolean blocked =
+                    CommandSelectActivity.this.mRootDenied && Action.needsRoot(actionType);
             rowHolder.itemView.setAlpha(blocked ? DISABLED_ALPHA : 1f);
             rowHolder.itemView.setOnClickListener(
                     v -> {

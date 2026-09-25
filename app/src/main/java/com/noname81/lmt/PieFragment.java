@@ -25,7 +25,7 @@ public class PieFragment extends Fragment {
     Adapter mAdapter;
     int mCurrentPos;
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         RecyclerView recyclerView = new RecyclerView(requireContext());
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -34,7 +34,7 @@ public class PieFragment extends Fragment {
         return recyclerView;
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onResume() {
         super.onResume();
         if (this.mAdapter != null) {
@@ -93,7 +93,7 @@ public class PieFragment extends Fragment {
         return this.mAdapter.mRows;
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
@@ -120,113 +120,169 @@ public class PieFragment extends Fragment {
 
         private List<SectionedRows.Labeled> level1Rows() {
             List<SectionedRows.Labeled> rows = new ArrayList<>();
-            rows.add(new SectionedRows.Labeled("Pie item 1", getString(R.string.pie_level_1_item_1)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 1 longpress", getString(R.string.pie_level_1_item_1_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 2", getString(R.string.pie_level_1_item_2)));
+                            "Pie item 1", getString(R.string.pie_level_1_item_1)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 2 longpress", getString(R.string.pie_level_1_item_2_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 3", getString(R.string.pie_level_1_item_3)));
+                            "Pie item 1 longpress",
+                            getString(R.string.pie_level_1_item_1_longpress)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 3 longpress", getString(R.string.pie_level_1_item_3_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 4", getString(R.string.pie_level_1_item_4)));
+                            "Pie item 2", getString(R.string.pie_level_1_item_2)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 4 longpress", getString(R.string.pie_level_1_item_4_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 5", getString(R.string.pie_level_1_item_5)));
+                            "Pie item 2 longpress",
+                            getString(R.string.pie_level_1_item_2_longpress)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 5 longpress", getString(R.string.pie_level_1_item_5_longpress)));
+                            "Pie item 3", getString(R.string.pie_level_1_item_3)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 3 longpress",
+                            getString(R.string.pie_level_1_item_3_longpress)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 4", getString(R.string.pie_level_1_item_4)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 4 longpress",
+                            getString(R.string.pie_level_1_item_4_longpress)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 5", getString(R.string.pie_level_1_item_5)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 5 longpress",
+                            getString(R.string.pie_level_1_item_5_longpress)));
             return rows;
         }
 
         private List<SectionedRows.Labeled> level2Rows() {
             List<SectionedRows.Labeled> rows = new ArrayList<>();
-            rows.add(new SectionedRows.Labeled("Pie item 1", getString(R.string.pie_level_2_item_1)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 1 longpress", getString(R.string.pie_level_2_item_1_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 2", getString(R.string.pie_level_2_item_2)));
+                            "Pie item 1", getString(R.string.pie_level_2_item_1)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 2 longpress", getString(R.string.pie_level_2_item_2_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 3", getString(R.string.pie_level_2_item_3)));
+                            "Pie item 1 longpress",
+                            getString(R.string.pie_level_2_item_1_longpress)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 3 longpress", getString(R.string.pie_level_2_item_3_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 4", getString(R.string.pie_level_2_item_4)));
+                            "Pie item 2", getString(R.string.pie_level_2_item_2)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 4 longpress", getString(R.string.pie_level_2_item_4_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 5", getString(R.string.pie_level_2_item_5)));
+                            "Pie item 2 longpress",
+                            getString(R.string.pie_level_2_item_2_longpress)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 5 longpress", getString(R.string.pie_level_2_item_5_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 6", getString(R.string.pie_level_2_item_6)));
+                            "Pie item 3", getString(R.string.pie_level_2_item_3)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 6 longpress", getString(R.string.pie_level_2_item_6_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 7", getString(R.string.pie_level_2_item_7)));
+                            "Pie item 3 longpress",
+                            getString(R.string.pie_level_2_item_3_longpress)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 7 longpress", getString(R.string.pie_level_2_item_7_longpress)));
+                            "Pie item 4", getString(R.string.pie_level_2_item_4)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 4 longpress",
+                            getString(R.string.pie_level_2_item_4_longpress)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 5", getString(R.string.pie_level_2_item_5)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 5 longpress",
+                            getString(R.string.pie_level_2_item_5_longpress)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 6", getString(R.string.pie_level_2_item_6)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 6 longpress",
+                            getString(R.string.pie_level_2_item_6_longpress)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 7", getString(R.string.pie_level_2_item_7)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 7 longpress",
+                            getString(R.string.pie_level_2_item_7_longpress)));
             return rows;
         }
 
         private List<SectionedRows.Labeled> level3Rows() {
             List<SectionedRows.Labeled> rows = new ArrayList<>();
-            rows.add(new SectionedRows.Labeled("Pie item 1", getString(R.string.pie_level_3_item_1)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 1 longpress", getString(R.string.pie_level_3_item_1_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 2", getString(R.string.pie_level_3_item_2)));
+                            "Pie item 1", getString(R.string.pie_level_3_item_1)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 2 longpress", getString(R.string.pie_level_3_item_2_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 3", getString(R.string.pie_level_3_item_3)));
+                            "Pie item 1 longpress",
+                            getString(R.string.pie_level_3_item_1_longpress)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 3 longpress", getString(R.string.pie_level_3_item_3_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 4", getString(R.string.pie_level_3_item_4)));
+                            "Pie item 2", getString(R.string.pie_level_3_item_2)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 4 longpress", getString(R.string.pie_level_3_item_4_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 5", getString(R.string.pie_level_3_item_5)));
+                            "Pie item 2 longpress",
+                            getString(R.string.pie_level_3_item_2_longpress)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 5 longpress", getString(R.string.pie_level_3_item_5_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 6", getString(R.string.pie_level_3_item_6)));
+                            "Pie item 3", getString(R.string.pie_level_3_item_3)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 6 longpress", getString(R.string.pie_level_3_item_6_longpress)));
-            rows.add(new SectionedRows.Labeled("Pie item 7", getString(R.string.pie_level_3_item_7)));
+                            "Pie item 3 longpress",
+                            getString(R.string.pie_level_3_item_3_longpress)));
             rows.add(
                     new SectionedRows.Labeled(
-                            "Pie item 7 longpress", getString(R.string.pie_level_3_item_7_longpress)));
+                            "Pie item 4", getString(R.string.pie_level_3_item_4)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 4 longpress",
+                            getString(R.string.pie_level_3_item_4_longpress)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 5", getString(R.string.pie_level_3_item_5)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 5 longpress",
+                            getString(R.string.pie_level_3_item_5_longpress)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 6", getString(R.string.pie_level_3_item_6)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 6 longpress",
+                            getString(R.string.pie_level_3_item_6_longpress)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 7", getString(R.string.pie_level_3_item_7)));
+            rows.add(
+                    new SectionedRows.Labeled(
+                            "Pie item 7 longpress",
+                            getString(R.string.pie_level_3_item_7_longpress)));
             return rows;
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public long getItemId(int position) {
             return position;
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public int getItemCount() {
             return this.mRows.getItemCount();
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public int getItemViewType(int position) {
             return this.mRows.getItemViewType(position);
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(
-                @NonNull ViewGroup parent, int viewType) {
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             if (viewType == SectionedRows.VIEW_TYPE_HEADER) {
                 return new HeaderViewHolder(inflater.inflate(R.layout.listheader, parent, false));
@@ -235,7 +291,7 @@ public class PieFragment extends Fragment {
                     inflater.inflate(R.layout.listitem_icondescriptionicon, parent, false));
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof HeaderViewHolder) {
                 ((HeaderViewHolder) holder).text.setText(this.mRows.headerAt(position));

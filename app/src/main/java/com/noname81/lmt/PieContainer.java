@@ -55,7 +55,7 @@ public class PieContainer {
             this.mBottom = expanded;
         }
 
-        @Override // android.view.ViewGroup, android.view.View
+        @Override
         public boolean dispatchTouchEvent(MotionEvent motionEvent) {
             if (PieContainer.DEBUG) {
                 Log.d(PieContainer.TAG, "dispatchTouchEvent " + motionEvent);
@@ -64,13 +64,13 @@ public class PieContainer {
                 return false;
             }
             int actionMasked = motionEvent.getActionMasked();
-            if (actionMasked == 0) {
+            if (actionMasked == MotionEvent.ACTION_DOWN) {
                 boolean zIsNotBlacklistedPie = PieContainer.this.mSettings.isNotBlacklistedPie();
                 this.mAllowed = zIsNotBlacklistedPie;
                 if (zIsNotBlacklistedPie) {
                     expandLayout();
                 }
-            } else if (1 == actionMasked) {
+            } else if (actionMasked == MotionEvent.ACTION_UP) {
                 shrinkLayout();
             }
             if (!this.mAllowed) {
@@ -80,7 +80,7 @@ public class PieContainer {
             return true;
         }
 
-        @Override // android.view.View
+        @Override
         public void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
             if (PieContainer.DEBUG) {
                 Log.d(
@@ -196,7 +196,7 @@ public class PieContainer {
 
     PieContainer(Context context) {
         this.mSettings = SettingsValues.getInstance(context);
-        this.mWindowManager = (WindowManager) context.getSystemService("window");
+        this.mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         this.mPieControl = new PieControl(context);
         this.mPieLayout1 = new PieLayout(context, false);
         this.mPieLayout2 = new PieLayout(context, false);
@@ -237,7 +237,7 @@ public class PieContainer {
                     (WindowManager.LayoutParams) this.mPieLayout1.getLayoutParams();
             layoutParams.width = this.mSettings.loadPieAreaX();
             layoutParams.height = this.mSettings.loadPieAreaY();
-            layoutParams.gravity = 8388613 | gravity;
+            layoutParams.gravity = Gravity.END | gravity;
             layoutParams.y = verticalInset;
             this.mWindowManager.updateViewLayout(this.mPieLayout1, layoutParams);
             this.mAddedLayout1 = true;
@@ -309,10 +309,6 @@ public class PieContainer {
         }
         if (this.mAddedLayout3) {
             this.mPieLayout3.shrinkLayout();
-        }
-        if (Build.VERSION.SDK_INT < 16) {
-            removeFromWindowManager();
-            attachToWindowManager();
         }
     }
 

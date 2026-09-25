@@ -48,6 +48,7 @@ public class RootContext {
      * sending {@code id} to the root shell that is already open.
      */
     static final int ROOT_UNKNOWN = 0;
+
     static final int ROOT_GRANTED = 1;
     static final int ROOT_DENIED = 2;
     private volatile int mRootState = ROOT_UNKNOWN;
@@ -70,7 +71,7 @@ public class RootContext {
             return;
         }
         this.mRootState = ROOT_DENIED;
-        Toast.makeText(context, "Failed to get root permissions!", 0).show();
+        Toast.makeText(context, "Failed to get root permissions!", Toast.LENGTH_SHORT).show();
         Log.e(TAG, "Failed to get root permissions!");
     }
 
@@ -88,7 +89,11 @@ public class RootContext {
     boolean isRootAvailable(boolean log) {
         boolean available = this.mInitialized && this.mRootState != ROOT_DENIED;
         if (log && !available) {
-            Toast.makeText(this.mContext, "This feature needs root permissions!", 0).show();
+            Toast.makeText(
+                            this.mContext,
+                            "This feature needs root permissions!",
+                            Toast.LENGTH_SHORT)
+                    .show();
             Log.e(TAG, "This feature needs root permissions!");
         }
         return available;
@@ -118,7 +123,8 @@ public class RootContext {
     void recheckRoot() {
         synchronized (this.mRootStateListeners) {
             if (!isRootDenied() || !suExists()) {
-                return; // Granted, still checking, or no su to ask (unrooted phone): keep the answer.
+                return; // Granted, still checking, or no su to ask (unrooted phone): keep the
+                        // answer.
             }
             this.mRootState = ROOT_UNKNOWN;
         }
@@ -214,10 +220,8 @@ public class RootContext {
         initRemoteStreams();
         if (Build.VERSION.SDK_INT >= 23) {
             initRemoteProcess23();
-        } else if (Build.VERSION.SDK_INT >= 20) {
-            initRemoteProcess21();
         } else {
-            initRemoteProcess20();
+            initRemoteProcess21();
         }
     }
 
@@ -272,23 +276,6 @@ public class RootContext {
         this.mRemoteProcess = new ProcessBuilder(this.mShell).redirectErrorStream(true).start();
         this.mRemoteOutputStream = new DataOutputStream(this.mRemoteProcess.getOutputStream());
         this.mRemoteInputStream = new DataInputStream(this.mRemoteProcess.getInputStream());
-    }
-
-    private void initRemoteProcess20() throws Exception {
-        if (DEBUG) {
-            Log.d(TAG, "initRemoteProcess20()");
-        }
-        if (Build.VERSION.SDK_INT >= 19) {
-            this.mRemoteOutputStream.write("sh\n".getBytes("ASCII"));
-        }
-        this.mRemoteOutputStream.write(
-                ("export CLASSPATH=" + this.mAbsolutePath + "/InputContext.jar\n")
-                        .getBytes("ASCII"));
-        this.mRemoteOutputStream.write(
-                ("exec app_process "
-                                + this.mAbsolutePath
-                                + " com.noname81.lmt.InputContext \"$@\"\n")
-                        .getBytes("ASCII"));
     }
 
     private void initRemoteProcess21() throws Exception {

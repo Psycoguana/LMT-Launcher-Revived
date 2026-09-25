@@ -8,7 +8,7 @@ import androidx.appcompat.app.ActionBar;
 /** The Appearance page (ROADMAP 1.10), opened from the Settings tab's General section. */
 public class AppearanceActivity extends ThemedActivity {
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.appearance);
@@ -26,7 +26,7 @@ public class AppearanceActivity extends ThemedActivity {
         }
     }
 
-    @Override // android.app.Activity
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();

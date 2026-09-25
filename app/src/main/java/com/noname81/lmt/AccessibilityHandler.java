@@ -36,7 +36,7 @@ public class AccessibilityHandler extends AccessibilityService {
     private static boolean mInitialized;
     private NotificationDataHelper mNotificationDataHelper;
 
-    @Override // android.accessibilityservice.AccessibilityService
+    @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         Notification notification;
         ApplicationInfo applicationInfo;
@@ -84,7 +84,7 @@ public class AccessibilityHandler extends AccessibilityService {
         }
     }
 
-    @Override // android.accessibilityservice.AccessibilityService
+    @Override
     protected void onServiceConnected() {
         if (mInitialized) {
             instance = this;
@@ -103,13 +103,13 @@ public class AccessibilityHandler extends AccessibilityService {
     // AccessibilityManager.interrupt(). It is not a disconnect: upstream cleared the state here,
     // which left the service bound (Settings shows it on) but unusable until toggled off and on.
     // See docs/ROADMAP.md 3.5.
-    @Override // android.accessibilityservice.AccessibilityService
+    @Override
     public void onInterrupt() {
         Log.i(TAG, "onInterrupt - ignored, service stays bound");
     }
 
     // The real disconnect: without clearing here, LMT kept calling into a dead service.
-    @Override // android.app.Service
+    @Override
     public boolean onUnbind(Intent intent) {
         Log.i(TAG, "onUnbind");
         instance = null;
@@ -122,9 +122,10 @@ public class AccessibilityHandler extends AccessibilityService {
     }
 
     static boolean isAccessibilityAvailable(Context context, boolean log) {
-        boolean available = Build.VERSION.SDK_INT >= 16 && mInitialized && instance != null;
+        boolean available = mInitialized && instance != null;
         if (log && !available) {
-            Toast.makeText(context, R.string.accessibility_service_activate, 0).show();
+            Toast.makeText(context, R.string.accessibility_service_activate, Toast.LENGTH_SHORT)
+                    .show();
             Log.e(TAG, String.valueOf(R.string.accessibility_service_activate));
         }
         return available;
@@ -140,9 +141,7 @@ public class AccessibilityHandler extends AccessibilityService {
         if (DEBUG) {
             Log.d(TAG, "performAction(" + globalAction + ")");
         }
-        if (Build.VERSION.SDK_INT < 16
-                || !mInitialized
-                || (accessibilityHandler = instance) == null) {
+        if (!mInitialized || (accessibilityHandler = instance) == null) {
             return;
         }
         boolean zPerformGlobalAction = accessibilityHandler.performGlobalAction(globalAction);
@@ -174,9 +173,8 @@ public class AccessibilityHandler extends AccessibilityService {
         boolean zDispatchGesture =
                 accessibilityHandler.dispatchGesture(
                         createClick(x, y),
-                        new AccessibilityService.GestureResultCallback() { // from class:
-                            // com.noname81.lmt.AccessibilityHandler.1
-                            @Override // android.accessibilityservice.AccessibilityService.GestureResultCallback
+                        new AccessibilityService.GestureResultCallback() {
+                            @Override
                             public void onCompleted(GestureDescription gestureDescription) {
                                 super.onCompleted(gestureDescription);
                                 if (AccessibilityHandler.DEBUG) {
@@ -184,7 +182,7 @@ public class AccessibilityHandler extends AccessibilityService {
                                 }
                             }
 
-                            @Override // android.accessibilityservice.AccessibilityService.GestureResultCallback
+                            @Override
                             public void onCancelled(GestureDescription gestureDescription) {
                                 super.onCancelled(gestureDescription);
                                 if (AccessibilityHandler.DEBUG) {

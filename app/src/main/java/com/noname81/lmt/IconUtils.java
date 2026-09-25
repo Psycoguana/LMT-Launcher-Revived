@@ -55,7 +55,12 @@ class IconUtils {
         Resources resources = context.getResources();
         boolean scaleToFit = scaleMode == 1;
         if (scaleMode > 0 && scaleMode <= 2) {
-            scaleMode = (int) TypedValue.applyDimension(1, 35.0f, resources.getDisplayMetrics());
+            scaleMode =
+                    (int)
+                            TypedValue.applyDimension(
+                                    TypedValue.COMPLEX_UNIT_DIP,
+                                    35.0f,
+                                    resources.getDisplayMetrics());
         }
         if (scaleMode <= 0) {
             if (scaleToFit) {
@@ -111,10 +116,7 @@ class IconUtils {
     }
 
     static Drawable getDrawable(Context context, int resId) {
-        if (Build.VERSION.SDK_INT >= 21) {
-            return context.getResources().getDrawable(resId, context.getTheme());
-        }
-        return context.getResources().getDrawable(resId);
+        return context.getResources().getDrawable(resId, context.getTheme());
     }
 
     static Drawable getIconForPieShortPress(Context context) {
@@ -148,9 +150,13 @@ class IconUtils {
         Resources resources = context.getResources();
         imageView.setAdjustViewBounds(true);
         imageView.setMaxHeight(
-                (int) TypedValue.applyDimension(1, 70.0f, resources.getDisplayMetrics()));
+                (int)
+                        TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_DIP, 70.0f, resources.getDisplayMetrics()));
         imageView.setMaxWidth(
-                (int) TypedValue.applyDimension(1, 70.0f, resources.getDisplayMetrics()));
+                (int)
+                        TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_DIP, 70.0f, resources.getDisplayMetrics()));
     }
 
     /** File name of the user-supplied PNG for pie slot {@code slot}. */

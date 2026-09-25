@@ -138,13 +138,13 @@ class PieMenu extends FrameLayout {
         this.mRadius =
                 (int)
                         TypedValue.applyDimension(
-                                1,
+                                TypedValue.COMPLEX_UNIT_DIP,
                                 this.mSettings.loadPieInnerRadius(),
                                 resources.getDisplayMetrics());
         this.mRadiusInc =
                 (int)
                         TypedValue.applyDimension(
-                                1,
+                                TypedValue.COMPLEX_UNIT_DIP,
                                 this.mSettings.loadPieOuterRadius(),
                                 resources.getDisplayMetrics());
         this.mSlop = this.mSettings.loadPieAreaX();
@@ -174,7 +174,6 @@ class PieMenu extends FrameLayout {
         this.mOutlinePaint.setStrokeWidth(this.mSettings.loadPieOutlineSize());
         this.mAnimationTime = this.mSettings.loadPieAnimation();
         String strLoadPieColor = this.mSettings.loadPieColor();
-        strLoadPieColor.hashCode();
         switch (strLoadPieColor) {
             case "0":
                 if (Build.VERSION.SDK_INT >= 31) {
@@ -492,9 +491,8 @@ class PieMenu extends FrameLayout {
     private void animateOpen() {
         ValueAnimator valueAnimatorOfFloat = ValueAnimator.ofFloat(0.0f, 1.0f);
         valueAnimatorOfFloat.addUpdateListener(
-                new ValueAnimator
-                        .AnimatorUpdateListener() { // from class: com.noname81.lmt.PieMenu.1
-                    @Override // android.animation.ValueAnimator.AnimatorUpdateListener
+                new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
                         for (PieItem pieItem : PieMenu.this.mItems) {
                             pieItem.setAnimationAngle(
@@ -583,8 +581,8 @@ class PieMenu extends FrameLayout {
         }
         if (this.mLongpressRunnable == null) {
             Runnable runnable2 =
-                    new Runnable() { // from class: com.noname81.lmt.PieMenu.1LongpressRunnable
-                        @Override // java.lang.Runnable
+                    new Runnable() {
+                        @Override
                         public void run() {
                             if (PieMenu.this.mSettings.loadPieVibrate() > 0) {
                                 PieMenu.this.mToaster.vibratePie();
@@ -621,7 +619,6 @@ class PieMenu extends FrameLayout {
         for (int level = 0; level < this.mLevels; level = nextLevel) {
             nextLevel = level + 1;
             double d = startGap * 2.0f;
-            Double.isNaN(d);
             float sweep = ((float) (3.141592653589793d - d)) / this.mCounts[nextLevel];
             float halfSweep = sweep / 2.0f;
             Path pathMakeSlice =
@@ -643,11 +640,9 @@ class PieMenu extends FrameLayout {
                         double d2 = (((outerRadius - innerRadius) * 2) / 3) + innerRadius;
                         double d3 = angle;
                         double dSin = Math.sin(d3);
-                        Double.isNaN(d2);
                         int iconOffset = (int) (d2 * dSin);
                         int centerY = this.mCenter.y;
                         double dCos = Math.cos(d3);
-                        Double.isNaN(d2);
                         int iconTop = (centerY - ((int) (d2 * dCos))) - (measuredHeight / 2);
                         if (onTheLeft()) {
                             iconX = this.mCenter.x + iconOffset;
@@ -668,19 +663,7 @@ class PieMenu extends FrameLayout {
                     pieItem.setColor(this.mIconColor);
                     angle += sweep;
                 } else {
-                    startGap = startGap;
-                    startAngle = startAngle;
-                    sliceGap = sliceGap;
-                    outerRadius = outerRadius;
-                    innerRadius = innerRadius;
-                    nextLevel = nextLevel;
                 }
-                startGap = startGap;
-                startAngle = startAngle;
-                sliceGap = sliceGap;
-                outerRadius = outerRadius;
-                innerRadius = innerRadius;
-                nextLevel = nextLevel;
             }
             int radiusInc = this.mRadiusInc;
             innerRadius += radiusInc;
@@ -708,7 +691,7 @@ class PieMenu extends FrameLayout {
         }
     }
 
-    @Override // android.view.View
+    @Override
     protected void onDraw(Canvas canvas) {
         PieView pieView;
         PieView pieView2;
@@ -792,7 +775,7 @@ class PieMenu extends FrameLayout {
         return path;
     }
 
-    @Override // android.view.View
+    @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
         PieView pieView;
         PieView pieView2;
@@ -822,7 +805,7 @@ class PieMenu extends FrameLayout {
                             + motionEvent.getRawY());
         }
         int actionMasked = motionEvent.getActionMasked();
-        if (actionMasked == 0) {
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
             int x = (int) rawX;
             int y = (int) rawY;
             setCenter(x, y);
@@ -840,7 +823,7 @@ class PieMenu extends FrameLayout {
                 }
                 return true;
             }
-        } else if (1 == actionMasked) {
+        } else if (actionMasked == MotionEvent.ACTION_UP) {
             if (this.mOpen) {
                 PointF polar = getPolar(rawX, rawY);
                 PieView pieView3 = this.mPiePointer;
@@ -868,14 +851,14 @@ class PieMenu extends FrameLayout {
                 setLongpressTimer(null);
                 return true;
             }
-        } else if (3 == actionMasked) {
+        } else if (actionMasked == MotionEvent.ACTION_CANCEL) {
             if (this.mOpen) {
                 show(false, false);
                 this.mBlur.close();
                 deselect();
                 return false;
             }
-        } else if (2 == actionMasked && this.mOpen) {
+        } else if (actionMasked == MotionEvent.ACTION_MOVE && this.mOpen) {
             PointF polar2 = getPolar(rawX, rawY);
             PieView pieView4 = this.mPiePointer;
             boolean zOnTouchEvent2 =

@@ -103,7 +103,7 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
         dialogInterface.dismiss();
     }
 
-    @Override // android.content.DialogInterface.OnClickListener
+    @Override
     public void onClick(DialogInterface dialog, int which) {
         if (which == -1) {
             if (onOkClicked(this.mColorString.getText().toString())) {
@@ -116,7 +116,7 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
         }
     }
 
-    @Override // com.google.android.material.slider.Slider.OnChangeListener
+    @Override
     public void onValueChange(Slider slider, float value, boolean fromUser) {
         if (fromUser) {
             int progress = (int) value;
@@ -141,7 +141,7 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
         }
     }
 
-    @Override // android.view.View.OnClickListener
+    @Override
     public void onClick(View view) {
         if (view.getId() == R.id.color_last) {
             int selection = this.mColorSelectionCurrent;

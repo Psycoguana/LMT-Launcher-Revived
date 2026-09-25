@@ -24,7 +24,7 @@ class SeparatedListAdapter extends BaseAdapter {
         return false;
     }
 
-    @Override // android.widget.Adapter
+    @Override
     public long getItemId(int position) {
         return position;
     }
@@ -45,7 +45,7 @@ class SeparatedListAdapter extends BaseAdapter {
         this.sections.put(header, adapter);
     }
 
-    @Override // android.widget.Adapter
+    @Override
     public Object getItem(int position) {
         for (String header : this.sections.keySet()) {
             Adapter adapter = this.sections.get(header);
@@ -61,7 +61,7 @@ class SeparatedListAdapter extends BaseAdapter {
         return null;
     }
 
-    @Override // android.widget.Adapter
+    @Override
     public int getCount() {
         Iterator<Adapter> it = this.sections.values().iterator();
         int count = 0;
@@ -71,7 +71,7 @@ class SeparatedListAdapter extends BaseAdapter {
         return count;
     }
 
-    @Override // android.widget.BaseAdapter, android.widget.Adapter
+    @Override
     public int getViewTypeCount() {
         Iterator<Adapter> it = this.sections.values().iterator();
         int viewTypeCount = 1;
@@ -81,7 +81,7 @@ class SeparatedListAdapter extends BaseAdapter {
         return viewTypeCount;
     }
 
-    @Override // android.widget.BaseAdapter, android.widget.Adapter
+    @Override
     public int getItemViewType(int position) {
         Iterator<String> it = this.sections.keySet().iterator();
         int viewTypeCount = 1;
@@ -100,7 +100,7 @@ class SeparatedListAdapter extends BaseAdapter {
         return -1;
     }
 
-    @Override // android.widget.BaseAdapter, android.widget.ListAdapter
+    @Override
     public boolean isEnabled(int position) {
         if (getItemViewType(position) != 0) {
             return true;
@@ -108,7 +108,7 @@ class SeparatedListAdapter extends BaseAdapter {
         return false;
     }
 
-    @Override // android.widget.Adapter
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Iterator<String> it = this.sections.keySet().iterator();
         int headerIndex = 0;

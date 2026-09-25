@@ -36,8 +36,8 @@ class DebugHelper {
                     context.getString(R.string.dialog_pie_service_debug),
                     context.getString(R.string.dialog_no_root)
                 },
-                Integer.toString(0)) { // from class: com.noname81.lmt.DebugHelper.1
-            @Override // com.noname81.lmt.InputDialog
+                Integer.toString(0)) {
+            @Override
             public boolean onOkClicked(String choice) {
                 try {
                     int selected = Integer.parseInt(choice);

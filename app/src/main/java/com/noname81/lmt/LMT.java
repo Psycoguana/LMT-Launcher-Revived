@@ -1,6 +1,5 @@
 package com.noname81.lmt;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Debug;
@@ -32,7 +31,7 @@ public class LMT extends ThemedActivity {
     TabLayout mTabLayout;
     private String mThemeStamp;
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         this.mThemeStamp = ThemeHelper.stamp(this);
@@ -68,7 +67,9 @@ public class LMT extends ThemedActivity {
         ViewPager2 viewPager = new ViewPager2(this);
         this.mViewPager = viewPager;
         viewPager.setId(R.id.pager);
-        root.addView(viewPager, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+        root.addView(
+                viewPager,
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
 
         setContentView(root);
         createTabs();
@@ -104,7 +105,7 @@ public class LMT extends ThemedActivity {
                 .attach();
     }
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     protected void onResume() {
         super.onResume();
         // A colour picked on the Appearance page (or restored from a backup) doesn't recreate
@@ -114,7 +115,7 @@ public class LMT extends ThemedActivity {
         }
     }
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
         bundle.putInt("tab", this.mViewPager.getCurrentItem());
@@ -129,7 +130,7 @@ public class LMT extends ThemedActivity {
         permissionChecker.hasUsageStatsPermission(this, true);
     }
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PermissionChecker.DRAW_OVER_APPS_REQUEST_CODE) {
@@ -157,12 +158,12 @@ public class LMT extends ThemedActivity {
             return this.mTitles.get(position);
         }
 
-        @Override // androidx.viewpager2.adapter.FragmentStateAdapter
+        @Override
         public int getItemCount() {
             return this.mFragmentClasses.size();
         }
 
-        @Override // androidx.viewpager2.adapter.FragmentStateAdapter
+        @Override
         public Fragment createFragment(int position) {
             try {
                 return this.mFragmentClasses.get(position).getDeclaredConstructor().newInstance();

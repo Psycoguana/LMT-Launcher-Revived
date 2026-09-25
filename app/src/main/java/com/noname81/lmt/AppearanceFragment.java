@@ -12,8 +12,8 @@ import androidx.preference.SwitchPreferenceCompat;
 /**
  * Light/dark mode and colour scheme (ROADMAP 1.10). Each change is saved, then applied: night mode
  * through {@link AppCompatDelegate}, which recreates every open AppCompat activity itself, and a
- * colour change by recreating this activity - {@code LMT} notices the new theme stamp when the
- * user comes back and recreates too.
+ * colour change by recreating this activity - {@code LMT} notices the new theme stamp when the user
+ * comes back and recreates too.
  */
 public class AppearanceFragment extends PreferenceFragmentCompat {
     /** A little over MaterialSwitch's thumb animation. */
@@ -24,17 +24,21 @@ public class AppearanceFragment extends PreferenceFragmentCompat {
     private SwitchPreferenceCompat mFollowSystemRow;
     private ColorDotPreference mColorRow;
 
-    @Override // androidx.preference.PreferenceFragmentCompat
+    @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         Context context = requireContext();
         this.mSettings = SettingsValues.getInstance(context.getApplicationContext());
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
         setPreferenceScreen(screen);
 
-        this.mThemeRow = addRow(screen, "Theme", preference -> {
-            pickThemeMode();
-            return true;
-        });
+        this.mThemeRow =
+                addRow(
+                        screen,
+                        "Theme",
+                        preference -> {
+                            pickThemeMode();
+                            return true;
+                        });
         this.mFollowSystemRow = new SwitchPreferenceCompat(context);
         this.mFollowSystemRow.setTitle("Follow system color");
         this.mFollowSystemRow.setSummary("Use the colors Android picks from your wallpaper");
@@ -42,27 +46,32 @@ public class AppearanceFragment extends PreferenceFragmentCompat {
         this.mFollowSystemRow.setIconSpaceReserved(false);
         this.mFollowSystemRow.setWidgetLayoutResource(R.layout.preference_widget_material_switch);
         this.mFollowSystemRow.setChecked(this.mSettings.loadThemeFollowSystemColor() > 0);
-        this.mFollowSystemRow.setOnPreferenceChangeListener((preference, newValue) -> {
-            this.mSettings.saveThemeFollowSystemColor((Boolean) newValue ? 1 : 0);
-            // Recreating straight away tears the switch down mid-animation; let the thumb
-            // finish sliding first.
-            getListView().postDelayed(() -> {
-                if (isAdded()) {
-                    requireActivity().recreate();
-                }
-            }, SWITCH_ANIMATION_MS);
-            return true;
-        });
+        this.mFollowSystemRow.setOnPreferenceChangeListener(
+                (preference, newValue) -> {
+                    this.mSettings.saveThemeFollowSystemColor((Boolean) newValue ? 1 : 0);
+                    // Recreating straight away tears the switch down mid-animation; let the thumb
+                    // finish sliding first.
+                    getListView()
+                            .postDelayed(
+                                    () -> {
+                                        if (isAdded()) {
+                                            requireActivity().recreate();
+                                        }
+                                    },
+                                    SWITCH_ANIMATION_MS);
+                    return true;
+                });
         screen.addPreference(this.mFollowSystemRow);
 
         this.mColorRow = new ColorDotPreference(context);
         this.mColorRow.setTitle("Color");
         this.mColorRow.setPersistent(false);
         this.mColorRow.setIconSpaceReserved(false);
-        this.mColorRow.setOnPreferenceClickListener(preference -> {
-            pickColor();
-            return true;
-        });
+        this.mColorRow.setOnPreferenceClickListener(
+                preference -> {
+                    pickColor();
+                    return true;
+                });
         screen.addPreference(this.mColorRow);
         if (!ThemeHelper.colorsAvailable()) {
             this.mFollowSystemRow.setEnabled(false);
@@ -83,8 +92,9 @@ public class AppearanceFragment extends PreferenceFragmentCompat {
     }
 
     private void updateSummaries() {
-        this.mThemeRow.setSummary(ThemeHelper.MODE_NAMES[clamp(
-                this.mSettings.loadThemeMode(), ThemeHelper.MODE_NAMES.length)]);
+        this.mThemeRow.setSummary(
+                ThemeHelper.MODE_NAMES[
+                        clamp(this.mSettings.loadThemeMode(), ThemeHelper.MODE_NAMES.length)]);
         if (!ThemeHelper.colorsAvailable()) {
             this.mFollowSystemRow.setSummary("Needs Android 12 or newer");
             this.mColorRow.setSummary("Needs Android 12 or newer");
@@ -112,7 +122,7 @@ public class AppearanceFragment extends PreferenceFragmentCompat {
                 "Theme",
                 ThemeHelper.MODE_NAMES,
                 Integer.toString(this.mSettings.loadThemeMode())) {
-            @Override // com.noname81.lmt.InputDialog
+            @Override
             public boolean onOkClicked(String value) {
                 int mode = Integer.parseInt(value);
                 AppearanceFragment.this.mSettings.saveThemeMode(mode);

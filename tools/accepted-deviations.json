@@ -219,67 +219,67 @@
     {
       "class": "AccessibilityHandler.smali",
       "method": "static isAccessibilityAvailable(Landroid/content/Context;Z)Z",
-      "reason": "Same minSdk-21 API-outlining/backport removal as the createClick entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as the createClick entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "AccessibilityHandler.smali",
       "method": "static performAction(I)V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as the createClick entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as the createClick entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Action.smali",
       "method": "checkNeededPermissions(Landroid/app/Activity;Z)V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "IconUtils.smali",
       "method": "static getDrawable(Landroid/content/Context;I)Landroid/graphics/drawable/Drawable;",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
       "method": "doOpenNotificationBar()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
       "method": "doOpenQuickSettings()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
       "method": "private doActivityAction(Ljava/lang/String;)V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
       "method": "private doDataToggleAction()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
       "method": "private doKillAllAppsAction()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
       "method": "private doKillAppAction()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
       "method": "private doLastApp()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
       "method": "private doNextApp()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
       "method": "private doPrevApp()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "Launcher.smali",
@@ -299,17 +299,17 @@
     {
       "class": "PieContainer.smali",
       "method": "rotate()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "PieStatusInfo.smali",
       "method": "private getMemInfo()Ljava/lang/String;",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "RootContext.smali",
       "method": "private initRemote()V",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "RootContext.smali",
@@ -319,7 +319,7 @@
     {
       "class": "SettingsValues.smali",
       "method": "getPackageNamesOfRecentApps(I)Ljava/lang/String;",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "SettingsValues.smali",
@@ -334,7 +334,7 @@
     {
       "class": "TouchService.smali",
       "method": "createNotification()Landroid/app/Notification;",
-      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above."
+      "reason": "Same minSdk-21 API-outlining/backport removal as AccessibilityHandler.createClick's entry above. ROADMAP 1.13 cleanup: also drops the branch for Android versions below minSdk 21 (Build.VERSION.SDK_INT checks against 16-21), which can never run; the branch that runs on every supported version is unchanged."
     },
     {
       "class": "TouchServiceResult.smali",
@@ -410,6 +410,31 @@
       "class": "RootContext.smali",
       "method": "isRootAvailable(Z)Z",
       "reason": "ROADMAP 1.13: starting su only proves the binary exists; Magisk can still deny it (the test phone test device does), and every root command then fails silently while isRootAvailable() said true. Now also false once the check says DENIED; while it is still running it answers as before, so nothing that worked is blocked by the check."
+    },
+    {
+      "class": "PieMenu.smali",
+      "method": "private layoutPie()V",
+      "reason": "ROADMAP 1.13 cleanup: removed a bare `Double.isNaN(x);` statement. Its result was discarded and isNaN has no side effects, so it did nothing; it came from the original build's int-to-double conversions and survived decompilation as noise. Nothing else in the method changed."
+    },
+    {
+      "class": "PiePointer.smali",
+      "method": "constructor <init>(Landroid/widget/FrameLayout;Landroid/content/Context;I)V",
+      "reason": "ROADMAP 1.13 cleanup: removed a bare `Double.isNaN(x);` statement. Its result was discarded and isNaN has no side effects, so it did nothing; it came from the original build's int-to-double conversions and survived decompilation as noise. Nothing else in the method changed."
+    },
+    {
+      "class": "PiePointer.smali",
+      "method": "public onTouchEvent(IFFFFLandroid/graphics/PointF;)Z",
+      "reason": "ROADMAP 1.13 cleanup: removed a bare `Double.isNaN(x);` statement. Its result was discarded and isNaN has no side effects, so it did nothing; it came from the original build's int-to-double conversions and survived decompilation as noise. Nothing else in the method changed."
+    },
+    {
+      "class": "Launcher.smali",
+      "method": "constructor private <init>(Landroid/content/Context;)V",
+      "reason": "ROADMAP 1.13 cleanup: no longer looks up the ActivityManager. Its only users were the pre-Lollipop (SDK < 21) branches of the next/previous/last-app, kill-app and activity actions, removed as dead code; see removed_members."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "constructor <init>(Landroid/content/Context;)V",
+      "reason": "ROADMAP 1.13 cleanup: no longer looks up the ActivityManager. Its only user was the pre-Lollipop getRunningTasks branch of getPackageNamesOfRecentApps, removed as dead code."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -886,6 +911,47 @@
     {
       "class": "AsyncDrawableTask.smali",
       "reason": "ROADMAP 1.6 phase 3: the shared AsyncTask base class every icon-loading site subclassed is deleted outright now that all six call sites (PieFragment, GesturesFragment, IsasFragment, CommandSelectActivity, MultiSelectActivity) have moved to IconLoader (see new_classes)."
+    },
+    {
+      "class": "Launcher$ANON.smali",
+      "reason": "ROADMAP 1.13 cleanup: the two TimerTasks of the SDK < 21 kill-app and kill-all-apps paths, removed as dead code (minSdk is 21)."
+    }
+  ],
+  "removed_members": [
+    {
+      "class": "Launcher.smali",
+      "member": "private moveTaskToFront(Ljava/lang/String;I)V",
+      "reason": "ROADMAP 1.13 cleanup: only used by code for Android versions below minSdk 21, which was removed as dead code. (SDK < 21 paths of next/previous/last app and doActivityAction; since 21 those run 'am next-app'/'am move-to-front-or-start' through the helper)."
+    },
+    {
+      "class": "Launcher.smali",
+      "member": "private startActivity(Ljava/lang/String;)V",
+      "reason": "ROADMAP 1.13 cleanup: only used by code for Android versions below minSdk 21, which was removed as dead code. (SDK < 21 path of doActivityAction)."
+    },
+    {
+      "class": "Launcher.smali",
+      "member": ".field private mActivityManager:Landroid/app/ActivityManager;",
+      "reason": "ROADMAP 1.13 cleanup: only used by code for Android versions below minSdk 21, which was removed as dead code."
+    },
+    {
+      "class": "Launcher.smali",
+      "member": ".field private mRecentTaskInfo:Ljava/util/List;",
+      "reason": "ROADMAP 1.13 cleanup: only used by code for Android versions below minSdk 21, which was removed as dead code. (getRecentTasks in next/previous/last app)."
+    },
+    {
+      "class": "Launcher.smali",
+      "member": ".field private mRunningTaskInfo:Ljava/util/List;",
+      "reason": "ROADMAP 1.13 cleanup: only used by code for Android versions below minSdk 21, which was removed as dead code. (getRunningTasks in kill-app, kill-all-apps and doActivityAction)."
+    },
+    {
+      "class": "RootContext.smali",
+      "member": "private initRemoteProcess20()V",
+      "reason": "ROADMAP 1.13 cleanup: only used by code for Android versions below minSdk 21, which was removed as dead code. (initRemote picks initRemoteProcess21 below API 23)."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "member": ".field mActivityManager:Landroid/app/ActivityManager;",
+      "reason": "ROADMAP 1.13 cleanup: only used by code for Android versions below minSdk 21, which was removed as dead code. (getPackageNamesOfRecentApps)."
     }
   ]
 }

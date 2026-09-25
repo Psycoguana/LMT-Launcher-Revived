@@ -61,7 +61,6 @@ class PiePointer implements PieMenu.PieView {
         this.mActivated = false;
         this.mFromTheEgdes = settingsValues.loadPiePointerFromEdges() > 0;
         double dLoadPiePointerWarpFactor = settingsValues.loadPiePointerWarpFactor();
-        Double.isNaN(dLoadPiePointerWarpFactor);
         this.mWarpFactor = (float) (dLoadPiePointerWarpFactor / 100.0d);
         this.mMargin =
                 ((int)
@@ -71,12 +70,12 @@ class PiePointer implements PieMenu.PieView {
                         / 30;
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public void activate() {
         this.mActivated = true;
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public void layout(
             boolean visible,
             Point center,
@@ -105,12 +104,12 @@ class PiePointer implements PieMenu.PieView {
                         Shader.TileMode.CLAMP));
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public boolean drawForeground(Canvas canvas) {
         return this.mActivated;
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public boolean drawBackground(Canvas canvas) {
         Point point;
         if (this.mActivated && (point = this.mCenter) != null && this.mPolar != null) {
@@ -133,7 +132,7 @@ class PiePointer implements PieMenu.PieView {
         return this.mActivated;
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public boolean onTouchEvent(
             int action, float x, float y, float deltaX, float deltaY, PointF polar) {
         if (this.mFromTheEgdes && polar.y > this.mRadius) {
@@ -169,8 +168,6 @@ class PiePointer implements PieMenu.PieView {
             double d = polar.y;
             double d2 = this.mRadius;
             double d3 = this.mRadiusInc;
-            Double.isNaN(d3);
-            Double.isNaN(d2);
             if (d < d2 + (d3 * 0.9d)) {
                 this.mActivated = false;
             }
@@ -178,7 +175,7 @@ class PiePointer implements PieMenu.PieView {
         return this.mActivated;
     }
 
-    @Override // com.noname81.lmt.PieMenu.PieView
+    @Override
     public void onShrink() {
         PointF pointF;
         if (this.mActivated

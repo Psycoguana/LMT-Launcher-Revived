@@ -25,7 +25,7 @@ import java.util.List;
 public class IsasFragment extends Fragment {
     Adapter mAdapter;
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         RecyclerView recyclerView = new RecyclerView(requireContext());
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -34,7 +34,7 @@ public class IsasFragment extends Fragment {
         return recyclerView;
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onResume() {
         super.onResume();
         if (this.mAdapter != null) {
@@ -99,24 +99,23 @@ public class IsasFragment extends Fragment {
             return rows;
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public long getItemId(int position) {
             return position;
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public int getItemCount() {
             return this.mRows.getItemCount();
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public int getItemViewType(int position) {
             return this.mRows.getItemViewType(position);
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
-        public RecyclerView.ViewHolder onCreateViewHolder(
-                @NonNull ViewGroup parent, int viewType) {
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             if (viewType == SectionedRows.VIEW_TYPE_HEADER) {
                 return new HeaderViewHolder(inflater.inflate(R.layout.listheader, parent, false));
@@ -125,7 +124,7 @@ public class IsasFragment extends Fragment {
                     inflater.inflate(R.layout.listitem_icondescriptionicon, parent, false));
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.Adapter
+        @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof HeaderViewHolder) {
                 ((HeaderViewHolder) holder).text.setText(this.mRows.headerAt(position));

@@ -18,13 +18,13 @@ import androidx.fragment.app.Fragment;
 /** About tab, and the hidden entry point to the debug menu. */
 public class InfoFragment extends Fragment {
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
         setUserVisibleHint(true);
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         Spanned spannedFromHtml;
         super.onCreateView(layoutInflater, viewGroup, bundle);
@@ -80,11 +80,10 @@ public class InfoFragment extends Fragment {
         final GestureDetector gestureDetector =
                 new GestureDetector(
                         getActivity(),
-                        new GestureDetector.SimpleOnGestureListener() { // from class:
-                            // com.noname81.lmt.InfoFragment.1GestureListener
+                        new GestureDetector.SimpleOnGestureListener() {
                             private int count = 0;
 
-                            @Override // android.view.GestureDetector.SimpleOnGestureListener,
+                            @Override
                             // android.view.GestureDetector.OnDoubleTapListener
                             public boolean onDoubleTap(MotionEvent event) {
                                 int taps = this.count + 1;
@@ -98,8 +97,8 @@ public class InfoFragment extends Fragment {
                             }
                         });
         view.setOnTouchListener(
-                new View.OnTouchListener() { // from class: com.noname81.lmt.InfoFragment.1
-                    @Override // android.view.View.OnTouchListener
+                new View.OnTouchListener() {
+                    @Override
                     public boolean onTouch(View touched, MotionEvent event) {
                         gestureDetector.onTouchEvent(event);
                         return false;

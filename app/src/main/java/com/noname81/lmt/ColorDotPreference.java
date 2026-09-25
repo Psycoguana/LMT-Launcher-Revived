@@ -22,7 +22,7 @@ public class ColorDotPreference extends Preference {
         notifyChanged();
     }
 
-    @Override // androidx.preference.Preference
+    @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         View dot = holder.findViewById(R.id.color_dot);

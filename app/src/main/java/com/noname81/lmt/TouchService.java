@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -42,12 +43,13 @@ public class TouchService extends Service {
     private MessageHandler mMessageHandler = new MessageHandler(this);
 
     /**
-     * Watches the gesture thread for a busy loop (ROADMAP 1.13). When its input source dies -
-     * e.g. root is denied, so the {@code su getevent} it reads exits - the native recogniser keeps
+     * Watches the gesture thread for a busy loop (ROADMAP 1.13). When its input source dies - e.g.
+     * root is denied, so the {@code su getevent} it reads exits - the native recogniser keeps
      * calling read() on the closed pipe and burns a whole core, forever. Checked on uptime, so it
      * never wakes a sleeping phone.
      */
     private static final long SPIN_BASELINE_MS = 2000;
+
     private static final long SPIN_FIRST_CHECK_MS = 10000;
     private static final long SPIN_CHECK_MS = 60000;
     private long mSpinCpuTicks = -1;
@@ -61,7 +63,7 @@ public class TouchService extends Service {
                 }
             };
 
-    @Override // android.app.Service
+    @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
@@ -75,7 +77,7 @@ public class TouchService extends Service {
             this.stopped = false;
         }
 
-        @Override // android.os.HandlerThread, java.lang.Thread, java.lang.Runnable
+        @Override
         public void run() {
             this.tid = android.os.Process.myTid();
             while (!this.stopped) {
@@ -87,7 +89,7 @@ public class TouchService extends Service {
             }
         }
 
-        @Override // android.os.HandlerThread
+        @Override
         public boolean quit() {
             this.stopped = true;
             return true;
@@ -101,7 +103,7 @@ public class TouchService extends Service {
             this.mTouchServiceReference = new WeakReference<>(touchService);
         }
 
-        @Override // android.os.Handler
+        @Override
         public void handleMessage(Message message) {
             TouchServiceResult touchServiceResult = (TouchServiceResult) message.obj;
             TouchService touchService = this.mTouchServiceReference.get();
@@ -138,7 +140,7 @@ public class TouchService extends Service {
         }
     }
 
-    @Override // android.app.Service
+    @Override
     public void onCreate() {
         Log.d(TAG, "TouchService created");
         this.mSettings = SettingsValues.getInstance(this);
@@ -183,7 +185,8 @@ public class TouchService extends Service {
         }
         if (!RootContext.getInstance(this).isRootAvailable(false)) {
             Log.w(TAG, "No root, gestures and ISAs stay off");
-            Toast.makeText(this, "LMT gestures need root, which isn't granted", 1).show();
+            Toast.makeText(this, "LMT gestures need root, which isn't granted", Toast.LENGTH_LONG)
+                    .show();
             return;
         }
         if (this.mTouchServiceThread == null) {
@@ -227,10 +230,16 @@ public class TouchService extends Service {
         long now = SystemClock.uptimeMillis();
         boolean baseline = this.mSpinCpuTicks < 0;
         if (!baseline
-                && isSpinning(ticks - this.mSpinCpuTicks, now - this.mSpinUptime,
+                && isSpinning(
+                        ticks - this.mSpinCpuTicks,
+                        now - this.mSpinUptime,
                         Os.sysconf(OsConstants._SC_CLK_TCK))) {
             Log.e(TAG, "Gesture thread is spinning without input, stopping it");
-            Toast.makeText(this, "LMT gestures stopped: no touch input (root denied?)", 1).show();
+            Toast.makeText(
+                            this,
+                            "LMT gestures stopped: no touch input (root denied?)",
+                            Toast.LENGTH_LONG)
+                    .show();
             thread.quit();
             this.mTouchServiceNative.quit();
             return;
@@ -243,7 +252,9 @@ public class TouchService extends Service {
 
     /** More than half a core over the window: a blocked reader uses next to nothing. */
     static boolean isSpinning(long cpuTicks, long elapsedMs, long ticksPerSecond) {
-        return elapsedMs > 0 && ticksPerSecond > 0 && cpuTicks * 1000 / ticksPerSecond * 2 > elapsedMs;
+        return elapsedMs > 0
+                && ticksPerSecond > 0
+                && cpuTicks * 1000 / ticksPerSecond * 2 > elapsedMs;
     }
 
     /** utime + stime of one of our threads, in clock ticks, or -1 when unreadable. */
@@ -277,47 +288,47 @@ public class TouchService extends Service {
 
     Notification createNotification() {
         if (Build.VERSION.SDK_INT >= 26) {
-            ((NotificationManager) getSystemService("notification"))
+            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE))
                     .createNotificationChannel(
                             new NotificationChannel(
                                     this.NOTIFICATION_CHANNEL_ID,
                                     this.NOTIFICATION_CHANNEL_NAME,
                                     0));
         }
-        if (Build.VERSION.SDK_INT >= 18) {
-            PendingIntent activity =
-                    PendingIntent.getActivity(
-                            this, 777, new Intent(this, (Class<?>) LMT.class), 67108864);
-            if (Build.VERSION.SDK_INT >= 26) {
-                return new Notification.Builder(this)
-                        .setContentTitle("LMT")
-                        .setContentText("Touch to open LMT")
-                        .setContentIntent(activity)
-                        .setSmallIcon(R.drawable.piewhite_s)
-                        .setChannelId(this.NOTIFICATION_CHANNEL_ID)
-                        .build();
-            }
+        PendingIntent activity =
+                PendingIntent.getActivity(
+                        this,
+                        777,
+                        new Intent(this, (Class<?>) LMT.class),
+                        PendingIntent.FLAG_IMMUTABLE);
+        if (Build.VERSION.SDK_INT >= 26) {
             return new Notification.Builder(this)
                     .setContentTitle("LMT")
                     .setContentText("Touch to open LMT")
                     .setContentIntent(activity)
                     .setSmallIcon(R.drawable.piewhite_s)
-                    .setPriority(-2)
+                    .setChannelId(this.NOTIFICATION_CHANNEL_ID)
                     .build();
         }
-        return new Notification();
+        return new Notification.Builder(this)
+                .setContentTitle("LMT")
+                .setContentText("Touch to open LMT")
+                .setContentIntent(activity)
+                .setSmallIcon(R.drawable.piewhite_s)
+                .setPriority(-2)
+                .build();
     }
 
-    @Override // android.app.Service
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "LMT started", 0).show();
+        Toast.makeText(this, "LMT started", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "TouchService started");
         return 1;
     }
 
-    @Override // android.app.Service
+    @Override
     public void onDestroy() {
-        Toast.makeText(this, "LMT stopped", 0).show();
+        Toast.makeText(this, "LMT stopped", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "TouchService stopped");
         this.mDestroyed = true;
         this.mMessageHandler.removeCallbacks(this.mSpinCheck);
@@ -337,7 +348,7 @@ public class TouchService extends Service {
         stopForeground(true);
     }
 
-    @Override // android.app.Service, android.content.ComponentCallbacks
+    @Override
     public void onConfigurationChanged(Configuration configuration) {
         PieContainer pieContainer;
         TouchServiceNative touchServiceNative;

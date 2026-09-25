@@ -15,7 +15,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
  *
  * <p>Subclasses override {@code onOkClicked} to validate and store; returning true dismisses.
  */
-abstract class InputDialog extends MaterialAlertDialogBuilder implements DialogInterface.OnClickListener {
+abstract class InputDialog extends MaterialAlertDialogBuilder
+        implements DialogInterface.OnClickListener {
     Context mContext;
     private final EditText mInput;
 
@@ -71,7 +72,10 @@ abstract class InputDialog extends MaterialAlertDialogBuilder implements DialogI
         } else {
             setSingleChoiceItems(
                     new ArrayAdapter<String>(
-                            getContext(), R.layout.dialog_singlechoice_item, android.R.id.text1, choices) {
+                            getContext(),
+                            R.layout.dialog_singlechoice_item,
+                            android.R.id.text1,
+                            choices) {
                         @Override
                         public boolean areAllItemsEnabled() {
                             return false;
@@ -101,7 +105,7 @@ abstract class InputDialog extends MaterialAlertDialogBuilder implements DialogI
         dialogInterface.dismiss();
     }
 
-    @Override // android.content.DialogInterface.OnClickListener
+    @Override
     public void onClick(DialogInterface dialog, int which) {
         if (which == -1) {
             if (onOkClicked(this.mInput.getText().toString())) {

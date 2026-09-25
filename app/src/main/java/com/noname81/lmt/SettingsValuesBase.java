@@ -1,7 +1,6 @@
 package com.noname81.lmt;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,7 +18,6 @@ import java.util.Vector;
  */
 class SettingsValuesBase extends SettingsSharedPrefsWrapper {
     static final String path = "/Android/data/com.noname81.lmt/files/";
-    ActivityManager mActivityManager;
     ArrayList<String> mBlacklist;
     ArrayList<String> mBlacklistPie;
     private int mCurrentGesture;
@@ -56,7 +54,6 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
         this.mPieActions = new Vector<>();
         this.mCurrentIsa = -1;
         this.mIsaActions = new Vector<>();
-        this.mActivityManager = (ActivityManager) this.mContext.getSystemService("activity");
         this.mBlacklist = new ArrayList<>();
         this.mBlacklistPie = new ArrayList<>();
         this.mSingleSwipesAArea = loadSingleSwipesAArea();

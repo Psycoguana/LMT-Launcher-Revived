@@ -9,7 +9,7 @@ import android.util.Log;
 public class StartupReceiver extends BroadcastReceiver {
     private static final String TAG = "LMT::StartupReceiver";
 
-    @Override // android.content.BroadcastReceiver
+    @Override
     public void onReceive(Context context, Intent intent) {
         if ("android.intent.action.BOOT_COMPLETED".equals(intent.getAction())) {
             startIfRequested(context);

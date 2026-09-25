@@ -13,13 +13,13 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 public abstract class ThemedActivity extends AppCompatActivity {
 
-    @Override // androidx.appcompat.app.AppCompatActivity
+    @Override
     protected void attachBaseContext(Context newBase) {
         ThemeHelper.applyNightMode(newBase);
         super.attachBaseContext(newBase);
     }
 
-    @Override // androidx.fragment.app.FragmentActivity
+    @Override
     protected void onCreate(Bundle bundle) {
         ThemeHelper.applyColors(this);
         super.onCreate(bundle);

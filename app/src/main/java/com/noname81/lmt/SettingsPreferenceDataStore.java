@@ -4,11 +4,10 @@ import androidx.preference.PreferenceDataStore;
 
 /**
  * Backs the 8 boolean-toggle preferences in {@link SettingsViewFragment} with {@link
- * SettingsValues}, reproducing the exact save call and side effects {@code SettingsViewHelper}
- * used to perform per tapped position. Every other preference on the settings screen is
- * non-persistent and reads/writes {@link SettingsValues} directly from its own click listener -
- * see {@link SettingsViewFragment} for why only these 8 go through a real {@code
- * PreferenceDataStore}.
+ * SettingsValues}, reproducing the exact save call and side effects {@code SettingsViewHelper} used
+ * to perform per tapped position. Every other preference on the settings screen is non-persistent
+ * and reads/writes {@link SettingsValues} directly from its own click listener - see {@link
+ * SettingsViewFragment} for why only these 8 go through a real {@code PreferenceDataStore}.
  */
 class SettingsPreferenceDataStore extends PreferenceDataStore {
     private final SettingsValues mSettings;
@@ -19,7 +18,7 @@ class SettingsPreferenceDataStore extends PreferenceDataStore {
         this.mTouchServiceNative = touchServiceNative;
     }
 
-    @Override // androidx.preference.PreferenceDataStore
+    @Override
     public boolean getBoolean(String key, boolean defValue) {
         switch (key) {
             case "Autostart":
@@ -43,7 +42,7 @@ class SettingsPreferenceDataStore extends PreferenceDataStore {
         }
     }
 
-    @Override // androidx.preference.PreferenceDataStore
+    @Override
     public void putBoolean(String key, boolean value) {
         int v = value ? 1 : 0;
         switch (key) {

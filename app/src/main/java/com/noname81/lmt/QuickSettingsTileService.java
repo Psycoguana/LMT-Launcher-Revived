@@ -5,7 +5,7 @@ import android.service.quicksettings.TileService;
 
 /** Quick Settings tile that starts and stops the service. */
 public class QuickSettingsTileService extends TileService {
-    @Override // android.service.quicksettings.TileService
+    @Override
     public void onStartListening() {
         super.onStartListening();
         if (SettingsValues.getInstance(this).getServiceState() == 0) {
@@ -15,7 +15,7 @@ public class QuickSettingsTileService extends TileService {
         }
     }
 
-    @Override // android.service.quicksettings.TileService
+    @Override
     public void onClick() {
         super.onClick();
         SettingsValues settingsValues = SettingsValues.getInstance(this);
