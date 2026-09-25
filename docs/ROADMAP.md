@@ -696,6 +696,25 @@ re-enable are the interesting ones.
   gravity, and a small pie preview in the radius, gap and outline sliders, so the result is
   visible before closing the dialog.
 
+### 1.16 Feature requests from the XDA thread
+
+Collected 2026-09-25 from the [LMT Launcher thread](https://xdaforums.com/t/app-root-lmt-launcher-v3-2.1330150/)
+(XDA answers direct fetches with 403; found through web search limited to the thread).
+None of these were built upstream.
+
+- **Pie folders / sub-pies**: asked for several times ("long press opens a second pie", like
+  the AOSP browser pie and the Android 4.2 camera settings pie; "folders in pie positions").
+  The author answered he might add it. Planned next (mockup A: outer ring).
+- **Brightness slider wrapped around the pie**. Planned first (fits the pointer's hook).
+- **Pie stays open after lifting the finger**, about 1.5 s or until the next touch outside
+  the trigger areas, since Back often needs several presses in a row.
+- **Icon pack support** for the slice icons.
+- **Different icon sizes per ring**: smaller on the inner ring, bigger on the outer.
+- **Corner pie**: a pie that opens from a screen corner.
+- **App slices show the app's name or icon** instead of the generic "APP".
+- **Bottom pie** with a short swipe up to open it (bottom positions exist now).
+- **Keep the Back slice on screen for a short while** (same need as the delayed hide above).
+
 ## Part 2 — Accessibility fallbacks for root-only actions
 
 Researched, not implemented. API levels below are from the SDK's own
