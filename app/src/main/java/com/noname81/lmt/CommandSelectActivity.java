@@ -2,7 +2,9 @@ package com.noname81.lmt;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +33,7 @@ import java.util.List;
  */
 public class CommandSelectActivity extends ThemedActivity {
     private static final int REQUEST_TASKER_TASK_SELECT = 1;
+    private static final int REQUEST_SCRIPT_FILE = 2;
 
     /** Material's opacity for disabled content. */
     static final float DISABLED_ALPHA = 0.38f;
@@ -113,26 +116,40 @@ public class CommandSelectActivity extends ThemedActivity {
             Action currentAction =
                     SettingsValues.getInstance(getApplicationContext()).getCurrentAction();
             String string = currentAction.getType() == this.mPos ? currentAction.getString() : "";
-            new InputDialog(
-                    this,
-                    getString(R.string.dialog_input),
-                    getString(R.string.dialog_define_the)
-                            + " "
-                            + Action.names[this.mPos]
-                            + " "
-                            + getString(R.string.dialog_to_be_executed),
-                    string,
-                    false) {
-                @Override
-                public boolean onOkClicked(String value) {
-                    SettingsValues.getInstance(CommandSelectActivity.this.getApplicationContext())
-                            .setCurrentAction(
-                                    CommandSelectActivity.this.getParent(),
-                                    new Action(CommandSelectActivity.this.mPos, value));
-                    CommandSelectActivity.this.onBackPressed();
-                    return true;
-                }
-            }.show();
+            InputDialog dialog =
+                    new InputDialog(
+                            this,
+                            getString(R.string.dialog_input),
+                            getString(R.string.dialog_define_the)
+                                    + " "
+                                    + Action.names[this.mPos]
+                                    + " "
+                                    + getString(R.string.dialog_to_be_executed),
+                            string,
+                            false) {
+                        @Override
+                        public boolean onOkClicked(String value) {
+                            SettingsValues.getInstance(
+                                            CommandSelectActivity.this.getApplicationContext())
+                                    .setCurrentAction(
+                                            CommandSelectActivity.this.getParent(),
+                                            new Action(CommandSelectActivity.this.mPos, value));
+                            CommandSelectActivity.this.onBackPressed();
+                            return true;
+                        }
+                    };
+            if (actionType == Action.Script) {
+                // ROADMAP 1.13: pick the script with the file explorer instead of typing its path.
+                dialog.setNeutralButton(
+                        "Browse…",
+                        (d, which) ->
+                                startActivityForResult(
+                                        new Intent(Intent.ACTION_OPEN_DOCUMENT)
+                                                .addCategory(Intent.CATEGORY_OPENABLE)
+                                                .setType("*/*"),
+                                        REQUEST_SCRIPT_FILE));
+            }
+            dialog.show();
             return;
         }
         SettingsValues.getInstance(getApplicationContext())
@@ -152,6 +169,21 @@ public class CommandSelectActivity extends ThemedActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_SCRIPT_FILE && resultCode == RESULT_OK && data != null) {
+            String path = filePathOf(data.getData());
+            if (path == null) {
+                Toast.makeText(
+                                this,
+                                "Pick the script from the device storage, not a cloud folder",
+                                Toast.LENGTH_LONG)
+                        .show();
+                return;
+            }
+            SettingsValues.getInstance(getApplicationContext())
+                    .setCurrentAction(getParent(), new Action(Action.Script, path));
+            onBackPressed();
+            return;
+        }
         if (requestCode != REQUEST_TASKER_TASK_SELECT || resultCode != RESULT_OK) {
             return;
         }
@@ -162,6 +194,37 @@ public class CommandSelectActivity extends ThemedActivity {
         SettingsValues.getInstance(getApplicationContext())
                 .setCurrentAction(getParent(), new Action(Action.TaskerTask, taskName));
         onBackPressed();
+    }
+
+    /**
+     * The file path behind a picked document, for the root shell that runs scripts: storage volumes
+     * ("primary:Download/x.sh") and the Downloads provider's "raw:" ids map to paths; anything else
+     * (cloud storage) has none.
+     */
+    static String filePathOf(Uri document) {
+        if (document == null) {
+            return null;
+        }
+        String authority = document.getAuthority();
+        String id;
+        try {
+            id = DocumentsContract.getDocumentId(document);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+        if (id.startsWith("raw:")) {
+            return id.substring(4);
+        }
+        if (!"com.android.externalstorage.documents".equals(authority)) {
+            return null;
+        }
+        int colon = id.indexOf(':');
+        if (colon < 0) {
+            return null;
+        }
+        String volume = id.substring(0, colon);
+        String root = volume.equals("primary") ? "/storage/emulated/0" : "/storage/" + volume;
+        return root + "/" + id.substring(colon + 1);
     }
 
     final class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

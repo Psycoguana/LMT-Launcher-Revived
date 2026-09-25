@@ -394,7 +394,7 @@
     {
       "class": "TouchService.smali",
       "method": "public onCreate()V",
-      "reason": "ROADMAP 1.13: the gesture setup moved unchanged into startGestures(), which runs through RootContext.whenRootKnown once the background root check has an answer, and only when root is really granted (otherwise a toast says gestures need root). Without root the native reader spins on a dead 'su getevent' pipe. startGestures also resets the spin watchdog and posts its first check (a baseline after 2 s, the verdict 10 s later, then every 60 s on uptime, so it never wakes the phone). If the thread uses over half a core in a window, checkTouchServiceThread quits it and the native loop, and shows a toast. Before the reader starts, one su call on a worker thread kills readers earlier runs left behind (`cat /dev/input/eventN` survives its closed pipe under su) and lists the input devices; if the saved device doesn't report touch positions, the service switches to the touchscreen TouchscreenDetector finds and says so in a toast."
+      "reason": "ROADMAP 1.13: the gesture setup moved unchanged into startGestures(), which runs through RootContext.whenRootKnown once the background root check has an answer, and only when root is really granted (otherwise a toast says gestures need root). Without root the native reader spins on a dead 'su getevent' pipe. startGestures also resets the spin watchdog and posts its first check (a baseline after 2 s, the verdict 10 s later, then every 60 s on uptime, so it never wakes the phone). If the thread uses over half a core in a window, checkTouchServiceThread quits it and the native loop, and shows a toast. Before the reader starts, one su call on a worker thread kills readers earlier runs left behind (`cat /dev/input/eventN` survives its closed pipe under su) and lists the input devices; if the saved device doesn't report touch positions, the service switches to the touchscreen TouchscreenDetector finds and says so in a toast. The startup log counts the image folder's files through IconFolder."
     },
     {
       "class": "TouchService.smali",
@@ -435,6 +435,21 @@
       "class": "SettingsValuesBase.smali",
       "method": "constructor <init>(Landroid/content/Context;)V",
       "reason": "ROADMAP 1.13 cleanup: no longer looks up the ActivityManager. Its only user was the pre-Lollipop getRunningTasks branch of getPackageNamesOfRecentApps, removed as dead code."
+    },
+    {
+      "class": "Action.smali",
+      "method": "getDrawable(Landroid/content/Context;Ljava/lang/String;IIZ)Landroid/graphics/drawable/Drawable;",
+      "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike. Looks up the slot's image, then the action-named one, in IconFolder and decodes it from a stream (Drawable.createFromStream) instead of createFromPath; the fallbacks are unchanged."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "loadResourceSearchPath()Ljava/lang/String;",
+      "reason": "ROADMAP 1.13, upstream bug: it ignored the saved value and always returned the app folder, so 'Set user image search path' never did anything. Now returns a folder picked in the system file picker while LMT still holds its persisted permission, else the app folder as before."
+    },
+    {
+      "class": "SettingsValuesBase.smali",
+      "method": "saveResourceSearchPath(Ljava/lang/String;)V",
+      "reason": "ROADMAP 1.13: stores a picked content:// folder as-is (no trailing slash) and drops IconFolder's cached listing."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -538,6 +553,10 @@
     {
       "class": "Action.smali",
       "reason": "ROADMAP 1.13: needsRoot(int), derived from the caption tags, so the action picker can grey out root-only actions when root is missing or denied."
+    },
+    {
+      "class": "IconUtils.smali",
+      "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike. saveImage writes through IconFolder."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -845,6 +864,10 @@
     {
       "class": "SettingsViewFragment$ANON$ANON.smali",
       "reason": "ROADMAP 1.13 settings dialogs: the color editor (ColorDialog subclass) opened from the \"Custom...\" entry of a color choice dialog, nested in that dialog's InputDialog subclass."
+    },
+    {
+      "class": "IconFolder.smali",
+      "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike."
     }
   ],
   "removed_classes": [
@@ -923,6 +946,10 @@
     {
       "class": "Launcher$ANON.smali",
       "reason": "ROADMAP 1.13 cleanup: the two TimerTasks of the SDK < 21 kill-app and kill-all-apps paths, removed as dead code (minSdk is 21)."
+    },
+    {
+      "class": "FileUtils.smali",
+      "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike. FileUtils' three File helpers (exists/delete/mkdirs) had no users left."
     }
   ],
   "removed_members": [
@@ -960,6 +987,11 @@
       "class": "SettingsValuesBase.smali",
       "member": ".field mActivityManager:Landroid/app/ActivityManager;",
       "reason": "ROADMAP 1.13 cleanup: only used by code for Android versions below minSdk 21, which was removed as dead code. (getPackageNamesOfRecentApps)."
+    },
+    {
+      "class": "IconUtils.smali",
+      "member": "static saveImageToFile(Landroid/graphics/Bitmap;Ljava/lang/String;Ljava/lang/String;)V",
+      "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike. Replaced by saveImage(Bitmap, IconFolder, String)."
     }
   ]
 }

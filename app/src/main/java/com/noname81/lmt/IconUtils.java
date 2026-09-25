@@ -15,8 +15,6 @@ import android.util.TypedValue;
 import android.widget.ImageView;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 
 /**
  * Icon loading, scaling and the base64 encoding used to store custom icons in prefs.
@@ -79,13 +77,9 @@ class IconUtils {
         return bitmapDrawable;
     }
 
-    static void saveImageToFile(Bitmap bitmap, String directory, String fileName) {
-        try {
-            FileUtils.createFolder(directory);
-            FileOutputStream fileOutputStream =
-                    new FileOutputStream(new File(directory + fileName));
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
-            fileOutputStream.close();
+    static void saveImage(Bitmap bitmap, IconFolder folder, String fileName) {
+        try (java.io.OutputStream out = folder.create(fileName)) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
         } catch (Exception e) {
             e.printStackTrace();
         }

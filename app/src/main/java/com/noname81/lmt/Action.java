@@ -7,8 +7,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import java.io.File;
-
 /**
  * One configurable action: a type from the catalogue plus an optional payload.
  *
@@ -273,35 +271,20 @@ class Action {
         }
         int identifier = 0;
         try {
-            String strLoadResourceSearchPath =
-                    SettingsValues.getInstance(context).loadResourceSearchPath();
+            IconFolder folder = IconFolder.of(context);
             String assetName = names[this.mType].toLowerCase() + ".png";
-            if (userIconName != null) {
-                File file = new File(strLoadResourceSearchPath + userIconName);
-                if (file.exists()) {
-                    file.setReadable(true, false);
-                    Drawable drawableCreateFromPath =
-                            Drawable.createFromPath(strLoadResourceSearchPath + userIconName);
-                    if (drawableCreateFromPath != null) {
-                        return IconUtils.resizeImage(
-                                context, drawableCreateFromPath, scaleUserImages);
-                    }
-                    Log.e(
-                            TAG,
-                            "Failed to load available image "
-                                    + strLoadResourceSearchPath
-                                    + userIconName);
+            for (String name : new String[] {userIconName, assetName}) {
+                if (name == null || !folder.exists(name)) {
+                    continue;
                 }
-            }
-            if (new File(strLoadResourceSearchPath + assetName).exists()) {
-                Drawable drawableCreateFromPath2 =
-                        Drawable.createFromPath(strLoadResourceSearchPath + assetName);
-                if (drawableCreateFromPath2 != null) {
-                    return IconUtils.resizeImage(context, drawableCreateFromPath2, scaleUserImages);
+                Drawable drawable;
+                try (java.io.InputStream in = folder.open(name)) {
+                    drawable = Drawable.createFromStream(in, name);
                 }
-                Log.e(
-                        TAG,
-                        "Failed to load available image " + strLoadResourceSearchPath + assetName);
+                if (drawable != null) {
+                    return IconUtils.resizeImage(context, drawable, scaleUserImages);
+                }
+                Log.e(TAG, "Failed to load available image " + name);
             }
         } catch (Exception unused) {
         }

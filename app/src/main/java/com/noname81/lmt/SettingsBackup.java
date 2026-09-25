@@ -6,9 +6,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,17 +18,17 @@ import java.util.zip.ZipOutputStream;
  *
  * <p>Reads and writes go through {@link SettingsSharedPrefsWrapper}'s loadInt/loadString/saveInt/
  * saveString directly - the same layer every setting already uses - so this works unmodified
- * whether the device stores settings in {@code LMT.xml} or, when {@code LMTExternalConfig} is
- * set, through {@code Settings.System} instead (see the wrapper's javadoc). The scalar defaults
- * below are copied from {@link SettingsValuesBase}'s load* methods so a setting the user never
- * touched round-trips to the same effective value instead of an arbitrary placeholder.
+ * whether the device stores settings in {@code LMT.xml} or, when {@code LMTExternalConfig} is set,
+ * through {@code Settings.System} instead (see the wrapper's javadoc). The scalar defaults below
+ * are copied from {@link SettingsValuesBase}'s load* methods so a setting the user never touched
+ * round-trips to the same effective value instead of an arbitrary placeholder.
  *
  * <p>Icon storage is two mechanisms, and both are covered: a custom gesture/pie/ISA icon chosen
- * from the icon picker is a base64 PNG embedded directly under that slot's "Icon" key, which
- * {@link #exportSettingsToJson} already picks up as an ordinary string; a custom pie-ring icon
- * dropped into the resource search path as {@code pieN.png} ({@link IconUtils#getNamePie}) is a
- * file, so {@link #exportZip}/{@link #importZip} copy those into/out of the zip's {@code icons/}
- * entry explicitly.
+ * from the icon picker is a base64 PNG embedded directly under that slot's "Icon" key, which {@link
+ * #exportSettingsToJson} already picks up as an ordinary string; a custom pie-ring icon dropped
+ * into the resource search path as {@code pieN.png} ({@link IconUtils#getNamePie}) is a file, so
+ * {@link #exportZip}/{@link #importZip} copy those into/out of the zip's {@code icons/} entry
+ * explicitly.
  */
 class SettingsBackup {
     private static final String SETTINGS_ENTRY = "settings.json";
@@ -166,7 +163,7 @@ class SettingsBackup {
      * destStream}, which is closed on return whether or not the write succeeds.
      */
     static void exportZip(
-            SettingsSharedPrefsWrapper prefs, String iconDirectory, OutputStream destStream)
+            SettingsSharedPrefsWrapper prefs, IconFolder icons, OutputStream destStream)
             throws IOException, JSONException {
         JSONObject json = exportSettingsToJson(prefs);
         try (ZipOutputStream zip = new ZipOutputStream(destStream)) {
@@ -174,10 +171,10 @@ class SettingsBackup {
             zip.write(json.toString().getBytes("UTF-8"));
             zip.closeEntry();
             for (int slot = 0; slot < PIE_SLOTS; slot++) {
-                File icon = new File(iconDirectory, IconUtils.getNamePie(slot));
-                if (icon.exists()) {
-                    zip.putNextEntry(new ZipEntry(ICON_ENTRY_PREFIX + icon.getName()));
-                    copyIntoOpenStream(new FileInputStream(icon), zip);
+                String name = IconUtils.getNamePie(slot);
+                if (icons.exists(name)) {
+                    zip.putNextEntry(new ZipEntry(ICON_ENTRY_PREFIX + name));
+                    copyIntoOpenStream(icons.open(name), zip);
                     zip.closeEntry();
                 }
             }
@@ -191,9 +188,8 @@ class SettingsBackup {
      * @return false if {@code srcStream} has no settings.json entry, i.e. it is not one of ours
      */
     static boolean importZip(
-            SettingsSharedPrefsWrapper prefs, String iconDirectory, InputStream srcStream)
+            SettingsSharedPrefsWrapper prefs, IconFolder icons, InputStream srcStream)
             throws IOException, JSONException {
-        FileUtils.createFolder(iconDirectory);
         JSONObject json = null;
         try (ZipInputStream zip = new ZipInputStream(srcStream)) {
             ZipEntry entry;
@@ -201,9 +197,11 @@ class SettingsBackup {
                 if (SETTINGS_ENTRY.equals(entry.getName())) {
                     json = new JSONObject(readAll(zip));
                 } else if (!entry.isDirectory() && entry.getName().startsWith(ICON_ENTRY_PREFIX)) {
-                    File target = new File(iconDirectory, entry.getName().substring(ICON_ENTRY_PREFIX.length()));
-                    if (isWithinDirectory(target, iconDirectory)) {
-                        copyIntoNewFile(zip, target);
+                    String name = entry.getName().substring(ICON_ENTRY_PREFIX.length());
+                    if (isPieIconName(name)) {
+                        try (OutputStream out = icons.create(name)) {
+                            copyIntoOpenStream(zip, out, false);
+                        }
                     }
                 }
                 zip.closeEntry();
@@ -216,11 +214,15 @@ class SettingsBackup {
         return true;
     }
 
-    // Guards against a zip entry named e.g. "icons/../../../etc/hosts" writing
-    // outside iconDirectory (zip-slip).
-    private static boolean isWithinDirectory(File file, String directory) throws IOException {
-        String canonicalDir = new File(directory).getCanonicalPath() + File.separator;
-        return file.getCanonicalPath().startsWith(canonicalDir);
+    // Only the pie icon names we export are restored: that also keeps a zip entry named e.g.
+    // "icons/../../etc/hosts" from writing outside the folder (zip-slip).
+    private static boolean isPieIconName(String name) {
+        for (int slot = 0; slot < PIE_SLOTS; slot++) {
+            if (IconUtils.getNamePie(slot).equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String readAll(InputStream in) throws IOException {
@@ -236,6 +238,11 @@ class SettingsBackup {
     // Copies a whole file into an already-open stream (a ZipOutputStream entry), closing
     // only the file side - the zip stream stays open for the entries that follow.
     private static void copyIntoOpenStream(InputStream in, OutputStream out) throws IOException {
+        copyIntoOpenStream(in, out, true);
+    }
+
+    private static void copyIntoOpenStream(InputStream in, OutputStream out, boolean closeIn)
+            throws IOException {
         try {
             byte[] buffer = new byte[8192];
             int read;
@@ -243,18 +250,8 @@ class SettingsBackup {
                 out.write(buffer, 0, read);
             }
         } finally {
-            in.close();
-        }
-    }
-
-    // Copies an already-open stream (a ZipInputStream entry) into a new file, closing only
-    // the file side - the zip stream stays open for the entries that follow.
-    private static void copyIntoNewFile(InputStream in, File target) throws IOException {
-        try (FileOutputStream out = new FileOutputStream(target)) {
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
+            if (closeIn) {
+                in.close();
             }
         }
     }

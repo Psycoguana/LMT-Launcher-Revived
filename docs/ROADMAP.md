@@ -608,6 +608,14 @@ A review pass over the whole app, looking for:
   the test phone). The same su call that lists the devices first runs `pkill -f '^cat /dev/input/event'`.
   "Set gesture input" and Auto configuration no longer open the device themselves on top of
   restarting the service (that made two readers).
+- **Settings dialogs (UX):** number rows are sliders (range, unit, Default button); rows whose
+  number encoded modes are choice dialogs ("Custom..." leads to a size slider or the color
+  editor). The user image folder is picked with the system file picker: `IconFolder` reads
+  and writes a picked `content://` folder (persisted permission) or a plain path, for the pie,
+  the Pie tab and backups. Upstream bug found on the way: `loadResourceSearchPath()` ignored
+  the saved value, so the typed path never did anything. The Script action gets a
+  **Browse...** button; the picked document is turned back into a path for the root shell
+  (storage volumes and Downloads' `raw:` ids; cloud files have none).
 - **Code cleanup:**
   - Bytecode-neutral: the decompiler's `@Override // <class>` and `// from class:` comments,
     self-assignments (`x = x;`, 12 in `PieMenu.layoutPie`), a bare `hashCode()`, and magic

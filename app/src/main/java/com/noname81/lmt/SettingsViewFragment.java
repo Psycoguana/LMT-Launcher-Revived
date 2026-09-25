@@ -1,9 +1,11 @@
 package com.noname81.lmt;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.UriPermission;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -45,12 +47,14 @@ import java.io.OutputStream;
 public class SettingsViewFragment extends PreferenceFragmentCompat {
     private static final int REQUEST_EXPORT_SETTINGS = 9001;
     private static final int REQUEST_IMPORT_SETTINGS = 9002;
+    private static final int REQUEST_IMAGE_FOLDER = 9003;
 
     private SettingsValues mSettings;
     private RootContext mRootContext;
     private TouchServiceNative mTouchServiceNative;
     private SwitchPreferenceCompat mActivateLmtPreference;
     private Preference mFeaturesPreference;
+    private Preference mImageFolderPreference;
 
     private interface IntGetter {
         int get();
@@ -757,17 +761,37 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
-        addTextDialog(
-                category,
-                "Set user image search path",
-                "default = /storage/emulated/0/Android/data/com.noname81.lmt/files/ (Leave blank"
-                        + " to set default)",
-                "User image search path",
-                this.mSettings::loadResourceSearchPath,
-                v -> {
-                    this.mSettings.saveResourceSearchPath(v);
-                    this.mSettings.restartServiceIfRequired();
-                });
+        // Picked with the system file picker (ROADMAP 1.13): a typed path was never used, and
+        // since Android 11 most paths outside the app folder can't be written anyway.
+        this.mImageFolderPreference =
+                addAction(
+                        category,
+                        "Set user image search path",
+                        imageFolderSummary(),
+                        preference -> {
+                            new InputDialog(
+                                    requireActivity(),
+                                    "User image folder",
+                                    new String[] {
+                                        "Choose a folder…", "Use the app folder (default)"
+                                    },
+                                    IconFolder.isPicked(this.mSettings.loadResourceSearchPath())
+                                            ? "0"
+                                            : "1") {
+                                @Override
+                                public boolean onOkClicked(String value) {
+                                    if (value.equals("0")) {
+                                        startActivityForResult(
+                                                new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE),
+                                                REQUEST_IMAGE_FOLDER);
+                                    } else {
+                                        setImageFolder(null);
+                                    }
+                                    return true;
+                                }
+                            }.show();
+                            return true;
+                        });
     }
 
     private void buildPieExtensionsSection(PreferenceCategory category) {
@@ -955,7 +979,39 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
             handleExportSettingsPicked(data.getData());
         } else if (requestCode == REQUEST_IMPORT_SETTINGS) {
             handleImportSettingsPicked(data.getData());
+        } else if (requestCode == REQUEST_IMAGE_FOLDER && data.getData() != null) {
+            setImageFolder(data.getData());
         }
+    }
+
+    /** Keeps access to a picked folder across reboots; null goes back to the app folder. */
+    private void setImageFolder(Uri folder) {
+        ContentResolver resolver = requireActivity().getContentResolver();
+        int access = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+        // Only one folder is ever used: let go of the previous one.
+        for (UriPermission permission : resolver.getPersistedUriPermissions()) {
+            if (folder == null || !permission.getUri().equals(folder)) {
+                try {
+                    resolver.releasePersistableUriPermission(permission.getUri(), access);
+                } catch (SecurityException ignored) {
+                }
+            }
+        }
+        if (folder != null) {
+            resolver.takePersistableUriPermission(folder, access);
+        }
+        this.mSettings.saveResourceSearchPath(folder != null ? folder.toString() : null);
+        this.mSettings.restartServiceIfRequired();
+        if (this.mImageFolderPreference != null) {
+            this.mImageFolderPreference.setSummary(imageFolderSummary());
+        }
+    }
+
+    private String imageFolderSummary() {
+        String folder = this.mSettings.loadResourceSearchPath();
+        return IconFolder.isPicked(folder)
+                ? "Folder with your own pie images: " + IconFolder.describe(folder)
+                : "Folder with your own pie images: the app folder (default)";
     }
 
     private void handleExportSettingsPicked(Uri uri) {
@@ -975,15 +1031,14 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     }
 
     private void exportSettings(OutputStream destStream) throws Exception {
-        SettingsBackup.exportZip(
-                this.mSettings, this.mSettings.loadResourceSearchPath(), destStream);
+        SettingsBackup.exportZip(this.mSettings, IconFolder.of(requireActivity()), destStream);
         Toast.makeText(requireActivity(), "Settings exported", Toast.LENGTH_SHORT).show();
     }
 
     private void importSettings(InputStream srcStream) throws Exception {
         boolean restored =
                 SettingsBackup.importZip(
-                        this.mSettings, this.mSettings.loadResourceSearchPath(), srcStream);
+                        this.mSettings, IconFolder.of(requireActivity()), srcStream);
         if (restored) {
             this.mSettings.restartServiceIfRequired();
             Toast.makeText(requireActivity(), "Settings imported", Toast.LENGTH_SHORT).show();
@@ -1234,30 +1289,6 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                                         start,
                                         onSaved);
                             }
-                            return true;
-                        }
-                    }.show();
-                    return true;
-                });
-    }
-
-    private void addTextDialog(
-            PreferenceCategory category,
-            String title,
-            String caption,
-            String dialogTitle,
-            StringGetter current,
-            StringCallback onSaved) {
-        addAction(
-                category,
-                title,
-                caption,
-                preference -> {
-                    new InputDialog(
-                            requireActivity(), dialogTitle, "Set new value", current.get(), false) {
-                        @Override
-                        public boolean onOkClicked(String value) {
-                            onSaved.run(value);
                             return true;
                         }
                     }.show();

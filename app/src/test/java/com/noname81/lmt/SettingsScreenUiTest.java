@@ -109,7 +109,11 @@ public class SettingsScreenUiTest {
         {"Pie icons / Set nav button style", "NavButtonStyle"},
         {"Pie icons / Show and scale app images", "PieShowAppImages"},
         {"Pie icons / Show and scale user images", "PieUserImageScaling"},
-        {"Pie icons / Set user image search path", "ResourceSearchPath"},
+        // Picks the folder with the system file picker (ROADMAP 1.13).
+        {
+            "Pie icons / Set user image search path",
+            "activity:android.intent.action.OPEN_DOCUMENT_TREE"
+        },
         {"Pie extensions / Pie pointer edge activation", "PiePointerFromEdges"},
         {"Pie extensions / Pie pointer warp factor", "PiePointerWarpFactorPercent"},
         {"Pie extensions / Pie pointer color", "PiePointerColorString"},

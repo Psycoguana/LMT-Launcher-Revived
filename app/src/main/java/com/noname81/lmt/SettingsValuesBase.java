@@ -36,12 +36,34 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
         return false;
     }
 
+    /**
+     * The user image folder: a folder picked in the system file picker while LMT still holds its
+     * permission, otherwise the app folder. Upstream always returned the app folder, so a typed
+     * path was saved but never used; since Android 11 most such paths can't be written anyway
+     * (ROADMAP 1.13).
+     */
     String loadResourceSearchPath() {
+        String picked = loadString("ResourceSearchPath", "");
+        if (IconFolder.isPicked(picked) && hasFolderPermission(picked)) {
+            return picked;
+        }
         String path2 = this.mContext.getExternalFilesDir(null).getPath();
         if (path2.endsWith("/")) {
             return path2;
         }
         return path2 + "/";
+    }
+
+    private boolean hasFolderPermission(String folder) {
+        for (android.content.UriPermission permission :
+                this.mContext.getContentResolver().getPersistedUriPermissions()) {
+            if (permission.getUri().toString().equals(folder)
+                    && permission.isReadPermission()
+                    && permission.isWritePermission()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     SettingsValuesBase(Context context) {
@@ -284,6 +306,11 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
     }
 
     void saveResourceSearchPath(String value) {
+        IconFolder.invalidate();
+        if (IconFolder.isPicked(value)) {
+            saveString("ResourceSearchPath", value, null);
+            return;
+        }
         if (value == null || value.length() == 0) {
             value = this.mContext.getExternalFilesDir(null).getPath();
         }

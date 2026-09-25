@@ -24,9 +24,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * ROADMAP 1.5: import/export. Pins the two things that would otherwise silently corrupt a
- * restore - a never-touched setting exporting as the wrong default, and an icon file escaping the
- * target directory on import.
+ * ROADMAP 1.5: import/export. Pins the two things that would otherwise silently corrupt a restore -
+ * a never-touched setting exporting as the wrong default, and an icon file escaping the target
+ * directory on import.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 33)
@@ -88,7 +88,8 @@ public class SettingsBackupTest {
         assertEquals(Action.RecentApps, prefs.loadInt("PieItem5 Type", Action.None));
         assertEquals("payload", prefs.loadString("PieItem5 String", ""));
         assertEquals("base64icon", prefs.loadString("PieItem5 Icon", ""));
-        assertEquals(Action.Home, prefs.loadInt(TouchServiceResult.names[0] + " Type", Action.None));
+        assertEquals(
+                Action.Home, prefs.loadInt(TouchServiceResult.names[0] + " Type", Action.None));
         assertEquals(Action.Back, prefs.loadInt("IsaItem3 Type", Action.None));
     }
 
@@ -110,13 +111,15 @@ public class SettingsBackupTest {
         prefs.saveInt("PiePos", 3, null);
         writeFile(new File(iconDir, IconUtils.getNamePie(0)), "fake-png-bytes");
 
-        SettingsBackup.exportZip(prefs, iconDir.getPath(), new FileOutputStream(zip));
+        SettingsBackup.exportZip(
+                prefs, IconFolder.forPath(iconDir.getPath()), new FileOutputStream(zip));
 
         prefs.saveInt("PiePos", 0, null);
         assertTrue(new File(iconDir, IconUtils.getNamePie(0)).delete());
 
         boolean restored =
-                SettingsBackup.importZip(prefs, iconDir.getPath(), new FileInputStream(zip));
+                SettingsBackup.importZip(
+                        prefs, IconFolder.forPath(iconDir.getPath()), new FileInputStream(zip));
 
         assertTrue(restored);
         assertEquals(3, prefs.loadInt("PiePos", -1));
@@ -133,7 +136,9 @@ public class SettingsBackupTest {
             out.closeEntry();
         }
 
-        assertFalse(SettingsBackup.importZip(prefs, iconDir.getPath(), new FileInputStream(zip)));
+        assertFalse(
+                SettingsBackup.importZip(
+                        prefs, IconFolder.forPath(iconDir.getPath()), new FileInputStream(zip)));
     }
 
     @Test
@@ -150,7 +155,8 @@ public class SettingsBackupTest {
             out.closeEntry();
         }
 
-        SettingsBackup.importZip(prefs, iconDir.getPath(), new FileInputStream(zip));
+        SettingsBackup.importZip(
+                prefs, IconFolder.forPath(iconDir.getPath()), new FileInputStream(zip));
 
         assertFalse(outside.exists());
     }

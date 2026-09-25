@@ -49,9 +49,9 @@ public class PieFragment extends Fragment {
 
     private void handleIconClick(int absoluteIndex) {
         this.mCurrentPos = absoluteIndex;
-        String path = SettingsValues.getInstance(requireActivity()).loadResourceSearchPath();
+        IconFolder folder = IconFolder.of(requireActivity());
         String fileName = IconUtils.getNamePie(this.mCurrentPos);
-        if (FileUtils.isFileAvailable(path, fileName)) {
+        if (folder.exists(fileName)) {
             new MaterialAlertDialogBuilder(requireActivity())
                     .setTitle("Icon selection")
                     .setMessage("Do you want to delete the current icon or set a new one?")
@@ -66,7 +66,7 @@ public class PieFragment extends Fragment {
                     .setNegativeButton(
                             "Delete",
                             (dialogInterface, which) -> {
-                                FileUtils.deleteFile(path, fileName);
+                                folder.delete(fileName);
                                 this.mAdapter.notifyDataSetChanged();
                                 SettingsValues.getInstance(requireActivity())
                                         .restartServiceIfRequired();
@@ -97,9 +97,9 @@ public class PieFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-            IconUtils.saveImageToFile(
+            IconUtils.saveImage(
                     IconUtils.getScaledBitmapFromUri(requireActivity(), data.getData(), 150),
-                    SettingsValues.getInstance(requireActivity()).loadResourceSearchPath(),
+                    IconFolder.of(requireActivity()),
                     IconUtils.getNamePie(this.mCurrentPos));
             SettingsValues.getInstance(requireActivity()).restartServiceIfRequired();
         }

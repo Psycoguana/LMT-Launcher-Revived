@@ -19,7 +19,6 @@ import android.system.OsConstants;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.lang.ref.WeakReference;
 
@@ -169,16 +168,13 @@ public class TouchService extends Service {
                 this.mSettings.setVisiblePieActivationAread(false);
             }
         }
-        File file = new File(this.mSettings.loadResourceSearchPath());
-        String[] list = file.list();
-        int length = list != null ? list.length : 0;
+        int count = IconFolder.of(this).count();
         Log.d(TAG, "Resource path " + this.mSettings.loadResourceSearchPath());
-        StringBuilder sb = new StringBuilder("Resource path is ");
-        sb.append(file.isDirectory() ? "available" : "not available");
-        sb.append(" containing ");
-        sb.append(length);
-        sb.append(" file(s)");
-        Log.d(TAG, sb.toString());
+        Log.d(
+                TAG,
+                "Resource path is "
+                        + (count >= 0 ? "available containing " + count : "not available with 0")
+                        + " file(s)");
         this.mSettings.setServiceState(1);
         startForeground(777, createNotification());
     }
