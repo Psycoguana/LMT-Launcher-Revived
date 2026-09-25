@@ -644,7 +644,22 @@ process as that user, so gestures could work root-free through it:
   *consumes* the events it listens to, so the phone would stop getting touches.
 - ISAs alone could go root-free without Shizuku, as invisible overlay strips like the pie's.
 
-Low priority: the user only uses the pie.
+Other things Shizuku (the shell user) could do, more useful to a pie-only user:
+
+- **Run the `InputContext` helper as shell instead of root.** Most root-only actions
+  (next/previous app, kill app, long-press keys, Menu, arbitrary keys, immersive mode) go
+  through that helper, and shell holds the permissions its calls need (`INJECT_EVENTS`,
+  `REORDER_TASKS`, `FORCE_STOP_PACKAGES`). Most of the actions greyed out without root would
+  then work on an unrooted phone. The biggest win.
+- **Keep the accessibility service enabled.** Android drops LMT from
+  `enabled_accessibility_services` when it is force-stopped (seen on the test phone) and in other
+  cases (see 3.5). With `WRITE_SECURE_SETTINGS`, granted once through Shizuku or by hand
+  (`adb shell pm grant com.noname81.lmt android.permission.WRITE_SECURE_SETTINGS`), LMT could put
+  itself back. Small, and it doesn't even need Shizuku running.
+- Grant usage access (LastApp, PieRecentApps) without the Settings round trip.
+
+Priority: gestures low (the user only uses the pie); the helper and the accessibility
+re-enable are the interesting ones.
 
 ## Part 2 — Accessibility fallbacks for root-only actions
 
