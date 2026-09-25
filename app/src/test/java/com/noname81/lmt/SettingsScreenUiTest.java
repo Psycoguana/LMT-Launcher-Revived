@@ -187,6 +187,10 @@ public class SettingsScreenUiTest {
     private Screen freshScreen() throws Exception {
         UiTestSupport.resetSingletons(context);
         SettingsValues.getInstance(context).saveTouchServiceMode(1);
+        // One excluded app each, so the clear rows have something to clear (with nothing, they
+        // only say so).
+        SettingsValues.getInstance(context).setBlacklisted("com.example.gesture");
+        SettingsValues.getInstance(context).setBlacklistedPie("com.example.pie");
         Screen screen = new Screen();
         screen.host = UiTestSupport.hostActivity();
         SettingsViewFragment fragment = new SettingsViewFragment();

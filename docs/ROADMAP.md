@@ -616,6 +616,9 @@ A review pass over the whole app, looking for:
   the saved value, so the typed path never did anything. The Script action gets a
   **Browse...** button; the picked document is turned back into a path for the root shell
   (storage volumes and Downloads' `raw:` ids; cloud files have none).
+  Every row's summary now ends in "Currently: ..." (slider rows: "500 ms (default)" or
+  "300 ms, default 500 ms"), updated as soon as it changes. Both "Clear ... blacklist" rows ask
+  first and show how many apps are excluded; with none they only say so.
 - **Code cleanup:**
   - Bytecode-neutral: the decompiler's `@Override // <class>` and `// from class:` comments,
     self-assignments (`x = x;`, 12 in `PieMenu.layoutPie`), a bare `hashCode()`, and magic
@@ -668,6 +671,16 @@ Other things Shizuku (the shell user) could do, more useful to a pie-only user:
 
 Priority: gestures low (the user only uses the pie); the helper and the accessibility
 re-enable are the interesting ones.
+
+### 1.15 Settings UX — possible next features
+
+- **Status card at the top of Settings** when something LMT relies on is missing: accessibility
+  off (Android drops it on force-stop, see 1.14), no overlay permission, no root while
+  gestures are selected. Tapping it fixes or explains the problem. It would have caught the
+  silent accessibility drops seen on the test phone.
+- **Live previews:** show the activation strips while dragging their thickness, length and
+  gravity, and a small pie preview in the radius, gap and outline sliders, so the result is
+  visible before closing the dialog.
 
 ## Part 2 — Accessibility fallbacks for root-only actions
 

@@ -55,6 +55,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     private SwitchPreferenceCompat mActivateLmtPreference;
     private Preference mFeaturesPreference;
     private Preference mImageFolderPreference;
+    private Preference mClearGestureBlacklist;
+    private Preference mClearPieBlacklist;
 
     private interface IntGetter {
         int get();
@@ -105,6 +107,15 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     @Override
     public void onResume() {
         super.onResume();
+        // Apps are added to the blacklists in another screen.
+        if (this.mClearGestureBlacklist != null) {
+            this.mClearGestureBlacklist.setSummary(
+                    blacklistSummary(this.mSettings.mBlacklist.size()));
+        }
+        if (this.mClearPieBlacklist != null) {
+            this.mClearPieBlacklist.setSummary(
+                    blacklistSummary(this.mSettings.mBlacklistPie.size()));
+        }
         if (this.mFeaturesPreference != null && this.mSettings.loadTouchServiceMode() < 2) {
             // Coming back from Magisk after granting root: ask su again (only after a "no").
             RootContext rootContext =
@@ -302,14 +313,13 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     return true;
                 });
 
-        addAction(
-                category,
-                "Clear gesture blacklist",
-                "Clear all excluded apps",
-                preference -> {
-                    this.mSettings.clearBlacklisted();
-                    return true;
-                });
+        this.mClearGestureBlacklist =
+                addClearBlacklist(
+                        category,
+                        "Clear gesture blacklist",
+                        "gesture recognition",
+                        () -> this.mSettings.mBlacklist.size(),
+                        this.mSettings::clearBlacklisted);
     }
 
     private void buildIsasSection(PreferenceCategory category) {
@@ -441,14 +451,13 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     return true;
                 });
 
-        addAction(
-                category,
-                "Clear pie blacklist",
-                "Clear all excluded apps",
-                preference -> {
-                    this.mSettings.clearBlacklistedPie();
-                    return true;
-                });
+        this.mClearPieBlacklist =
+                addClearBlacklist(
+                        category,
+                        "Clear pie blacklist",
+                        "the pie",
+                        () -> this.mSettings.mBlacklistPie.size(),
+                        this.mSettings::clearBlacklistedPie);
     }
 
     private void buildPieStyleSection(PreferenceCategory category) {
@@ -1094,11 +1103,65 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         }.show();
     }
 
+    private static final String[] FEATURE_NAMES = {
+        "Gestures and ISAs", "Gestures, ISAs and pie", "Pie"
+    };
+
     private String featuresSummary(RootContext rootContext) {
-        if (this.mSettings.loadTouchServiceMode() < 2 && rootContext.isRootDenied()) {
-            return "Gestures and ISAs need root, which isn't granted";
-        }
-        return "Configure LMT's feature set";
+        int mode = this.mSettings.loadTouchServiceMode();
+        String caption =
+                mode < 2 && rootContext.isRootDenied()
+                        ? "Gestures and ISAs need root, which isn't granted"
+                        : "Configure LMT's feature set";
+        return withCurrent(caption, choiceLabel(FEATURE_NAMES, mode));
+    }
+
+    /**
+     * Clears a blacklist after asking (ROADMAP 1.13: it used to go on a single tap), and shows how
+     * many apps it holds.
+     */
+    private Preference addClearBlacklist(
+            PreferenceCategory category,
+            String title,
+            String from,
+            IntGetter count,
+            Runnable clear) {
+        return addAction(
+                category,
+                title,
+                blacklistSummary(count.get()),
+                preference -> {
+                    int apps = count.get();
+                    if (apps == 0) {
+                        Toast.makeText(requireContext(), "No apps are excluded", Toast.LENGTH_SHORT)
+                                .show();
+                        return true;
+                    }
+                    new MaterialAlertDialogBuilder(requireActivity())
+                            .setTitle(title + "?")
+                            .setMessage(
+                                    (apps == 1 ? "1 app" : apps + " apps")
+                                            + " will work with "
+                                            + from
+                                            + " again.")
+                            .setPositiveButton(
+                                    "Clear",
+                                    (d, w) -> {
+                                        clear.run();
+                                        preference.setSummary(blacklistSummary(count.get()));
+                                    })
+                            .setNegativeButton(R.string.dialog_cancel, null)
+                            .show();
+                    return true;
+                });
+    }
+
+    private static String blacklistSummary(int apps) {
+        return withCurrent(
+                "Clear all excluded apps",
+                apps == 0
+                        ? "no apps excluded"
+                        : apps == 1 ? "1 app excluded" : apps + " apps excluded");
     }
 
     private Preference addAction(
@@ -1127,7 +1190,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         addAction(
                 category,
                 title,
-                caption,
+                withCurrent(caption, choiceLabel(choices, current.get())),
                 preference -> {
                     new InputDialog(
                             requireActivity(),
@@ -1138,6 +1201,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                         public boolean onOkClicked(String value) {
                             try {
                                 onPicked.run(Integer.parseInt(value));
+                                preference.setSummary(
+                                        withCurrent(caption, choiceLabel(choices, current.get())));
                             } catch (NumberFormatException ignored) {
                             }
                             return true;
@@ -1145,6 +1210,33 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     }.show();
                     return true;
                 });
+    }
+
+    /**
+     * A row's description plus what it is set to now (ROADMAP 1.13), so you don't have to open
+     * every dialog to see the settings.
+     */
+    private static String withCurrent(String caption, String current) {
+        return caption + "\nCurrently: " + current;
+    }
+
+    private static String choiceLabel(String[] choices, int index) {
+        // Multi-line choices ("Bottom\n(not centered)") read better on one line here.
+        return index >= 0 && index < choices.length
+                ? choices[index].replace('\n', ' ').replace("…", "")
+                : String.valueOf(index);
+    }
+
+    /** "500 ms (default)" or "300 ms, default 500 ms". */
+    private static String sliderLabel(int value, int defaultValue, String unit) {
+        return value == defaultValue
+                ? withUnit(value, unit) + " (default)"
+                : withUnit(value, unit) + ", default " + withUnit(defaultValue, unit);
+    }
+
+    /** Slider captions say "..., default = 50"; the summary now shows that on its own line. */
+    static String withoutDefault(String caption) {
+        return caption.replaceFirst("(?i),?\\s*default\\s*=.*$", "").trim();
     }
 
     /** A number picked with a slider over [min, max]; a stored value outside widens it. */
@@ -1160,10 +1252,11 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
             int defaultValue,
             IntGetter current,
             IntCallback onSaved) {
+        String description = withoutDefault(caption);
         addAction(
                 category,
                 title,
-                caption,
+                withCurrent(description, sliderLabel(current.get(), defaultValue, unit)),
                 preference -> {
                     showSliderDialog(
                             dialogTitle,
@@ -1173,7 +1266,13 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                             step,
                             defaultValue,
                             current.get(),
-                            onSaved);
+                            v -> {
+                                onSaved.run(v);
+                                preference.setSummary(
+                                        withCurrent(
+                                                description,
+                                                sliderLabel(current.get(), defaultValue, unit)));
+                            });
                     return true;
                 });
     }
@@ -1262,7 +1361,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         addAction(
                 category,
                 title,
-                caption,
+                withCurrent(caption, codedLabel(choices, values, unit, current.get())),
                 preference -> {
                     int value = current.get();
                     int checked = values.length;
@@ -1271,12 +1370,20 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                             checked = i;
                         }
                     }
+                    IntCallback save =
+                            v -> {
+                                onSaved.run(v);
+                                preference.setSummary(
+                                        withCurrent(
+                                                caption,
+                                                codedLabel(choices, values, unit, current.get())));
+                            };
                     new InputDialog(requireActivity(), title, choices, String.valueOf(checked)) {
                         @Override
                         public boolean onOkClicked(String picked) {
                             int which = Integer.parseInt(picked);
                             if (which < values.length) {
-                                onSaved.run(values[which]);
+                                save.run(values[which]);
                             } else {
                                 int start = value >= customMin ? value : customDefault;
                                 showSliderDialog(
@@ -1287,13 +1394,23 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                                         1,
                                         customDefault,
                                         start,
-                                        onSaved);
+                                        save);
                             }
                             return true;
                         }
                     }.show();
                     return true;
                 });
+    }
+
+    /** The fixed choice's label, or "Custom size, tinted (96 px)". */
+    private static String codedLabel(String[] choices, int[] values, String unit, int value) {
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == value) {
+                return choiceLabel(choices, i);
+            }
+        }
+        return choiceLabel(choices, values.length) + " (" + withUnit(value, unit) + ")";
     }
 
     /**
@@ -1315,23 +1432,28 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         addAction(
                 category,
                 title,
-                caption,
+                withCurrent(caption, choiceLabel(choices, presetIndex(presets, current.get()))),
                 preference -> {
                     String value = current.get();
-                    int checked = presets.length;
-                    for (int i = 0; i < presets.length; i++) {
-                        if (value.equals(String.valueOf(i))) {
-                            checked = i;
-                        }
-                    }
+                    int checked = presetIndex(presets, value);
                     boolean custom = checked == presets.length;
+                    StringCallback save =
+                            v -> {
+                                onSaved.run(v);
+                                preference.setSummary(
+                                        withCurrent(
+                                                caption,
+                                                choiceLabel(
+                                                        choices,
+                                                        presetIndex(presets, current.get()))));
+                            };
                     new InputDialog(
                             requireActivity(), dialogTitle, choices, String.valueOf(checked)) {
                         @Override
                         public boolean onOkClicked(String picked) {
                             int which = Integer.parseInt(picked);
                             if (which < presets.length) {
-                                onSaved.run(String.valueOf(which));
+                                save.run(String.valueOf(which));
                             } else {
                                 // A preset code means nothing to the editor: start it empty.
                                 new ColorDialog(
@@ -1341,7 +1463,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                                         custom ? value : "") {
                                     @Override
                                     public boolean onOkClicked(String colorString) {
-                                        onSaved.run(colorString);
+                                        save.run(colorString);
                                         return true;
                                     }
                                 }.show();
@@ -1351,6 +1473,16 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     }.show();
                     return true;
                 });
+    }
+
+    /** The preset a stored color string names ("0", "1", ...), or presets.length for custom. */
+    private static int presetIndex(String[] presets, String value) {
+        for (int i = 0; i < presets.length; i++) {
+            if (String.valueOf(i).equals(value)) {
+                return i;
+            }
+        }
+        return presets.length;
     }
 
     /** Preset 0 follows the wallpaper's accent on Android 12+ (see PieMenu.init). */
