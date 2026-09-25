@@ -1,8 +1,6 @@
 package com.noname81.lmt;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -23,12 +21,9 @@ import androidx.core.content.ContextCompat;
  * an icon tinted with the icon color, at the user's radii, outline, shift and slice gap sizes. A
  * checkerboard behind it shows how see-through the colors are.
  *
- * <p>Colors come in the color string's order - normal, selected, icon, outline, gradient, gradient
- * outline, shift - with {@link #UNSET} (-2) for a part left empty, which falls back the way {@code
- * PieMenu.init} does.
+ * <p>Colors: normal, selected, icon, outline, gradient, gradient outline, shift.
  */
-public class PieTileView extends View {
-    static final int UNSET = -2;
+public class PieTileView extends View implements ColorPreview {
     static final int COLOR_COUNT = 7;
 
     /** One slice of a four-item ring, the shape the Pie tab's rows show. */
@@ -68,12 +63,14 @@ public class PieTileView extends View {
         this.mStroke.setStyle(Paint.Style.STROKE);
         Drawable back = IconUtils.getIconForAction(context, new Action(Action.Back), null);
         this.mIcon = back != null ? back.mutate() : null;
-        this.mChecker.setShader(checkerboard(density));
+        this.mChecker.setShader(ColorPreview.checkerboard(density));
     }
 
-    void setColors(int[] colors, boolean selected) {
+    /** Editing "selected color" (index 1) shows the slice selected. */
+    @Override
+    public void setColors(int[] colors, int current) {
         System.arraycopy(colors, 0, this.mColors, 0, Math.min(colors.length, COLOR_COUNT));
-        this.mSelected = selected;
+        this.mSelected = current == 1;
         invalidate();
     }
 
@@ -167,17 +164,5 @@ public class PieTileView extends View {
         Color.colorToHSV(color, hsv);
         hsv[2] *= 0.8f;
         return Color.HSVToColor(hsv);
-    }
-
-    private static BitmapShader checkerboard(float density) {
-        int cell = Math.max(1, (int) (8 * density));
-        Bitmap bitmap = Bitmap.createBitmap(cell * 2, cell * 2, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(0xFF9E9E9E);
-        Paint dark = new Paint();
-        dark.setColor(0xFF616161);
-        canvas.drawRect(0, 0, cell, cell, dark);
-        canvas.drawRect(cell, cell, cell * 2, cell * 2, dark);
-        return new BitmapShader(bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
     }
 }

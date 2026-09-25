@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.UriPermission;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -485,6 +487,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     "gradient outline color",
                     "shift color"
                 },
+                ColorDialog.PREVIEW_PIE,
                 this.mSettings::loadPieColor,
                 v -> {
                     this.mSettings.savePieColor(v);
@@ -849,6 +852,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 "Pie pointer colors",
                 new String[] {defaultColorName("Blue")},
                 new String[] {"pointer color"},
+                ColorDialog.PREVIEW_POINTER,
                 this.mSettings::loadPiePointerColor,
                 v -> {
                     this.mSettings.savePiePointerColor(v);
@@ -879,6 +883,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 "Pie status info colors",
                 new String[] {"White"},
                 new String[] {"clock color", "notification color", "dim color"},
+                ColorDialog.PREVIEW_STATUS_INFOS,
                 this.mSettings::loadPieStatusInfoColor,
                 v -> {
                     this.mSettings.savePieStatusInfoColor(v);
@@ -905,7 +910,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 v -> {
                     this.mSettings.savePieFont(v);
                     this.mSettings.restartServiceIfRequired();
-                });
+                },
+                fontRowStyle());
     }
 
     private void buildBackupSection(PreferenceCategory category) {
@@ -1201,6 +1207,18 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
             String[] choices,
             IntGetter current,
             IntCallback onPicked) {
+        addChoiceDialog(category, title, caption, dialogTitle, choices, current, onPicked, null);
+    }
+
+    private void addChoiceDialog(
+            PreferenceCategory category,
+            String title,
+            String caption,
+            String dialogTitle,
+            String[] choices,
+            IntGetter current,
+            IntCallback onPicked,
+            InputDialog.ItemStyle style) {
         addAction(
                 category,
                 title,
@@ -1210,7 +1228,9 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                             requireActivity(),
                             dialogTitle,
                             choices,
-                            String.valueOf(current.get())) {
+                            String.valueOf(current.get()),
+                            null,
+                            style) {
                         @Override
                         public boolean onOkClicked(String value) {
                             try {
@@ -1224,6 +1244,22 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     }.show();
                     return true;
                 });
+    }
+
+    /**
+     * Shows each "Pie status info font" choice in its font (ROADMAP 1.13): Roboto Thin, Roboto
+     * Light or the system font, a size step smaller or larger for small and big.
+     */
+    private InputDialog.ItemStyle fontRowStyle() {
+        Typeface[] typefaces = new Typeface[3];
+        for (int i = 0; i < typefaces.length; i++) {
+            typefaces[i] = PieStatusInfoPreviewView.typeface(requireContext(), i * 3);
+        }
+        float[] sizes = {14, 17, 20};
+        return (position, row) -> {
+            row.setTypeface(typefaces[position / 3]);
+            row.setTextSize(TypedValue.COMPLEX_UNIT_SP, sizes[position % 3]);
+        };
     }
 
     /**
@@ -1438,6 +1474,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
             String dialogTitle,
             String[] presets,
             String[] labels,
+            int preview,
             StringGetter current,
             StringCallback onSaved) {
         String[] choices = new String[presets.length + 1];
@@ -1474,7 +1511,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                                         requireActivity(),
                                         dialogTitle,
                                         labels,
-                                        custom ? value : "") {
+                                        custom ? value : "",
+                                        preview) {
                                     @Override
                                     public boolean onOkClicked(String colorString) {
                                         save.run(colorString);

@@ -871,7 +871,7 @@
     },
     {
       "class": "PieTileView.smali",
-      "reason": "ROADMAP 1.13: the pie color editor's preview, one slice drawn the way PieMenu draws the pie (fill and outline with their gradients, shift stroke, tinted icon) at the user's sizes."
+      "reason": "ROADMAP 1.13: the pie color editor's preview, one slice drawn the way PieMenu draws the pie (fill and outline with their gradients, shift stroke, tinted icon) at the user's sizes. Implements ColorPreview; the checkerboard moved there."
     },
     {
       "class": "ColorDialog$ANON.smali",
@@ -880,6 +880,26 @@
     {
       "class": "SamsungBlur.smali",
       "reason": "ROADMAP 1.11 upgrade: Samsung's live window blur (View.semSetBlurInfo with BLUR_MODE_WINDOW) by reflection, used by PieBlur on phones whose SemFloatingFeature has SEC_FLOATING_FEATURE_GRAPHICS_SUPPORT_3D_SURFACE_TRANSITION_FLAG (the Samsung flagship; not the test phone)."
+    },
+    {
+      "class": "ColorPreview.smali",
+      "reason": "ROADMAP 1.13: interface the color editor's previews implement (setColors), plus the shared checkerboard shader."
+    },
+    {
+      "class": "ColorPreview$-CC.smali",
+      "reason": "ROADMAP 1.13: D8's companion class for ColorPreview's static checkerboard() interface method."
+    },
+    {
+      "class": "PiePointerPreviewView.smali",
+      "reason": "ROADMAP 1.13: the pointer color editor's preview, the pointer drawn the way PiePointer draws it (gradient line, circle, tip, white shadows)."
+    },
+    {
+      "class": "PieStatusInfoPreviewView.smali",
+      "reason": "ROADMAP 1.13: the status info color editor's preview, clock and overview lines drawn the way PieStatusInfo draws them over the dim color, in the user's pie font."
+    },
+    {
+      "class": "InputDialog$ItemStyle.smali",
+      "reason": "ROADMAP 1.13: callback that styles a single-choice row, used to show each \"Pie status info font\" choice in its font."
     }
   ],
   "removed_classes": [

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -51,13 +52,31 @@ abstract class InputDialog extends MaterialAlertDialogBuilder
         this(context, title, choices, selectedValue, null);
     }
 
-    /** A single choice where {@code enabled[i] == false} greys out and blocks choice i. */
+    /** Styles one choice's row, e.g. to show it in the font it picks (ROADMAP 1.13). */
+    interface ItemStyle {
+        void apply(int position, TextView row);
+    }
+
     InputDialog(
             Context context,
             String title,
             String[] choices,
             String selectedValue,
             boolean[] enabled) {
+        this(context, title, choices, selectedValue, enabled, null);
+    }
+
+    /**
+     * A single choice where {@code enabled[i] == false} greys out and blocks choice i, and {@code
+     * style}, when given, styles each row.
+     */
+    InputDialog(
+            Context context,
+            String title,
+            String[] choices,
+            String selectedValue,
+            boolean[] enabled,
+            ItemStyle style) {
         super(context);
         this.mContext = context;
         setTitle(title);
@@ -67,7 +86,7 @@ abstract class InputDialog extends MaterialAlertDialogBuilder
         } catch (NumberFormatException unused) {
             selectedIndex = -1;
         }
-        if (enabled == null) {
+        if (enabled == null && style == null) {
             setSingleChoiceItems(choices, selectedIndex, this);
         } else {
             setSingleChoiceItems(
@@ -78,20 +97,27 @@ abstract class InputDialog extends MaterialAlertDialogBuilder
                             choices) {
                         @Override
                         public boolean areAllItemsEnabled() {
-                            return false;
+                            return enabled == null;
                         }
 
                         @Override
                         public boolean isEnabled(int position) {
-                            return enabled[position];
+                            return enabled == null || enabled[position];
                         }
 
                         @Override
                         public View getView(int position, View convertView, ViewGroup parent) {
                             View view = super.getView(position, convertView, parent);
-                            view.setEnabled(enabled[position]);
-                            view.setAlpha(
-                                    enabled[position] ? 1f : CommandSelectActivity.DISABLED_ALPHA);
+                            if (style != null) {
+                                style.apply(position, (TextView) view);
+                            }
+                            if (enabled != null) {
+                                view.setEnabled(enabled[position]);
+                                view.setAlpha(
+                                        enabled[position]
+                                                ? 1f
+                                                : CommandSelectActivity.DISABLED_ALPHA);
+                            }
                             return view;
                         }
                     },

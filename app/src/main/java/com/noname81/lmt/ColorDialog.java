@@ -18,7 +18,8 @@ import com.google.android.material.slider.Slider;
 import java.util.Arrays;
 
 /**
- * Dialog for picking the pie's colours: a set of ARGB sliders over a live preview.
+ * Dialog for picking the pie's colours: a set of ARGB sliders under a live preview of what they
+ * color (a pie slice, the pointer or the status infos).
  *
  * <p>Colours are stored as a comma-separated string rather than an int, so a scheme can specify
  * only the parts it cares about and leave the rest at their defaults — see {@code PieMenu.init} for
@@ -34,7 +35,6 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
     private TextView mBlueValue;
     private Button mColorLast;
     private Button mColorNext;
-    private Button mColorPreview;
     private int mColorSelectionCurrent;
     private String[] mColorSelectionStrings;
     private int[] mColorSelectionValues;
@@ -43,15 +43,21 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
     private Slider mGreenSeek;
     private TextView mGreenValue;
     private TextView mRedLabel;
-    private PieTileView mPieTile;
+    private ColorPreview mPreview;
     private TextView mColorLabel;
     private boolean mUpdating;
     private Slider mRedSeek;
     private TextView mRedValue;
 
+    /** What the editor previews its colors on (ROADMAP 1.13). */
+    static final int PREVIEW_PIE = 0;
+
+    static final int PREVIEW_POINTER = 1;
+    static final int PREVIEW_STATUS_INFOS = 2;
+
     public abstract boolean onOkClicked(String colorString);
 
-    ColorDialog(Context context, String title, String[] labels, String colorString) {
+    ColorDialog(Context context, String title, String[] labels, String colorString, int preview) {
         super(context);
         setTitle(title);
         View viewInflate =
@@ -77,9 +83,6 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
         this.mBlueSeek = (Slider) viewInflate.findViewById(R.id.blue_seek);
         this.mBlueLabel.setText(R.string.blue_string);
         this.mBlueSeek.addOnChangeListener(this);
-        Button button = (Button) viewInflate.findViewById(R.id.color_preview);
-        this.mColorPreview = button;
-        button.setOnClickListener(this);
         Button button2 = (Button) viewInflate.findViewById(R.id.color_last);
         this.mColorLast = button2;
         this.mColorLast.setOnClickListener(this);
@@ -95,14 +98,16 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
         EditText editText = (EditText) viewInflate.findViewById(R.id.color_string);
         this.mColorString = editText;
         editText.setText(colorString);
-        // Pie colors (seven parts) preview as a pie slice; the others keep the swatch.
-        if (labels.length == PieTileView.COLOR_COUNT) {
-            this.mPieTile = viewInflate.findViewById(R.id.pie_tile);
-            this.mColorLabel = viewInflate.findViewById(R.id.color_label);
-            this.mPieTile.setVisibility(View.VISIBLE);
-            this.mColorLabel.setVisibility(View.VISIBLE);
-            button.setVisibility(View.GONE);
-        }
+        View previewView =
+                viewInflate.findViewById(
+                        preview == PREVIEW_POINTER
+                                ? R.id.pointer_preview
+                                : preview == PREVIEW_STATUS_INFOS
+                                        ? R.id.status_info_preview
+                                        : R.id.pie_tile);
+        previewView.setVisibility(View.VISIBLE);
+        this.mPreview = (ColorPreview) previewView;
+        this.mColorLabel = viewInflate.findViewById(R.id.color_label);
         // A color string typed or pasted by hand updates the sliders and the preview too.
         editText.addTextChangedListener(
                 new TextWatcher() {
@@ -166,7 +171,6 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
                             progressOf(this.mRedSeek),
                             progressOf(this.mGreenSeek),
                             progressOf(this.mBlueSeek));
-            this.mColorPreview.setBackgroundColor(iArgb);
             this.mColorSelectionValues[this.mColorSelectionCurrent] = iArgb;
             updateColorPreviews();
         }
@@ -233,11 +237,8 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
         } finally {
             this.mUpdating = false;
         }
-        if (this.mPieTile != null) {
-            // Editing "selected color" shows the slice selected.
-            this.mPieTile.setColors(this.mColorSelectionValues, this.mColorSelectionCurrent == 1);
-            this.mColorLabel.setText(this.mColorSelectionStrings[this.mColorSelectionCurrent]);
-        }
+        this.mPreview.setColors(this.mColorSelectionValues, this.mColorSelectionCurrent);
+        this.mColorLabel.setText(this.mColorSelectionStrings[this.mColorSelectionCurrent]);
     }
 
     private void showColors() {
@@ -251,7 +252,6 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
             this.mGreenValue.setText(Integer.toString(progressOf(this.mGreenSeek)));
             this.mBlueSeek.setValue(0f);
             this.mBlueValue.setText(Integer.toString(progressOf(this.mBlueSeek)));
-            this.mColorPreview.setBackgroundColor(0xFF000000);
         } else {
             this.mAlphaValue.setText(Integer.toString(Color.alpha(color)));
             this.mAlphaSeek.setValue((float) Color.alpha(color));
@@ -261,10 +261,7 @@ abstract class ColorDialog extends MaterialAlertDialogBuilder
             this.mGreenSeek.setValue((float) Color.green(color));
             this.mBlueValue.setText(Integer.toString(Color.blue(color)));
             this.mBlueSeek.setValue((float) Color.blue(color));
-            this.mColorPreview.setBackgroundColor(
-                    this.mColorSelectionValues[this.mColorSelectionCurrent]);
         }
-        this.mColorPreview.setText(this.mColorSelectionStrings[this.mColorSelectionCurrent]);
         StringBuilder sb = new StringBuilder();
         boolean anyTransparent = false;
         for (int index = 0; index < this.mColorSelectionValues.length; index++) {

@@ -35,11 +35,23 @@
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
-                <!-- Pie colors: one slice drawn like the pie (ROADMAP 1.13). -->
+                <!-- One preview per editor, drawn like LMT draws it (ROADMAP 1.13). -->
                 <com.noname81.lmt.PieTileView
                     android:id="@+id/pie_tile"
                     android:layout_width="match_parent"
                     android:layout_height="120dp"
+                    android:visibility="gone" />
+
+                <com.noname81.lmt.PiePointerPreviewView
+                    android:id="@+id/pointer_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:visibility="gone" />
+
+                <com.noname81.lmt.PieStatusInfoPreviewView
+                    android:id="@+id/status_info_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
                     android:visibility="gone" />
 
                 <TextView
@@ -47,21 +59,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textAppearance="?attr/textAppearanceLabelLarge"
-                    android:visibility="gone" />
-
-                <!-- Other colors (pointer, status infos): a plain swatch. -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@id/color_preview"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:clickable="false"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:textColor="@color/qc_normal_white"
-                    app:cornerRadius="16dp"
-                    app:strokeColor="?attr/colorOutlineVariant"
-                    app:strokeWidth="1dp" />
+                    android:textAppearance="?attr/textAppearanceLabelLarge" />
             </LinearLayout>
 
             <Button

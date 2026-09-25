@@ -77,6 +77,11 @@ android {
             // these as fast plain-JVM tests instead of needing an emulator.
             returnDefaultValues = true
             includeAndroidResources = true
+            // Every Robolectric test runs in one JVM; the default 512 MB heap ran out once
+            // the settings dialog tests grew (OutOfMemoryError in SettingsScreenUiTest).
+            all {
+                maxHeapSize = "1g"
+            }
         }
     }
 
