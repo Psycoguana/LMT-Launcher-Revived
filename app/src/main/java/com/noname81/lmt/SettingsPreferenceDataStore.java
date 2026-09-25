@@ -37,6 +37,9 @@ class SettingsPreferenceDataStore extends PreferenceDataStore {
                 return this.mSettings.loadPiePointerFromEdges() != 0;
             case "PieMultiCommand":
                 return this.mSettings.loadPieMultiCommand() != 0;
+            case "PieBlurLive":
+                // Off wherever it can't work, whatever a restored backup says.
+                return SamsungBlur.isAvailable() && this.mSettings.loadPieBlurLive() != 0;
             default:
                 return defValue;
         }
@@ -77,6 +80,12 @@ class SettingsPreferenceDataStore extends PreferenceDataStore {
                 return;
             case "PieMultiCommand":
                 this.mSettings.savePieMultiCommand(v);
+                this.mSettings.restartServiceIfRequired();
+                return;
+            case "PieBlurLive":
+                // The live blur stays set on the pie's blur view once applied, so switching
+                // back to the screenshot only takes effect with a fresh pie: restart.
+                this.mSettings.savePieBlurLive(v);
                 this.mSettings.restartServiceIfRequired();
                 return;
             default:

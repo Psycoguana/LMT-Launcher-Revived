@@ -623,6 +623,19 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 50,
                 this.mSettings::loadPieBlurRadius,
                 this.mSettings::savePieBlurRadius);
+
+        // Shown everywhere, but only phones with Samsung's live window blur (the Samsung flagship, not the
+        // TEST_PHONE) can turn it on; there it is on by default.
+        addSwitch(
+                        category,
+                        "Samsung Live Blur",
+                        SamsungBlur.isAvailable()
+                                ? "Apply real time blur. Does not blur pie's inner radius."
+                                : "Apply real time blur. Does not blur pie's inner radius.\n"
+                                        + "Not available on this device",
+                        "PieBlurLive",
+                        SamsungBlur.isAvailable())
+                .setEnabled(SamsungBlur.isAvailable());
     }
 
     private void buildPieBehaviorSection(PreferenceCategory category) {
@@ -1070,7 +1083,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         return category;
     }
 
-    private void addSwitch(
+    private SwitchPreferenceCompat addSwitch(
             PreferenceCategory category,
             String title,
             String caption,
@@ -1084,6 +1097,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         preference.setIconSpaceReserved(false);
         preference.setWidgetLayoutResource(R.layout.preference_widget_material_switch);
         category.addPreference(preference);
+        return preference;
     }
 
     private void showFeaturesDialog(String[] features, boolean root) {

@@ -876,6 +876,10 @@
     {
       "class": "ColorDialog$ANON.smali",
       "reason": "ROADMAP 1.13: TextWatcher so a color string typed or pasted into the editor updates the sliders and the preview."
+    },
+    {
+      "class": "SamsungBlur.smali",
+      "reason": "ROADMAP 1.11 upgrade: Samsung's live window blur (View.semSetBlurInfo with BLUR_MODE_WINDOW) by reflection, used by PieBlur on phones whose SemFloatingFeature has SEC_FLOATING_FEATURE_GRAPHICS_SUPPORT_3D_SURFACE_TRANSITION_FLAG (the Samsung flagship; not the test phone)."
     }
   ],
   "removed_classes": [

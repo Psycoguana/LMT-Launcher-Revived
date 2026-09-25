@@ -409,7 +409,17 @@ Settings → General → **Appearance** opens its own page (`AppearanceActivity`
   - Export/import toasts say "Settings exported" / "Settings imported" with no
     URI. The "Show system apps" chip sits at the right.
 
-### 1.11 Blurred pie background  ✅ done (Samsung live blur / AOSP blur-behind upgrades still open)
+### 1.11 Blurred pie background  ✅ done (Samsung live blur done; AOSP blur-behind still open)
+
+**Samsung live blur, done (Samsung flagship):** `SamsungBlur` sets `SemBlurInfo` (`BLUR_MODE_WINDOW`) on the
+`PieBlur` view inside LMT's own overlay window, by reflection, when `SemFloatingFeature` has
+`SEC_FLOATING_FEATURE_GRAPHICS_SUPPORT_3D_SURFACE_TRANSITION_FLAG` (the Samsung flagship has it, the test phone
+doesn't and keeps the screenshot). No screenshot, so the pie shows at once and the blur is
+live. Needs no probe app or extra accessibility service. A window blur can't leave a hole, so
+"Blur behind pie" becomes a disc (centre blurred too); the **Samsung Live Blur** switch
+(`PieBlurLive`) falls back to the screenshot ring. It is on by default only where live blur
+exists and greyed out elsewhere. Toggling it restarts the service: once set, the Samsung blur
+stays on the reused `PieBlur` view, so the screenshot route would otherwise never come back.
 
 Blur what's behind the pie while it is open, as the system does for the
 notification shade and power menu, instead of drawing the pie over the plain app.

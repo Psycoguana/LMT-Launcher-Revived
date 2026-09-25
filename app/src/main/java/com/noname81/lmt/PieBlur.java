@@ -21,17 +21,17 @@ import android.widget.FrameLayout;
 /**
  * Blurs what is behind the pie while it is open (ROADMAP 1.11).
  *
- * <p>No window blur works on every phone (AOSP cross-window blur is off on Samsung; Samsung's
- * own live blur only exists on flagships), so this takes one accessibility screenshot per pie
- * opening and draws it blurred behind the pie. On the test phone that is a ~20 ms GPU capture and a
- * blurred frame ~75-90 ms after the touch; nothing runs while the pie is closed.
+ * <p>No window blur works on every phone (AOSP cross-window blur is off on Samsung; Samsung's own
+ * live blur only exists on flagships), so this takes one accessibility screenshot per pie opening
+ * and draws it blurred behind the pie. On the test phone that is a ~20 ms GPU capture and a blurred frame
+ * ~75-90 ms after the touch; nothing runs while the pie is closed.
  *
  * <p>The pie is kept invisible until the screenshot arrives, otherwise it could end up in its own
- * background; a timeout reveals it anyway if the capture is slow or refused (the system allows
- * one screenshot per 333 ms, so a quick second opening goes unblurred).
+ * background; a timeout reveals it anyway if the capture is slow or refused (the system allows one
+ * screenshot per 333 ms, so a quick second opening goes unblurred).
  *
- * <p>In behind-pie mode the blur is a ring: the pie's inner circle is left clear, since there is
- * no pie there to sit on.
+ * <p>In behind-pie mode the blur is a ring: the pie's inner circle is left clear, since there is no
+ * pie there to sit on.
  *
  * <p>Needs Android 12 ({@link RenderEffect}) and LMT's accessibility service; without either the
  * pie opens exactly as before.
@@ -81,8 +81,15 @@ final class PieBlur extends View {
             return;
         }
         int mode = this.mSettings.loadPieBlur();
+        if (mode == MODE_NONE) {
+            return;
+        }
+        if (SamsungBlur.isAvailable() && this.mSettings.loadPieBlurLive() != 0) {
+            openLive((FrameLayout) pie.getParent(), mode, centerX, centerY, radius);
+            return;
+        }
         AccessibilityService service = AccessibilityHandler.connectedService();
-        if (mode == MODE_NONE || service == null) {
+        if (service == null) {
             return;
         }
         FrameLayout container = (FrameLayout) pie.getParent();
@@ -95,8 +102,10 @@ final class PieBlur extends View {
             params.leftMargin = centerX - radius;
             params.topMargin = centerY - radius;
         } else {
-            params = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            params =
+                    new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT);
         }
         setOutlineProvider(mode == MODE_BEHIND_PIE ? OVAL : null);
         setClipToOutline(mode == MODE_BEHIND_PIE);
@@ -147,6 +156,37 @@ final class PieBlur extends View {
                         }
                     }
                 });
+    }
+
+    /**
+     * Samsung's live window blur (ROADMAP 1.11 upgrade): the system blurs whatever is behind this
+     * view, every frame, so there is no screenshot to wait for and the pie shows at once. In
+     * behind-pie mode it is a disc: a window blur has no way to leave the centre clear.
+     */
+    private void openLive(FrameLayout container, int mode, int centerX, int centerY, int radius) {
+        close();
+        FrameLayout.LayoutParams params;
+        float corner;
+        if (mode == MODE_BEHIND_PIE) {
+            params = new FrameLayout.LayoutParams(radius * 2, radius * 2);
+            params.leftMargin = centerX - radius;
+            params.topMargin = centerY - radius;
+            corner = radius;
+        } else {
+            params =
+                    new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT);
+            corner = 0;
+        }
+        setOutlineProvider(null);
+        setClipToOutline(false);
+        this.mHoleRadius = 0;
+        setAlpha(1f);
+        if (!SamsungBlur.apply(this, this.mSettings.loadPieBlurRadius(), corner)) {
+            return;
+        }
+        container.addView(this, 0, params);
     }
 
     /** Removes the blur and frees the screenshot; safe to call when nothing is open. */

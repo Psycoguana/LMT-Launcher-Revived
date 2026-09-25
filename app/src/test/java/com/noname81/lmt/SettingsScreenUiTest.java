@@ -99,6 +99,8 @@ public class SettingsScreenUiTest {
         {"Pie style / Pie start gap", "PieStartGap"},
         {"Pie style / Blur", "PieBlur"},
         {"Pie style / Blur amount", "PieBlurRadius"},
+        // Greyed out except on Samsungs with live window blur (not Robolectric).
+        {"Pie style / Samsung Live Blur", ""},
         {"Pie behavior / Longpress time", "PieLongpress"},
         {"Pie behavior / Animation time", "PieAnimation"},
         {"Pie behavior / Feedback type", "PieVibrate"},

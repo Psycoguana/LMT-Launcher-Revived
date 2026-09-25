@@ -753,4 +753,13 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
     void savePieBlurRadius(int value) {
         saveInt("PieBlurRadius", Math.max(1, Math.min(150, value)), null);
     }
+
+    /** Samsung live window blur instead of the screenshot: on by default where available. */
+    int loadPieBlurLive() {
+        return loadInt("PieBlurLive", SamsungBlur.isAvailable() ? 1 : 0);
+    }
+
+    void savePieBlurLive(int value) {
+        saveInt("PieBlurLive", value, null);
+    }
 }
