@@ -621,7 +621,7 @@
     },
     {
       "class": "PieMenu.smali",
-      "reason": "ROADMAP 1.11: adds the mBlur field holding the pie's PieBlur view. ROADMAP 1.17 pie folders and ROADMAP 1.17 brightness dial: mBrightness, mFolderParent/mFolderItems/mFolderBaseLevels, getLevels, getOpenFolder, openFolder, closeFolder, placeIcon, armBrightness, plus the fade lambda."
+      "reason": "ROADMAP 1.11: adds the mBlur field holding the pie's PieBlur view. ROADMAP 1.17 pie folders and ROADMAP 1.17 brightness dial: mBrightness, mFolderParent/mFolderItems/mFolderBaseLevels, getLevels, getOpenFolder, openFolder, closeFolder, placeIcon, armBrightness, plus the fade lambda. Folder blur: blurRadius(levels), sectorPath and pointAt give PieBlur.showFolder the folder slices' outlines so only they are blurred."
     },
     {
       "class": "TouchService.smali",

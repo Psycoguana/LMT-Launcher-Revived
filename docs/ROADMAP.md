@@ -745,8 +745,10 @@ Both from 1.16. The dial came first because it fits the pie pointer's extension 
     2,200 icons; common folder-style icons first while the search is empty). The choice is
     saved as `symbol:<name>` in the slot's Icon field, so backups carry it, and drawn white so
     the pie tints it like its own icons.
-  - The blur behind the pie grows under an open folder's ring (`PieBlur.resize`) and
-    shrinks back when it closes. The Pie tab shows a folder slot as `Folder "Name", N actions`.
+  - The blur behind the pie also covers an open folder's slices, and only those
+    (`PieBlur.showFolder`): the screenshot blur is clipped to the pie's disc plus the slices'
+    outlines; Samsung's live blur, which only does rounded rectangles, gets one small rounded
+    blur behind each folder slice (not yet checked on the Samsung flagship). The Pie tab shows a folder slot as `Folder "Name", N actions`.
 
 ## Part 2 — Accessibility fallbacks for root-only actions
 

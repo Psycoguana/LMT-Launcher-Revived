@@ -443,9 +443,16 @@ class PieMenu extends FrameLayout {
         Path path =
                 makeSlice(
                         getDegrees(0.0d), getDegrees(sweep), outer, inner, this.mCenter, sliceGap);
+        // The blur covers the pie and the folder's own slices, not the rest of their ring.
+        int blurEdge = outer + this.mSettings.loadPieOutlineSize();
+        List<Path> blurSlices = new ArrayList<>();
+        List<RectF> blurBoxes = new ArrayList<>();
         for (PieItem item : items) {
             placeIcon(item.getView(), start + sweep / 2.0f, inner, outer);
             item.setGeometry(start, sweep, inner, outer, path);
+            RectF box = new RectF();
+            blurSlices.add(sectorPath(start, sweep, inner, blurEdge, box));
+            blurBoxes.add(box);
             item.setColor(this.mIconColor);
             item.setAlpha(0);
             this.mItems.add(item);
@@ -463,15 +470,44 @@ class PieMenu extends FrameLayout {
                 });
         fade.setDuration(Math.max(1, this.mAnimationTime * 2));
         fade.start();
-        this.mBlur.resize(blurRadius());
+        this.mBlur.showFolder(
+                blurSlices,
+                blurBoxes,
+                blurRadius(this.mFolderBaseLevels),
+                blurRadius(this.mLevels));
         invalidate();
     }
 
-    /** The blur disc's radius: out to the outermost ring and its outline. */
-    private int blurRadius() {
-        return this.mRadius
-                + (this.mRadiusInc * this.mLevels)
-                + this.mSettings.loadPieOutlineSize();
+    /** The blur disc's radius for a pie of {@code levels} rings: out to its outline. */
+    private int blurRadius(int levels) {
+        return this.mRadius + (this.mRadiusInc * levels) + this.mSettings.loadPieOutlineSize();
+    }
+
+    /** A slice's outline in screen space (the inverse of getPolar), and its bounding box. */
+    private Path sectorPath(float start, float sweep, int inner, int outer, RectF bounds) {
+        Path path = new Path();
+        int steps = 16;
+        for (int i = 0; i <= steps; i++) {
+            PointF p = pointAt(outer, start + sweep * i / steps);
+            if (i == 0) {
+                path.moveTo(p.x, p.y);
+            } else {
+                path.lineTo(p.x, p.y);
+            }
+        }
+        for (int i = steps; i >= 0; i--) {
+            PointF p = pointAt(inner, start + sweep * i / steps);
+            path.lineTo(p.x, p.y);
+        }
+        path.close();
+        path.computeBounds(bounds, true);
+        return path;
+    }
+
+    private PointF pointAt(float radius, double angle) {
+        float dx = (float) (radius * Math.sin(angle));
+        float x = onTheLeft() ? this.mCenter.x + dx : this.mCenter.x - dx;
+        return new PointF(x, (float) (this.mCenter.y - radius * Math.cos(angle)));
     }
 
     /** Takes the open folder's ring away again; hovering another slice or closing does this. */
@@ -490,7 +526,7 @@ class PieMenu extends FrameLayout {
         this.mFolderItems.clear();
         this.mLevels = this.mFolderBaseLevels;
         this.mFolderParent = null;
-        this.mBlur.resize(blurRadius());
+        this.mBlur.hideFolder(blurRadius(this.mLevels));
         invalidate();
     }
 

@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Path;
 import android.graphics.RecordingCanvas;
+import android.graphics.RectF;
 import android.graphics.RenderEffect;
 import android.graphics.RenderNode;
 import android.graphics.Shader;
@@ -17,6 +18,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Blurs what is behind the pie while it is open (ROADMAP 1.11).
@@ -65,6 +69,14 @@ final class PieBlur extends View {
 
     /** The open blur's shape, so a pie folder can grow it (ROADMAP 1.17). */
     private boolean mBehindPie;
+
+    /**
+     * With a folder open, the screenshot blur is clipped to the pie's disc plus the folder's own
+     * slices (view coordinates); the live blur adds one rounded blur per folder slice instead.
+     */
+    private Path mShape;
+
+    private final List<View> mFolderBlurs = new ArrayList<>();
 
     private boolean mLive;
     private int mCenterX;
@@ -201,27 +213,83 @@ final class PieBlur extends View {
     }
 
     /**
-     * Grows or shrinks the disc behind the pie to {@code radius}, for a pie folder's ring opening
-     * or closing (ROADMAP 1.17). The screenshot covers the whole display, so only the view's bounds
-     * change; a live blur gets the new corner radius too.
+     * A pie folder opened (ROADMAP 1.17): blur behind its slices too, and nothing else of their
+     * ring. {@code slices} are the folder slices' outlines and {@code bounds} their boxes, in the
+     * pie's coordinates; {@code radius} is the pie's own blur radius and {@code outer} the folder
+     * ring's.
      */
-    void resize(int radius) {
+    void showFolder(List<Path> slices, List<RectF> bounds, int radius, int outer) {
         if (!this.mBehindPie || !(getLayoutParams() instanceof FrameLayout.LayoutParams)) {
             return;
         }
+        hideFolderBlurs();
+        if (this.mLive) {
+            // A window blur is a rounded rectangle, so each folder slice gets its own.
+            ViewGroup container = (ViewGroup) getParent();
+            int blur = this.mSettings.loadPieBlurRadius();
+            for (RectF box : bounds) {
+                View view = new View(getContext());
+                FrameLayout.LayoutParams params =
+                        new FrameLayout.LayoutParams(
+                                Math.round(box.width()), Math.round(box.height()));
+                params.leftMargin = Math.round(box.left);
+                params.topMargin = Math.round(box.top);
+                if (SamsungBlur.apply(view, blur, Math.min(box.width(), box.height()) / 4)) {
+                    container.addView(view, container.indexOfChild(this) + 1, params);
+                    this.mFolderBlurs.add(view);
+                }
+            }
+            return;
+        }
+        // The screenshot covers the whole display: grow the view to the folder ring and clip
+        // the blur to the pie's disc plus the folder's slices.
+        setBounds(outer);
+        Path shape = new Path();
+        shape.addCircle(outer, outer, radius, Path.Direction.CW);
+        for (Path slice : slices) {
+            Path local = new Path(slice);
+            local.offset(outer - this.mCenterX, outer - this.mCenterY);
+            shape.op(local, Path.Op.UNION);
+        }
+        this.mShape = shape;
+        setClipToOutline(false);
+        invalidate();
+    }
+
+    /** The folder closed: back to the pie's own disc. */
+    void hideFolder(int radius) {
+        hideFolderBlurs();
+        if (this.mShape == null) {
+            return;
+        }
+        this.mShape = null;
+        setBounds(radius);
+        setClipToOutline(true);
+        invalidate();
+    }
+
+    private void hideFolderBlurs() {
+        for (View view : this.mFolderBlurs) {
+            if (view.getParent() instanceof ViewGroup) {
+                ((ViewGroup) view.getParent()).removeView(view);
+            }
+        }
+        this.mFolderBlurs.clear();
+    }
+
+    private void setBounds(int radius) {
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) getLayoutParams();
         params.width = radius * 2;
         params.height = radius * 2;
         params.leftMargin = this.mCenterX - radius;
         params.topMargin = this.mCenterY - radius;
         setLayoutParams(params);
-        if (this.mLive) {
-            SamsungBlur.apply(this, this.mSettings.loadPieBlurRadius(), radius);
-        }
     }
 
     /** Removes the blur and frees the screenshot; safe to call when nothing is open. */
     void close() {
+        hideFolderBlurs();
+        this.mShape = null;
         this.mGeneration++;
         revealPie();
         animate().cancel();
@@ -272,6 +340,9 @@ final class PieBlur extends View {
         // was on screen, whatever this view's (or the window's) offset is.
         getLocationOnScreen(this.mLocation);
         if (this.mNode == null || !canvas.isHardwareAccelerated()) {
+            if (this.mShape != null) {
+                canvas.clipPath(this.mShape);
+            }
             canvas.drawBitmap(this.mBitmap, -this.mLocation[0], -this.mLocation[1], null);
             return;
         }
@@ -280,6 +351,9 @@ final class PieBlur extends View {
         recording.drawBitmap(this.mBitmap, -this.mLocation[0], -this.mLocation[1], null);
         this.mNode.endRecording();
         int save = canvas.save();
+        if (this.mShape != null) {
+            canvas.clipPath(this.mShape);
+        }
         if (this.mHoleRadius > 0) {
             this.mHole.rewind();
             this.mHole.addCircle(
