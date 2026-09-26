@@ -563,7 +563,7 @@
     },
     {
       "class": "SettingsValuesBase.smali",
-      "reason": "ROADMAP 1.4: loadShowSystemApps/saveShowSystemApps persist the app picker's 'show system apps' toggle. Missing from this file until ROADMAP 3.6 made one-sided methods actually fail the oracle - before that they only printed a warning. ROADMAP 1.10 adds load/save ThemeMode, ThemeFollowSystemColor, ThemeColor and ThemeCustomColor for the Appearance page. ROADMAP 1.17 pie folders: FOLDER_ITEMS, mCurrentFolderSlot/mCurrentFolderItem/mFolderActions, getFolderAction, folderPrefix, saveFolderName, setCurrentFolderItem, currentPieSlot, reloadFolders, loadPieFolderOpen/savePieFolderOpen. ROADMAP 1.17 folder icons: saveFolderSymbol."
+      "reason": "ROADMAP 1.4: loadShowSystemApps/saveShowSystemApps persist the app picker's 'show system apps' toggle. Missing from this file until ROADMAP 3.6 made one-sided methods actually fail the oracle - before that they only printed a warning. ROADMAP 1.10 adds load/save ThemeMode, ThemeFollowSystemColor, ThemeColor and ThemeCustomColor for the Appearance page. ROADMAP 1.17 pie folders: FOLDER_ITEMS, mCurrentFolderSlot/mCurrentFolderItem/mFolderActions, getFolderAction, folderPrefix, saveFolderName, setCurrentFolderItem, currentPieSlot, reloadFolders, loadPieFolderOpen/savePieFolderOpen. ROADMAP 1.17 folder icons: saveFolderSymbol. loadPieBrightnessDial/savePieBrightnessDial."
     },
     {
       "class": "LMT.smali",
@@ -1054,7 +1054,7 @@
     },
     {
       "class": "PieBrightness.smali",
-      "reason": "ROADMAP 1.17 brightness dial: PieView extension, armed by hovering its slice; past the rim the finger's angle sets Settings.System.SCREEN_BRIGHTNESS (gamma 2.2) and draws the dial."
+      "reason": "ROADMAP 1.17 brightness dial: PieView extension, armed by hovering its slice; past the rim the finger's angle sets Settings.System.SCREEN_BRIGHTNESS (gamma 2.2) and draws the dial. With the Brightness dial setting (PieBrightnessDial) it is also always drawn, faint, just outside the pie and grabbed by resting on it for 80% of the long press time."
     },
     {
       "class": "MaterialIcons.smali",
@@ -1083,6 +1083,10 @@
     {
       "class": "IconPickerDialog$ANON.smali",
       "reason": "ROADMAP 1.17 folder icons: search TextWatcher and the dialog's listeners, merged by the fingerprinter."
+    },
+    {
+      "class": "PieBrightness$ANON.smali",
+      "reason": "ROADMAP 1.17 brightness dial: the grab Runnable (this::grab) of the always-there dial, posted when the finger rests on it."
     }
   ],
   "removed_classes": [

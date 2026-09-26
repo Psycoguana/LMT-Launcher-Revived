@@ -868,6 +868,23 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                     this.mSettings.restartServiceIfRequired();
                 });
 
+        // ROADMAP 1.17: the dial without spending a slice on it, like the status infos.
+        addSwitch(
+                        category,
+                        "Brightness dial",
+                        "A dial just outside the pie sets the brightness: hold on it for a moment,"
+                                + " then slide along it. Needs Modify system settings",
+                        "PieBrightnessDial",
+                        false)
+                .setOnPreferenceChangeListener(
+                        (preference, value) -> {
+                            if (Boolean.TRUE.equals(value)) {
+                                PermissionChecker.checkAndRequestWriteSettingsPermission(
+                                        requireActivity());
+                            }
+                            return true;
+                        });
+
         addChoiceDialog(
                 category,
                 "Show status infos",

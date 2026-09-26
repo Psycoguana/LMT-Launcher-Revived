@@ -375,7 +375,7 @@ class PieMenu extends FrameLayout {
             }
         }
         this.mPiePointer = new PiePointer(this, context, this.mPointerColor);
-        this.mBrightness = new PieBrightness(context, this.mPointerColor);
+        this.mBrightness = new PieBrightness(this, context, this.mPointerColor);
         if (this.mSettings.loadPieShowStatusInfos() > 0) {
             this.mStatusInfo =
                     new PieStatusInfo(

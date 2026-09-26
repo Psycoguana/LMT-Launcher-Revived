@@ -21,6 +21,10 @@ import android.widget.Toast;
  * finger keeps the value and fires nothing; sliding back into the centre hands the touch back to
  * the pie.
  *
+ * <p>With the Brightness dial setting on, the dial is also always there, faint, just outside the
+ * pie, with no slice needed (like the status infos): resting the finger on it for a moment grabs
+ * it, so sliding out past it to an outer slice doesn't change the brightness.
+ *
  * <p>Writes {@link Settings.System#SCREEN_BRIGHTNESS} (switching adaptive brightness off), so it
  * needs the "Modify system settings" permission; without it the slice asks for it when released.
  */
@@ -36,6 +40,15 @@ class PieBrightness implements PieMenu.PieView {
     private static final double GAMMA = 2.2;
 
     private final Context mContext;
+    private final android.view.View mHost;
+    private final SettingsValues mSettings;
+    private final Runnable mGrab = this::grab;
+    private final float mGrabBand;
+
+    /** The always-there dial (setting on and allowed), and whether its grab is pending. */
+    private boolean mAlways;
+
+    private boolean mGrabPending;
     private final Paint mTrack = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mFill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mKnob = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -61,9 +74,12 @@ class PieBrightness implements PieMenu.PieView {
     private float mFraction;
     private int mWritten = -1;
 
-    PieBrightness(Context context, int color) {
+    PieBrightness(android.view.View host, Context context, int color) {
         this.mContext = context;
+        this.mHost = host;
+        this.mSettings = SettingsValues.getInstance(context);
         float density = context.getResources().getDisplayMetrics().density;
+        this.mGrabBand = 26 * density;
         this.mGap = 22 * density;
         this.mStroke = 10 * density;
         this.mTrack.setStyle(Paint.Style.STROKE);
@@ -150,15 +166,54 @@ class PieBrightness implements PieMenu.PieView {
         this.mRimRadius = radius + radiusInc * levels;
         this.mOnTheLeft = onTheLeft;
         this.mOnTheBottom = onTheBottom;
-        if (!visible) {
-            this.mArmed = false;
-            this.mActive = false;
+        cancelGrab();
+        this.mArmed = false;
+        this.mActive = false;
+        this.mAlways =
+                visible && this.mSettings.loadPieBrightnessDial() != 0 && canWrite(this.mContext);
+        if (this.mAlways) {
+            currentValue();
         }
+    }
+
+    /** Resting on the always-there dial long enough grabs it. */
+    private void grab() {
+        this.mGrabPending = false;
+        if (!this.mAlways || this.mActive) {
+            return;
+        }
+        this.mActive = true;
+        this.mWritten = currentValue();
+        this.mHost.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+        this.mHost.invalidate();
+    }
+
+    private void cancelGrab() {
+        if (this.mGrabPending) {
+            this.mHost.removeCallbacks(this.mGrab);
+            this.mGrabPending = false;
+        }
+    }
+
+    /** The dial's radius, just outside the pie. */
+    private float dialRadius() {
+        return this.mRimRadius + this.mGap;
     }
 
     @Override
     public boolean onTouchEvent(
             int action, float x, float y, float deltaX, float deltaY, PointF polar) {
+        if (!this.mActive && this.mAlways && action == 2) {
+            // Before the pie's own long press (which would fire the slice under the finger).
+            boolean onDial =
+                    polar.y > this.mRimRadius && Math.abs(polar.y - dialRadius()) < this.mGrabBand;
+            if (onDial && !this.mGrabPending) {
+                this.mGrabPending = true;
+                this.mHost.postDelayed(this.mGrab, this.mSettings.loadPieLongpress() * 4L / 5);
+            } else if (!onDial) {
+                cancelGrab();
+            }
+        }
         if (!this.mActive) {
             if (!this.mArmed || action != 2) {
                 return false;
@@ -194,10 +249,22 @@ class PieBrightness implements PieMenu.PieView {
 
     @Override
     public boolean drawForeground(Canvas canvas) {
-        if (!this.mActive || this.mCenter == null) {
+        if (this.mCenter == null || !(this.mActive || this.mAlways)) {
             return false;
         }
-        float r = this.mRimRadius + this.mGap;
+        float r = dialRadius();
+        if (!this.mActive) {
+            // Resting: a faint dial showing the level, to grab by holding on it.
+            int track = this.mTrack.getAlpha();
+            int fill = this.mFill.getAlpha();
+            this.mTrack.setAlpha(track / 2);
+            this.mFill.setAlpha(110);
+            arc(canvas, r, 0f, 1f, this.mTrack);
+            arc(canvas, r, 0f, this.mFraction, this.mFill);
+            this.mTrack.setAlpha(track);
+            this.mFill.setAlpha(fill);
+            return false;
+        }
         arc(canvas, r, 0f, 1f, this.mTrack);
         arc(canvas, r, 0f, this.mFraction, this.mFill);
         PointF knob = point(r, angleOf(this.mFraction));
@@ -215,6 +282,7 @@ class PieBrightness implements PieMenu.PieView {
 
     @Override
     public void onShrink() {
+        cancelGrab();
         this.mArmed = false;
         this.mActive = false;
     }

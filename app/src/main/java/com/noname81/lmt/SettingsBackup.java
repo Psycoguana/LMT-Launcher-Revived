@@ -88,6 +88,7 @@ class SettingsBackup {
         {"PieBlurRadius", "50"},
         {"PieBlurLive", "1"},
         {"PieFolderOpen", "0"},
+        {"PieBrightnessDial", "0"},
     };
 
     private static final String[][] STRING_DEFAULTS = {

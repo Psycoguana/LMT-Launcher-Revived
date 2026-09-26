@@ -74,4 +74,15 @@ public class NewActionsTest {
         KeepScreenOn.toggle(context);
         assertFalse(KeepScreenOn.isOn());
     }
+
+    @Test
+    public void theAlwaysThereDialIsASettingThatBackupsCarry() throws Exception {
+        Context context = ApplicationProvider.getApplicationContext();
+        SettingsValues settings = SettingsValues.getInstance(context);
+        assertEquals(0, settings.loadPieBrightnessDial());
+        settings.savePieBrightnessDial(1);
+        assertEquals(
+                1, SettingsBackup.exportSettingsToJson(settings).getInt("PieBrightnessDial"));
+        settings.savePieBrightnessDial(0);
+    }
 }

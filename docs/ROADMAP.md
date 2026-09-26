@@ -727,6 +727,11 @@ Both from 1.16. The dial came first because it fits the pie pointer's extension 
   toggles adaptive brightness. Needs "Modify system settings"; picking the action or tapping
   the slice opens that screen. Drawn as a white arc on a dark track with a knob and a
   percentage, readable on any wallpaper.
+- **Brightness dial setting** (`PieBrightnessDial`, Pie extensions): the same dial without
+  spending a slice on it, like the status infos. When on, it is drawn faint just outside the
+  pie every time it opens; resting the finger on it for 80% of the long press time grabs it
+  (a haptic tick), then sliding along it sets the brightness. Passing over it on the way to an
+  outer slice doesn't change anything. It may overlap the status infos' clock.
 - **50 Folder** (mockup A, outer ring): a pie slot holds a folder of up to 8 actions
   (`PieFolder<slot>Item<i> Type/String/Icon`, name in the slot's own string, backed up with
   the rest). Picked from the action picker on pie slots only (not gestures, ISAs or inside

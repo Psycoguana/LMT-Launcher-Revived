@@ -831,6 +831,15 @@ class SettingsValuesBase extends SettingsSharedPrefsWrapper {
         saveInt("PieBlurLive", value, null);
     }
 
+    /** The brightness dial always around the pie, no slice needed (ROADMAP 1.17): 0 off. */
+    int loadPieBrightnessDial() {
+        return loadInt("PieBrightnessDial", 0);
+    }
+
+    void savePieBrightnessDial(int value) {
+        saveInt("PieBrightnessDial", value, null);
+    }
+
     /**
      * When a pie folder opens (ROADMAP 1.17): 0 when its slice is hovered, 1 after a long press.
      */

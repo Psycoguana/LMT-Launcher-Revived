@@ -120,6 +120,7 @@ public class SettingsScreenUiTest {
         {"Pie extensions / Pie pointer edge activation", "PiePointerFromEdges"},
         {"Pie extensions / Pie pointer warp factor", "PiePointerWarpFactorPercent"},
         {"Pie extensions / Pie pointer color", "PiePointerColorString"},
+        {"Pie extensions / Brightness dial", "PieBrightnessDial"},
         {"Pie extensions / Show status infos", "PieShowStatusInfos"},
         {"Pie extensions / Pie status info colors", "PieStatusInfoColorString"},
         {"Pie extensions / Pie status info font", "PieFont"},
