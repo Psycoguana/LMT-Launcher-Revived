@@ -100,6 +100,7 @@ public class AccessibilityHandler extends AccessibilityService {
     protected void onServiceConnected() {
         if (mInitialized) {
             instance = this;
+            TouchService.accessibilityChanged();
             return;
         }
         AccessibilityServiceInfo accessibilityServiceInfo = new AccessibilityServiceInfo();
@@ -109,6 +110,7 @@ public class AccessibilityHandler extends AccessibilityService {
         this.mNotificationDataHelper = NotificationDataHelper.getInstance();
         instance = this;
         mInitialized = true;
+        TouchService.accessibilityChanged();
     }
 
     /**
@@ -146,6 +148,7 @@ public class AccessibilityHandler extends AccessibilityService {
         Log.i(TAG, "onUnbind");
         instance = null;
         mInitialized = false;
+        TouchService.accessibilityChanged();
         return super.onUnbind(intent);
     }
 

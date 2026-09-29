@@ -1156,6 +1156,26 @@ infinity. The fix is a float division; the same applies to Y. Found while writin
 row lambda, and the `SettingsViewFragment$ANON` bucket is already accepted as new.
 Not exercised on-device (needs root plus gestures/ISA mode).
 
+### 3.8 ✅ FIXED — Chrome "This site can't ask for your permission" while LMT runs (upstream)
+
+With the pie on, allowing a site's camera, microphone or location in Chrome failed with "Close
+any bubbles or overlays from other apps. Then try again", and worked with LMT stopped.
+
+- The pie's trigger strips are `TYPE_APPLICATION_OVERLAY` windows. Any touch over an app
+  while such a window is on screen reaches the app flagged
+  `FLAG_WINDOW_IS_PARTIALLY_OBSCURED` (`InputDispatcher: partially obscured by ... com.no...`
+  in logcat), and Chrome's prompt refuses those touches (tapjacking protection).
+- Fix: when LMT's accessibility service is connected, the strips are added through the
+  service as `TYPE_ACCESSIBILITY_OVERLAY`, which the input system treats as trusted. The pie
+  and blur work the same. `TouchService.accessibilityChanged` re-adds them as the other type
+  when accessibility connects or goes away, so the pie never disappears. Keep screen on's
+  1-pixel window does the same.
+- Without the accessibility service it can't be avoided; workaround: tap "Block", then
+  allow the permission from the site's settings (lock icon).
+- Verified on the test phone: location and microphone prompts accept taps with the pie running;
+  `dumpsys window` shows `ty=ACCESSIBILITY_OVERLAY`, and `APPLICATION_OVERLAY` again with
+  accessibility off.
+
 ---
 
 ## Part 4 — Reconstruction cleanup still outstanding

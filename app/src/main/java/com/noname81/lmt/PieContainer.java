@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -31,6 +32,15 @@ public class PieContainer {
     private final PieLayout mPieLayout3;
     private final SettingsValues mSettings;
     private final WindowManager mWindowManager;
+
+    /**
+     * The trigger strips are accessibility overlays when LMT's accessibility service is on. An app
+     * overlay (TYPE_APPLICATION_OVERLAY) marks every touch in the app below as partially obscured,
+     * and apps with tapjacking protection refuse those touches: Chrome's site permission prompt
+     * answers "close bubbles or overlays of other apps". An accessibility overlay is a trusted
+     * overlay, which the input system doesn't count (ROADMAP 3.8).
+     */
+    private final boolean mTrusted;
 
     private int getWindowFlags(int position) {
         return (position > 0 ? 131072 : 32) | 32 | 8;
@@ -196,7 +206,13 @@ public class PieContainer {
 
     PieContainer(Context context) {
         this.mSettings = SettingsValues.getInstance(context);
-        this.mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        android.accessibilityservice.AccessibilityService service =
+                Build.VERSION.SDK_INT >= 26 ? AccessibilityHandler.connectedService() : null;
+        this.mTrusted = service != null;
+        this.mWindowManager =
+                (WindowManager)
+                        (this.mTrusted ? service : context)
+                                .getSystemService(Context.WINDOW_SERVICE);
         this.mPieControl = new PieControl(context);
         this.mPieLayout1 = new PieLayout(context, false);
         this.mPieLayout2 = new PieLayout(context, false);
@@ -283,18 +299,32 @@ public class PieContainer {
         if (DEBUG) {
             Log.d(TAG, "removeFromWindowManager");
         }
+        // An accessibility overlay is already gone when the accessibility service went away.
         if (this.mAddedLayout1) {
-            this.mWindowManager.removeView(this.mPieLayout1);
+            removeQuietly(this.mPieLayout1);
             this.mAddedLayout1 = false;
         }
         if (this.mAddedLayout2) {
-            this.mWindowManager.removeView(this.mPieLayout2);
+            removeQuietly(this.mPieLayout2);
             this.mAddedLayout2 = false;
         }
         if (this.mAddedLayout3) {
-            this.mWindowManager.removeView(this.mPieLayout3);
+            removeQuietly(this.mPieLayout3);
             this.mAddedLayout3 = false;
         }
+    }
+
+    private void removeQuietly(View layout) {
+        try {
+            this.mWindowManager.removeView(layout);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Pie window already removed", e);
+        }
+    }
+
+    /** Whether the strips were added as accessibility overlays. */
+    boolean isTrusted() {
+        return this.mTrusted;
     }
 
     void rotate() {
@@ -328,6 +358,6 @@ public class PieContainer {
         if (Build.VERSION.SDK_INT < 26) {
             return position > 0 ? 2010 : 2003;
         }
-        return 2038;
+        return this.mTrusted ? WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY : 2038;
     }
 }

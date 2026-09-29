@@ -20,6 +20,7 @@ final class KeepScreenOn {
     private static final String TAG = "LMT::KeepScreenOn";
     private static View sView;
     private static BroadcastReceiver sScreenOff;
+    private static Context sWindowContext;
 
     private KeepScreenOn() {}
 
@@ -35,11 +36,18 @@ final class KeepScreenOn {
             Toast.makeText(context, "The screen can turn off again", Toast.LENGTH_SHORT).show();
             return;
         }
+        // An accessibility overlay when possible: an app overlay makes apps with tapjacking
+        // protection (Chrome's permission prompt) refuse touches (ROADMAP 3.8).
+        android.accessibilityservice.AccessibilityService service =
+                AccessibilityHandler.connectedService();
+        sWindowContext = service != null ? service : context;
         WindowManager.LayoutParams params =
                 new WindowManager.LayoutParams(
                         1,
                         1,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                        service != null
+                                ? WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+                                : WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                                 | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                                 | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
@@ -47,7 +55,7 @@ final class KeepScreenOn {
         params.gravity = Gravity.TOP | Gravity.START;
         View view = new View(context);
         try {
-            context.getSystemService(WindowManager.class).addView(view, params);
+            sWindowContext.getSystemService(WindowManager.class).addView(view, params);
         } catch (RuntimeException e) {
             Log.w(TAG, "Overlay refused", e);
             Toast.makeText(context, "LMT needs the draw over apps permission", Toast.LENGTH_SHORT)
@@ -71,7 +79,7 @@ final class KeepScreenOn {
         Context context = caller.getApplicationContext();
         if (sView != null) {
             try {
-                context.getSystemService(WindowManager.class).removeView(sView);
+                sWindowContext.getSystemService(WindowManager.class).removeView(sView);
             } catch (RuntimeException e) {
                 Log.w(TAG, "Overlay already gone", e);
             }

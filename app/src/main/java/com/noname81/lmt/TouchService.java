@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.system.Os;
@@ -145,6 +146,7 @@ public class TouchService extends Service {
 
     @Override
     public void onCreate() {
+        sInstance = this;
         Log.d(TAG, "TouchService created");
         this.mSettings = SettingsValues.getInstance(this);
         this.mToaster = Toaster.getInstance(this);
@@ -177,6 +179,33 @@ public class TouchService extends Service {
                         + " file(s)");
         this.mSettings.setServiceState(1);
         startForeground(777, createNotification());
+    }
+
+    /** The running service, for the accessibility service to reach (ROADMAP 3.8). */
+    private static TouchService sInstance;
+
+    /**
+     * LMT's accessibility service connected or went away: re-add the pie so its trigger strips are
+     * accessibility overlays whenever they can be (ROADMAP 3.8). Accessibility overlays leave with
+     * the service, so the pie falls back to app overlays then instead of vanishing.
+     */
+    static void accessibilityChanged() {
+        TouchService service = sInstance;
+        if (service != null) {
+            new Handler(Looper.getMainLooper()).post(service::reattachPie);
+        }
+    }
+
+    private void reattachPie() {
+        PieContainer pie = this.mPieContainer;
+        if (this.mDestroyed
+                || pie == null
+                || pie.isTrusted() == (AccessibilityHandler.connectedService() != null)) {
+            return;
+        }
+        pie.removeFromWindowManager();
+        this.mPieContainer = new PieContainer(this);
+        this.mPieContainer.attachToWindowManager();
     }
 
     private void startGestures() {
@@ -381,6 +410,7 @@ public class TouchService extends Service {
         Toast.makeText(this, "LMT stopped", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "TouchService stopped");
         this.mDestroyed = true;
+        sInstance = null;
         this.mMessageHandler.removeCallbacks(this.mSpinCheck);
         KeepScreenOn.stop(this);
         TouchServiceNative touchServiceNative = this.mTouchServiceNative;

@@ -535,6 +535,21 @@
       "class": "SettingsValuesBase.smali",
       "method": "private savePieAction(ILcom/noname81/lmt/Action;Landroid/content/SharedPreferences$Editor;)V",
       "reason": "ROADMAP 1.17 folder icons: the Icon field is written by Action.encodeIcon (symbol:<name> for a picked Material icon, else the base64 image as before)."
+    },
+    {
+      "class": "PieContainer.smali",
+      "method": "constructor <init>(Landroid/content/Context;)V",
+      "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): when LMT's accessibility service is connected, takes the window manager from it (mTrusted), so the trigger strips can be accessibility overlays."
+    },
+    {
+      "class": "PieContainer.smali",
+      "method": "private getWindowType(I)I",
+      "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): TYPE_ACCESSIBILITY_OVERLAY when mTrusted, else TYPE_APPLICATION_OVERLAY as before. App overlays make every touch partially obscured and Chrome's permission prompt refuses those."
+    },
+    {
+      "class": "PieContainer.smali",
+      "method": "removeFromWindowManager()V",
+      "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): removes through removeQuietly, since accessibility overlays are already gone when the service unbinds."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -559,7 +574,7 @@
     },
     {
       "class": "AccessibilityHandler.smali",
-      "reason": "ROADMAP 3.5: adds onUnbind, which clears instance/mInitialized on a real disconnect - previously nothing did, so LMT kept calling into a dead service."
+      "reason": "ROADMAP 3.5: adds onUnbind, which clears instance/mInitialized on a real disconnect - previously nothing did, so LMT kept calling into a dead service. ROADMAP 3.8 (Chrome can't ask for permissions): onServiceConnected/onUnbind call TouchService.accessibilityChanged."
     },
     {
       "class": "SettingsValuesBase.smali",
@@ -625,7 +640,7 @@
     },
     {
       "class": "TouchService.smali",
-      "reason": "ROADMAP 1.13: spinning gesture-thread watchdog - checkTouchServiceThread, isSpinning, threadCpuTicks, parseCpuTicks and the mSpin*/SPIN_* fields. Also startGestureThread (the unchanged reader start), checkInputDevice and PREPARE_INPUT (stale-reader cleanup and touchscreen check)."
+      "reason": "ROADMAP 1.13: spinning gesture-thread watchdog - checkTouchServiceThread, isSpinning, threadCpuTicks, parseCpuTicks and the mSpin*/SPIN_* fields. Also startGestureThread (the unchanged reader start), checkInputDevice and PREPARE_INPUT (stale-reader cleanup and touchscreen check). ROADMAP 3.8 (Chrome can't ask for permissions): sInstance, accessibilityChanged and reattachPie re-add the pie as the other overlay type when accessibility connects or goes away."
     },
     {
       "class": "TouchService$TouchServiceThread.smali",
@@ -656,6 +671,10 @@
     {
       "class": "PermissionChecker.smali",
       "reason": "ROADMAP 1.17 brightness dial: static checkAndRequestWriteSettingsPermission opens Settings.ACTION_MANAGE_WRITE_SETTINGS for LMT when Modify system settings isn't granted."
+    },
+    {
+      "class": "PieContainer.smali",
+      "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): mTrusted, isTrusted and removeQuietly."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
