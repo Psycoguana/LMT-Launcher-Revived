@@ -44,7 +44,11 @@ android {
             signingConfig signingConfigs.release
         }
         debug {
-            signingConfig signingConfigs.release
+            // With the release key present, debug builds install over release ones; without it
+            // (a fresh clone) they use the standard debug key so the project still builds.
+            if (keystoreProps['storeFile']) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
