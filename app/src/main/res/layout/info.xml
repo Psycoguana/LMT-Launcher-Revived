@@ -84,14 +84,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="GitHub repo" />
+                    android:text="GitHub repo"
+                    app:icon="@drawable/ic_brand_github"
+                    app:iconGravity="textEnd"
+                    app:iconPadding="8dp"
+                    app:iconSize="18dp" />
 
                 <Button
                     android:id="@+id/info_xda"
                     style="?attr/materialButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="XDA thread" />
+                    android:text="XDA thread"
+                    app:icon="@drawable/ic_brand_xda"
+                    app:iconGravity="textEnd"
+                    app:iconPadding="8dp"
+                    app:iconSize="18dp" />
 
                 <Button
                     android:id="@+id/info_donate"
@@ -99,7 +107,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Donate to noname81"
-                    app:backgroundTint="?attr/colorSurfaceContainer" />
+                    app:backgroundTint="?attr/colorSurfaceContainer"
+                    app:icon="@drawable/ic_brand_paypal"
+                    app:iconGravity="textEnd"
+                    app:iconPadding="8dp"
+                    app:iconSize="18dp" />
             </LinearLayout>
         </FrameLayout>
 
