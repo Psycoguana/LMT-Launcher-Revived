@@ -51,6 +51,13 @@ class PieBrightness implements PieMenu.PieView {
     private boolean mGrabPending;
     private final Paint mTrack = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mFill = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    /**
+     * A thin dark rim around the track, so the dial reads on white apps too. No shadows: on a light
+     * background a shadowed white arc showed as a blurry grey smear.
+     */
+    private final Paint mEdge = new Paint(Paint.ANTI_ALIAS_FLAG);
+
     private final Paint mKnob = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mKnobRing = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -70,6 +77,11 @@ class PieBrightness implements PieMenu.PieView {
 
     private final Paint mSunGapFill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mText = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    /** The percentage sits on a dark pill, readable on light and dark apps alike. */
+    private final Paint mPill = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    private final android.graphics.RectF mPillBox = new android.graphics.RectF();
     private final Path mPath = new Path();
     private final float mGap;
     private final float mStroke;
@@ -102,12 +114,15 @@ class PieBrightness implements PieMenu.PieView {
         this.mTrack.setStrokeCap(Paint.Cap.ROUND);
         this.mTrack.setStrokeWidth(this.mStroke);
         // White on a dark track reads on light and dark wallpapers alike.
-        this.mTrack.setColor(Color.argb(110, 0, 0, 0));
+        this.mTrack.setColor(Color.argb(150, 128, 128, 128));
+        this.mEdge.setStyle(Paint.Style.STROKE);
+        this.mEdge.setStrokeCap(Paint.Cap.ROUND);
+        this.mEdge.setStrokeWidth(this.mStroke + 3 * density);
+        this.mEdge.setColor(Color.argb(90, 0, 0, 0));
         this.mFill.setStyle(Paint.Style.STROKE);
         this.mFill.setStrokeCap(Paint.Cap.ROUND);
         this.mFill.setStrokeWidth(this.mStroke);
-        this.mFill.setColor(Color.WHITE);
-        this.mFill.setShadowLayer(2 * density, 0, 0, Color.argb(120, 0, 0, 0));
+        this.mFill.setColor(SUN_GOLD);
         this.mKnob.setColor(Color.WHITE);
         this.mKnobRing.setStyle(Paint.Style.STROKE);
         this.mKnobRing.setStrokeWidth(3 * density);
@@ -142,7 +157,7 @@ class PieBrightness implements PieMenu.PieView {
                         TypedValue.COMPLEX_UNIT_SP,
                         14,
                         context.getResources().getDisplayMetrics()));
-        this.mText.setShadowLayer(3 * density, 0, 0, Color.argb(160, 0, 0, 0));
+        this.mPill.setColor(Color.argb(170, 0, 0, 0));
     }
 
     /** Not used: the dial arms with {@link #arm}, which knows the slice. */
@@ -293,12 +308,16 @@ class PieBrightness implements PieMenu.PieView {
         float r = dialRadius();
         if (!this.mActive) {
             // Resting: a faint dial showing the level, to grab by holding on it.
+            int edge = this.mEdge.getAlpha();
             int track = this.mTrack.getAlpha();
             int fill = this.mFill.getAlpha();
+            this.mEdge.setAlpha(edge / 2);
             this.mTrack.setAlpha(track / 2);
-            this.mFill.setAlpha(110);
+            this.mFill.setAlpha(140);
+            arc(canvas, r, 0f, 1f, this.mEdge);
             arc(canvas, r, 0f, 1f, this.mTrack);
             arc(canvas, r, 0f, this.mFraction, this.mFill);
+            this.mEdge.setAlpha(edge);
             this.mTrack.setAlpha(track);
             this.mFill.setAlpha(fill);
             return false;
@@ -307,6 +326,7 @@ class PieBrightness implements PieMenu.PieView {
         // The dial goes on a layer so a gap following the sun's outline can be cut out of it:
         // no white shows under or through the sun.
         int layer = canvas.saveLayer(null, null);
+        arc(canvas, r, 0f, 1f, this.mEdge);
         arc(canvas, r, 0f, 1f, this.mTrack);
         arc(canvas, r, 0f, this.mFraction, this.mFill);
         if (this.mHasSun) {
@@ -325,12 +345,17 @@ class PieBrightness implements PieMenu.PieView {
             canvas.drawCircle(knob.x, knob.y, this.mStroke * 0.9f, this.mKnobRing);
         }
         // The value sits just outside the knob, away from the finger.
-        PointF label = point(r + this.mStroke * 3.4f, angleOf(this.mFraction));
-        canvas.drawText(
-                Math.round(this.mFraction * 100) + "%",
-                label.x,
-                label.y + this.mText.getTextSize() / 3,
-                this.mText);
+        PointF label = point(r + this.mStroke * 3.8f, angleOf(this.mFraction));
+        String percent = Math.round(this.mFraction * 100) + "%";
+        float halfWidth = this.mText.measureText(percent) / 2 + this.mStroke * 0.8f;
+        float halfHeight = this.mText.getTextSize() * 0.75f;
+        this.mPillBox.set(
+                label.x - halfWidth,
+                label.y - halfHeight,
+                label.x + halfWidth,
+                label.y + halfHeight);
+        canvas.drawRoundRect(this.mPillBox, halfHeight, halfHeight, this.mPill);
+        canvas.drawText(percent, label.x, label.y + this.mText.getTextSize() / 3, this.mText);
         return false;
     }
 
