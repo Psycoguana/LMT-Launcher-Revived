@@ -755,6 +755,21 @@ Both from 1.16. The dial came first because it fits the pie pointer's extension 
     outlines; Samsung's live blur, which only does rounded rectangles, gets one small rounded
     blur behind each folder slice (not yet checked on the Samsung flagship). The Pie tab shows a folder slot as `Folder "Name", N actions`.
 
+### 1.18 Info tab redesign  ✅ done (verified on the test phone)
+
+Chosen from mockups (canvas "LMT Info Tab Proposals"): header of A, body of B, pie of C.
+
+- Header card: the pie drawn in from the card's right edge (`InfoPieView`, theme colors), the
+  app icon (`drawable-nodpi/lmt_icon.png`, redrawn as a vector from the 192 px legacy icon;
+  source in `docs/art/lmt_icon.svg`), a version chip (five double-taps open the debug menu),
+  "Original app by noname81" (his XDA profile) and "Revived by Psycoguana" (GitHub), and
+  stacked GitHub repo (no URL yet), XDA thread and Donate to noname81 buttons.
+- Status card: green "The pie is ready" when running with accessibility and overlay;
+  otherwise red with the first problem and a tap that fixes it (allow overlay, start the
+  service, open accessibility settings).
+- Tiles for Accessibility, Draw over apps, Usage access, Root, Modify settings and Phone
+  calls; an off tile opens its permission screen. Refreshed on every resume.
+
 ## Part 2 — Accessibility fallbacks for root-only actions
 
 Researched, not implemented. API levels below are from the SDK's own

@@ -1,79 +1,295 @@
 package com.noname81.lmt;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Html;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-/** About tab, and the hidden entry point to the debug menu. */
-public class InfoFragment extends Fragment {
+import com.google.android.material.color.ColorRoles;
+import com.google.android.material.color.MaterialColors;
 
-    @Override
-    public void onSaveInstanceState(Bundle bundle) {
-        super.onSaveInstanceState(bundle);
-        setUserVisibleHint(true);
-    }
+/**
+ * About tab (ROADMAP 1.18): a header card with the pie, the credits and links, a status card that
+ * says whether the pie can work (and fixes what it can with a tap), and a tile per permission LMT
+ * can use. Five double-taps on the version chip open the hidden debug menu.
+ */
+public class InfoFragment extends Fragment {
+    static final String XDA_THREAD = "https://xdaforums.com/t/app-root-lmt-launcher-v3-2.1330150/";
+    static final String NONAME81 = "https://xdaforums.com/m/noname81.1864347/";
+    static final String PSYCOGUANA = "https://github.com/Psycoguana";
+    static final String DONATE =
+            "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9C5JKBHDM6QSE";
+
+    private View mRoot;
 
     @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        Spanned spannedFromHtml;
-        super.onCreateView(layoutInflater, viewGroup, bundle);
-        TextView textView = new TextView(getActivity());
-        textView.setGravity(17);
-        textView.setLinksClickable(true);
-        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        View root = layoutInflater.inflate(R.layout.info, viewGroup, false);
+        this.mRoot = root;
+        Context context = requireContext();
+
+        TextView version = root.findViewById(R.id.info_version);
+        String name = SettingsValues.getInstance(context).getVersion();
+        version.setText("Version " + (name.startsWith("v") ? name.substring(1) : name));
+        addGestureListener(version);
+
+        TextView credits = root.findViewById(R.id.info_credits);
         String html =
-                "LMT "
-                        + SettingsValues.getInstance(getActivity()).getVersion()
-                        + " by noname81<br><br>This version of LMT will never expire!<br><br><a"
-                        + " href='http://forum.xda-developers.com/showthread.php?t=1330150'>Visit"
-                        + " the thread at XDA developers!</a><br><br><a"
-                        + " href='https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9C5JKBHDM6QSE'>If"
-                        + " you like my work, please consider a donation!</a><br><br>Runtime"
-                        + " Permissions:<br>Root: "
-                        + RootContext.getInstance(getActivity()).isRootAvailable(false)
-                        + "<br>Accessibility: "
-                        + AccessibilityHandler.isAccessibilityAvailable(getActivity(), false)
-                        + "<br>DrawOverApps: "
-                        + PermissionChecker.getInstance()
-                                .hasDrawOverAppsPermission(getActivity(), false)
-                        + "<br>ExternalStorageRead: "
-                        + PermissionChecker.getInstance()
-                                .hasExternalStorageReadPermission(getActivity(), false)
-                        + "<br>ExternalStorageWrite: "
-                        + PermissionChecker.getInstance()
-                                .hasExternalStorageWritePermission(getActivity(), false)
-                        + "<br>PhoneCalls: "
-                        + PermissionChecker.getInstance()
-                                .hasPhoneCallPermission(getActivity(), false)
-                        + "<br>UsageStats: "
-                        + PermissionChecker.getInstance()
-                                .hasUsageStatsPermission(getActivity(), false)
-                        + "<br><br>";
-        if (Build.VERSION.SDK_INT >= 24) {
-            spannedFromHtml = Html.fromHtml(html, 0);
-        } else {
-            spannedFromHtml = Html.fromHtml(html);
+                "Original app by <a href='"
+                        + NONAME81
+                        + "'><b>noname81</b></a><br>Revived by <a href='"
+                        + PSYCOGUANA
+                        + "'><b>Psycoguana</b></a>";
+        credits.setText(Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(html, 0) : Html.fromHtml(html));
+        credits.setMovementMethod(LinkMovementMethod.getInstance());
+        credits.setLinkTextColor(
+                MaterialColors.getColor(root, com.google.android.material.R.attr.colorPrimary));
+
+        // No repository yet: the button is there, it just doesn't go anywhere.
+        root.findViewById(R.id.info_xda).setOnClickListener(v -> open(XDA_THREAD));
+        root.findViewById(R.id.info_donate).setOnClickListener(v -> open(DONATE));
+        return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refresh();
+    }
+
+    private void open(String url) {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        } catch (RuntimeException e) {
+            // No browser.
         }
-        textView.setText(spannedFromHtml);
-        addGestureListener(textView);
-        FrameLayout frameLayout = new FrameLayout(getActivity());
-        frameLayout.addView(textView);
-        return frameLayout;
+    }
+
+    /** Fills in the status card and the tiles from what LMT currently has. */
+    void refresh() {
+        if (this.mRoot == null || getContext() == null) {
+            return;
+        }
+        Context context = requireContext();
+        SettingsValues settings = SettingsValues.getInstance(context);
+        PermissionChecker permissions = PermissionChecker.getInstance();
+        boolean pie = settings.loadTouchServiceMode() > 0;
+        boolean running = settings.getServiceState() > 0;
+        boolean overlay = permissions.hasDrawOverAppsPermission(context, false);
+        boolean accessibility = AccessibilityHandler.isAccessibilityAvailable(context, false);
+
+        if (pie && !overlay) {
+            showStatus(
+                    false,
+                    "The pie can't show",
+                    "Tap to allow LMT to draw over other apps",
+                    v ->
+                            permissions.checkAndRequestDrawOverAppsPermission(
+                                    requireActivity(), true));
+        } else if (!running) {
+            showStatus(
+                    false,
+                    pie ? "The pie is stopped" : "LMT is stopped",
+                    "Tap to start it",
+                    v -> {
+                        settings.startService();
+                        this.mRoot.postDelayed(this::refresh, 600);
+                    });
+        } else if (!accessibility) {
+            showStatus(
+                    false,
+                    "Accessibility is off",
+                    "Back, Home, blur and more need it. Tap to turn it on",
+                    v -> openSettings(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)));
+        } else {
+            showStatus(
+                    true,
+                    pie ? "The pie is ready" : "LMT is running",
+                    "Running · Accessibility on · Overlay allowed",
+                    null);
+        }
+
+        LinearLayout tiles = this.mRoot.findViewById(R.id.info_tiles);
+        tiles.removeAllViews();
+        RootContext root = RootContext.getInstance(context.getApplicationContext());
+        boolean rootKnownGranted = !root.isRootDenied() && root.isRootAvailable(false);
+        Tile[] all = {
+            new Tile(
+                    "Accessibility",
+                    accessibility,
+                    () -> openSettings(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))),
+            new Tile(
+                    "Draw over apps",
+                    overlay,
+                    () ->
+                            permissions.checkAndRequestDrawOverAppsPermission(
+                                    requireActivity(), true)),
+            new Tile(
+                    "Usage access",
+                    permissions.hasUsageStatsPermission(context, false),
+                    () -> permissions.checkAndRequestUsageStatsPermission(requireActivity(), true)),
+            new Tile("Root", rootKnownGranted, null),
+            new Tile(
+                    "Modify settings",
+                    PieBrightness.canWrite(context),
+                    () -> PermissionChecker.checkAndRequestWriteSettingsPermission(context)),
+            new Tile(
+                    "Phone calls",
+                    permissions.hasPhoneCallPermission(context, false),
+                    () -> permissions.checkAndRequestPhoneCallPermission(requireActivity(), true))
+        };
+        LinearLayout row = null;
+        for (int i = 0; i < all.length; i++) {
+            if (i % 2 == 0) {
+                row = new LinearLayout(context);
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                LinearLayout.LayoutParams rowParams =
+                        new LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT);
+                if (i > 0) {
+                    rowParams.topMargin = dp(10);
+                }
+                tiles.addView(row, rowParams);
+            }
+            LinearLayout.LayoutParams params =
+                    new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+            if (i % 2 == 1) {
+                params.setMarginStart(dp(10));
+            }
+            row.addView(tileView(all[i]), params);
+        }
+        // Root's answer may still be on its way.
+        root.whenRootKnown(
+                () -> {
+                    if (isAdded() && rootKnownGranted != (!root.isRootDenied())) {
+                        refresh();
+                    }
+                });
+    }
+
+    private void showStatus(boolean ok, String title, String text, View.OnClickListener onClick) {
+        View card = this.mRoot.findViewById(R.id.info_status);
+        int container;
+        int onContainer;
+        int badge;
+        if (ok) {
+            // A green harmonized with the theme, in its container roles.
+            ColorRoles green =
+                    MaterialColors.getColorRoles(
+                            requireContext(),
+                            MaterialColors.harmonizeWithPrimary(requireContext(), 0xFF43A047));
+            container = green.getAccentContainer();
+            onContainer = green.getOnAccentContainer();
+            badge = green.getAccent();
+        } else {
+            container =
+                    MaterialColors.getColor(
+                            card, com.google.android.material.R.attr.colorErrorContainer);
+            onContainer =
+                    MaterialColors.getColor(
+                            card, com.google.android.material.R.attr.colorOnErrorContainer);
+            badge = MaterialColors.getColor(card, com.google.android.material.R.attr.colorError);
+        }
+        card.setBackgroundTintList(ColorStateList.valueOf(container));
+        this.mRoot
+                .findViewById(R.id.info_status_badge)
+                .setBackgroundTintList(ColorStateList.valueOf(badge));
+        ImageView icon = this.mRoot.findViewById(R.id.info_status_icon);
+        icon.setImageResource(ok ? R.drawable.ic_check : R.drawable.ic_warning);
+        icon.setImageTintList(ColorStateList.valueOf(container));
+        TextView titleView = this.mRoot.findViewById(R.id.info_status_title);
+        titleView.setText(title);
+        titleView.setTextColor(onContainer);
+        TextView textView = this.mRoot.findViewById(R.id.info_status_text);
+        textView.setText(text);
+        textView.setTextColor(onContainer);
+        card.setOnClickListener(onClick);
+        card.setClickable(onClick != null);
+    }
+
+    private static final class Tile {
+        final String name;
+        final boolean on;
+        final Runnable fix;
+
+        Tile(String name, boolean on, Runnable fix) {
+            this.name = name;
+            this.on = on;
+            this.fix = fix;
+        }
+    }
+
+    private View tileView(Tile tile) {
+        Context context = requireContext();
+        LinearLayout view = new LinearLayout(context);
+        view.setOrientation(LinearLayout.VERTICAL);
+        view.setBackgroundResource(R.drawable.info_tile);
+        view.setPadding(dp(14), dp(12), dp(14), dp(12));
+        TextView status = new TextView(context);
+        status.setTextSize(12);
+        TextView name = new TextView(context);
+        name.setTextSize(15);
+        name.setText(tile.name);
+        name.setTextColor(
+                MaterialColors.getColor(view, com.google.android.material.R.attr.colorOnSurface));
+        if (tile.on) {
+            status.setText("● On");
+            status.setTextColor(
+                    MaterialColors.getColorRoles(
+                                    context,
+                                    MaterialColors.harmonizeWithPrimary(context, 0xFF43A047))
+                            .getAccent());
+        } else if (tile.fix != null) {
+            status.setText("○ Off · tap to allow");
+            status.setTextColor(
+                    MaterialColors.getColor(view, com.google.android.material.R.attr.colorPrimary));
+            android.util.TypedValue ripple = new android.util.TypedValue();
+            context.getTheme()
+                    .resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
+            view.setForeground(context.getDrawable(ripple.resourceId));
+            view.setOnClickListener(v -> tile.fix.run());
+        } else {
+            status.setText("○ Not granted");
+            status.setTextColor(
+                    MaterialColors.getColor(
+                            view, com.google.android.material.R.attr.colorOnSurfaceVariant));
+        }
+        view.addView(status);
+        view.addView(name);
+        view.setContentDescription(tile.name + ", " + status.getText());
+        return view;
+    }
+
+    private void openSettings(Intent intent) {
+        try {
+            startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        } catch (RuntimeException e) {
+            // No such settings screen on this phone.
+        }
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     /**
-     * Five double-taps anywhere on the Info tab opens the hidden debug menu, which toggles the
+     * Five double-taps on the version chip open the hidden debug menu, which toggles the
      * per-component logging that {@code DebugHelper} drives.
      */
     private void addGestureListener(View view) {
@@ -95,13 +311,18 @@ public class InfoFragment extends Fragment {
                                         .showDebugMenu(InfoFragment.this.getActivity());
                                 return false;
                             }
+
+                            @Override
+                            public boolean onDown(MotionEvent event) {
+                                return true;
+                            }
                         });
         view.setOnTouchListener(
                 new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View touched, MotionEvent event) {
                         gestureDetector.onTouchEvent(event);
-                        return false;
+                        return true;
                     }
                 });
     }

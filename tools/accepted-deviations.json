@@ -680,6 +680,11 @@
     {
       "class": "PieContainer.smali",
       "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): mTrusted, isTrusted and removeQuietly. ROADMAP 3.8 lock screen: mContext, mLockReceiver, watchLock, applyLock, setTouchable."
+    },
+    {
+      "class": "InfoFragment.smali",
+      "reworked": true,
+      "reason": "ROADMAP 1.18 Info tab redesign: the HTML text block (version, links, raw true/false permission list) becomes R.layout.info: a header card with InfoPieView, the app icon, a version chip, credits (noname81 -> his XDA profile, Psycoguana -> GitHub) and GitHub repo / XDA thread / Donate buttons; a status card that says whether the pie can work and fixes overlay/start/accessibility with a tap (refresh, showStatus); and a tile per permission (Tile, tileView, open, openSettings, dp), refreshed in onResume. onSaveInstanceState's setUserVisibleHint(true) is dropped (ViewPager2 tabs). The five-double-tap debug menu moves to the version chip."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -1115,6 +1120,14 @@
     {
       "class": "PieContainer$ANON.smali",
       "reason": "ROADMAP 3.8 lock screen: the screen off/on and user-present receiver that calls applyLock."
+    },
+    {
+      "class": "InfoPieView.smali",
+      "reason": "ROADMAP 1.18 Info tab redesign: the header card's decorative pie, four ring slices from the card's right edge in theme colors."
+    },
+    {
+      "class": "InfoFragment$Tile.smali",
+      "reason": "ROADMAP 1.18 Info tab redesign: one permission tile's name, state and fix."
     }
   ],
   "removed_classes": [
