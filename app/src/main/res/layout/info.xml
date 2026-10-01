@@ -86,7 +86,7 @@
                     android:layout_marginTop="12dp"
                     android:text="GitHub repo"
                     app:icon="@drawable/ic_brand_github"
-                    app:iconGravity="textEnd"
+                    app:iconGravity="textStart"
                     app:iconPadding="8dp"
                     app:iconSize="18dp" />
 
@@ -97,7 +97,7 @@
                     android:layout_height="wrap_content"
                     android:text="XDA thread"
                     app:icon="@drawable/ic_brand_xda"
-                    app:iconGravity="textEnd"
+                    app:iconGravity="textStart"
                     app:iconPadding="8dp"
                     app:iconSize="18dp" />
 
@@ -109,7 +109,7 @@
                     android:text="Donate to noname81"
                     app:backgroundTint="?attr/colorSurfaceContainer"
                     app:icon="@drawable/ic_brand_paypal"
-                    app:iconGravity="textEnd"
+                    app:iconGravity="textStart"
                     app:iconPadding="8dp"
                     app:iconSize="18dp" />
             </LinearLayout>
