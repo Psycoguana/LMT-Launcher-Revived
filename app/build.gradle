@@ -1,9 +1,11 @@
 plugins { id 'com.android.application' }
 
-// Version scheme carried over from the upstream build.sh:
-//   versionCode = major * 1000 + minor * 100   (3.10 -> 4000, 3.11 -> 4100)
-def versionMajor = 3
-def versionMinor = 11
+// Semantic version. versionCode = major * 10000 + minor * 100 + patch (4.0.0 -> 40000).
+// Upstream used major * 1000 + minor * 100, and 3.11 was 4100: every code here must stay above
+// that, or Android refuses to install over 3.11 (INSTALL_FAILED_VERSION_DOWNGRADE).
+def versionMajor = 4
+def versionMinor = 0
+def versionPatch = 0
 
 def keystoreProps = new Properties()
 def keystorePropsFile = rootProject.file("keystore/key.properties")
@@ -19,8 +21,8 @@ android {
         applicationId 'com.noname81.lmt'
         minSdk 21
         targetSdk 34
-        versionCode versionMajor * 1000 + versionMinor * 100
-        versionName "${versionMajor}.${versionMinor}"
+        versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
     }
 
     signingConfigs {
