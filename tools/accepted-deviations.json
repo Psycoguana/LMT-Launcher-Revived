@@ -555,6 +555,26 @@
       "class": "PieContainer.smali",
       "method": "attachToWindowManager()V",
       "reason": "ROADMAP 3.8 lock screen: ends with watchLock(), which (for accessibility-overlay strips with 'pie on lock screen' off) makes the strips untouchable while the keyguard is up, since accessibility overlays show above the lock screen where app overlays never did."
+    },
+    {
+      "class": "PieContainer$PieLayout.smali",
+      "method": "public dispatchTouchEvent(Landroid/view/MotionEvent;)Z",
+      "reason": "ROADMAP 3.9 (pie shows and hides at once until restart, upstream): ACTION_CANCEL shrinks the window like ACTION_UP (logged), so a gesture the system takes doesn't leave it full screen."
+    },
+    {
+      "class": "PieContainer$PieLayout.smali",
+      "method": "public expandLayout()V",
+      "reason": "ROADMAP 3.9 (pie shows and hides at once until restart, upstream): logs a failed updateViewLayout instead of swallowing it."
+    },
+    {
+      "class": "PieContainer$PieLayout.smali",
+      "method": "public shrinkLayout()V",
+      "reason": "ROADMAP 3.9 (pie shows and hides at once until restart, upstream): calls the pie's onShrink right away instead of setting mShrinking for onSizeChanged; a quick tap ends before the window grows, so the size never changed and extension state (the pointer) stayed stuck. Logs a failed addView."
+    },
+    {
+      "class": "PiePointer.smali",
+      "method": "public layout(ZLandroid/graphics/Point;IIIZZZ)V",
+      "reason": "ROADMAP 3.9 (pie shows and hides at once until restart, upstream): a visible layout resets mActivated and mPolar; an active pointer stops the slices from drawing."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -679,7 +699,7 @@
     },
     {
       "class": "PieContainer.smali",
-      "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): mTrusted, isTrusted and removeQuietly. ROADMAP 3.8 lock screen: mContext, mLockReceiver, watchLock, applyLock, setTouchable."
+      "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): mTrusted, isTrusted and removeQuietly. ROADMAP 3.8 lock screen: mContext, mLockReceiver, watchLock, applyLock, setTouchable. ROADMAP 3.9 (pie shows and hides at once until restart, upstream): mService and addedThrough (re-add the strips when the accessibility service instance changes; isTrusted removed)."
     },
     {
       "class": "InfoFragment.smali",

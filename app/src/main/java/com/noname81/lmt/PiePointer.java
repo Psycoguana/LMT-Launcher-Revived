@@ -90,6 +90,12 @@ class PiePointer implements PieMenu.PieView {
         this.mRadiusInc = radiusInc;
         this.mLevels = levels;
         this.mOnTheBottom = onTheBottom;
+        if (visible) {
+            // Every pie starts with the pointer off; while it is active the pie's slices aren't
+            // drawn, so a pointer left on would hide the pie right as it opens (ROADMAP 3.9).
+            this.mActivated = false;
+            this.mPolar = null;
+        }
         this.mPointerPaint.setShader(
                 new RadialGradient(
                         this.mCenter.x,

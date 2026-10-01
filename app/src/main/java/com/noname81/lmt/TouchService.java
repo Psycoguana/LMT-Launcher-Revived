@@ -198,11 +198,12 @@ public class TouchService extends Service {
 
     private void reattachPie() {
         PieContainer pie = this.mPieContainer;
-        if (this.mDestroyed
-                || pie == null
-                || pie.isTrusted() == (AccessibilityHandler.connectedService() != null)) {
+        Object service =
+                Build.VERSION.SDK_INT >= 26 ? AccessibilityHandler.connectedService() : null;
+        if (this.mDestroyed || pie == null || pie.addedThrough(service)) {
             return;
         }
+        Log.i(TAG, "Re-adding the pie for the accessibility service " + service);
         pie.removeFromWindowManager();
         this.mPieContainer = new PieContainer(this);
         this.mPieContainer.attachToWindowManager();

@@ -51,6 +51,9 @@ public class PieContainer {
 
     private android.content.BroadcastReceiver mLockReceiver;
 
+    /** The accessibility service the strips were added through, or null. */
+    private final Object mService;
+
     private int getWindowFlags(int position) {
         return (position > 0 ? 131072 : 32) | 32 | 8;
     }
@@ -89,7 +92,13 @@ public class PieContainer {
                 if (zIsNotBlacklistedPie) {
                     expandLayout();
                 }
-            } else if (actionMasked == MotionEvent.ACTION_UP) {
+            } else if (actionMasked == MotionEvent.ACTION_UP
+                    || actionMasked == MotionEvent.ACTION_CANCEL) {
+                // A cancelled touch (the system took the gesture) closes the pie too: shrink the
+                // window back, or it stays full screen with nothing in it (ROADMAP 3.9).
+                if (actionMasked == MotionEvent.ACTION_CANCEL) {
+                    Log.i(PieContainer.TAG, "Touch cancelled by the system");
+                }
                 shrinkLayout();
             }
             if (!this.mAllowed) {
@@ -147,7 +156,8 @@ public class PieContainer {
                 layoutParams.format = -2;
                 try {
                     PieContainer.this.mWindowManager.updateViewLayout(this, layoutParams);
-                } catch (Exception unused) {
+                } catch (Exception e) {
+                    Log.w(PieContainer.TAG, "Pie window could not expand", e);
                 }
             }
             if (PieContainer.this.mPieControl == null || this.mPieControlAdded) {
@@ -175,7 +185,10 @@ public class PieContainer {
             if (PieContainer.this.mPieControl != null && this.mPieControlAdded) {
                 PieContainer.this.mPieControl.removeFromContainer(this);
                 this.mPieControlAdded = false;
-                this.mShrinking = true;
+                // Upstream waited for onSizeChanged to wrap up the extensions (pointer tap and
+                // reset). A quick tap ends before the window has grown, so the size never
+                // changes and that state stayed stuck until a restart (ROADMAP 3.9).
+                PieContainer.this.mPieControl.mPie.onShrink();
             }
             layoutParams.width =
                     this.mBottom
@@ -188,7 +201,8 @@ public class PieContainer {
             layoutParams.format = -2;
             try {
                 PieContainer.this.mWindowManager.addView(this, layoutParams);
-            } catch (Exception unused2) {
+            } catch (Exception e) {
+                Log.w(PieContainer.TAG, "Pie strip could not be added back", e);
             }
         }
 
@@ -219,6 +233,7 @@ public class PieContainer {
         android.accessibilityservice.AccessibilityService service =
                 Build.VERSION.SDK_INT >= 26 ? AccessibilityHandler.connectedService() : null;
         this.mTrusted = service != null;
+        this.mService = service;
         this.mWindowManager =
                 (WindowManager)
                         (this.mTrusted ? service : context)
@@ -391,9 +406,12 @@ public class PieContainer {
         }
     }
 
-    /** Whether the strips were added as accessibility overlays. */
-    boolean isTrusted() {
-        return this.mTrusted;
+    /**
+     * Whether the strips were added through {@code service} (null: as app overlays). A new instance
+     * of the accessibility service takes the old one's overlays away with it.
+     */
+    boolean addedThrough(Object service) {
+        return this.mService == service;
     }
 
     void rotate() {

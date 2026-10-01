@@ -1196,6 +1196,22 @@ any bubbles or overlays from other apps. Then try again", and worked with LMT st
   user-present receiver makes the strips `FLAG_NOT_TOUCHABLE` while the keyguard is up, and
   touchable again once unlocked (verified on the test phone: `fl` gains 0x10 when locked).
 
+### 3.9 🟡 HARDENED — pie shows and hides at once until the service restarts (upstream)
+
+Reported on the Samsung flagship (also in the original app), not reproducible on demand. Likely causes found
+by reading the code, all fixed defensively:
+
+- The pie's extensions were wrapped up (`PieMenu.onShrink`: the pointer's tap and reset) only
+  from `onSizeChanged` after the shrink. A tap that ends before the window has grown changes no
+  size, so that state stayed until a restart. `shrinkLayout` now calls `onShrink` itself.
+- An active pie pointer stops the slices from drawing; it is now reset whenever the pie opens.
+- `ACTION_CANCEL` (a gesture the system takes) hid the pie but left the window full screen; it
+  now shrinks like `ACTION_UP`.
+- A new instance of the accessibility service takes its overlays away; the strips are re-added
+  whenever the instance changes (`PieContainer.addedThrough`).
+- Failed window updates are logged (`LMT::PieContainer`), so `adb logcat` shows what happened
+  the next time.
+
 ---
 
 ## Part 4 — Reconstruction cleanup still outstanding
