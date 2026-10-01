@@ -90,6 +90,6 @@ public class InfoTabTest {
         View root = showInfo();
         TextView title = root.findViewById(R.id.info_status_title);
         String text = title.getText().toString();
-        assertTrue(text, text.contains("stopped") || text.contains("can't show"));
+        assertTrue(text, text.equals("LMT is stopped") || text.equals("The pie can't show"));
     }
 }

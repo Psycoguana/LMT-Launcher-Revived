@@ -60,7 +60,8 @@ public class InfoFragment extends Fragment {
         credits.setLinkTextColor(
                 MaterialColors.getColor(root, com.google.android.material.R.attr.colorPrimary));
 
-        // No repository yet: the button is there, it just doesn't go anywhere.
+        // No repository yet: the button is there and answers the tap, it just doesn't go anywhere.
+        root.findViewById(R.id.info_github).setOnClickListener(v -> {});
         root.findViewById(R.id.info_xda).setOnClickListener(v -> open(XDA_THREAD));
         root.findViewById(R.id.info_donate).setOnClickListener(v -> open(DONATE));
         return root;
@@ -88,10 +89,16 @@ public class InfoFragment extends Fragment {
         Context context = requireContext();
         SettingsValues settings = SettingsValues.getInstance(context);
         PermissionChecker permissions = PermissionChecker.getInstance();
-        boolean pie = settings.loadTouchServiceMode() > 0;
+        // Set active features: 0 gestures and ISAs, 1 gestures, ISAs and pie, 2 pie.
+        int mode = settings.loadTouchServiceMode();
+        boolean pie = mode > 0;
+        boolean gestures = mode < 2;
         boolean running = settings.getServiceState() > 0;
         boolean overlay = permissions.hasDrawOverAppsPermission(context, false);
         boolean accessibility = AccessibilityHandler.isAccessibilityAvailable(context, false);
+        RootContext root = RootContext.getInstance(context.getApplicationContext());
+        String features =
+                mode == 0 ? "Gestures and ISAs" : mode == 1 ? "Pie, gestures and ISAs" : "Pie";
 
         if (pie && !overlay) {
             showStatus(
@@ -104,12 +111,20 @@ public class InfoFragment extends Fragment {
         } else if (!running) {
             showStatus(
                     false,
-                    pie ? "The pie is stopped" : "LMT is stopped",
+                    "LMT is stopped",
                     "Tap to start it",
                     v -> {
                         settings.startService();
                         this.mRoot.postDelayed(this::refresh, 600);
                     });
+        } else if (gestures && root.isRootDenied()) {
+            showStatus(
+                    false,
+                    "Gestures and ISAs need root",
+                    pie
+                            ? "The pie works. Grant root, or pick Pie in Set active features"
+                            : "Grant root, or pick Pie in Set active features",
+                    null);
         } else if (!accessibility) {
             showStatus(
                     false,
@@ -117,41 +132,41 @@ public class InfoFragment extends Fragment {
                     "Back, Home, blur and more need it. Tap to turn it on",
                     v -> openSettings(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)));
         } else {
-            showStatus(
-                    true,
-                    pie ? "The pie is ready" : "LMT is running",
-                    "Running · Accessibility on · Overlay allowed",
-                    null);
+            showStatus(true, "LMT is ready", features + " · Accessibility on", null);
         }
 
         LinearLayout tiles = this.mRoot.findViewById(R.id.info_tiles);
         tiles.removeAllViews();
-        RootContext root = RootContext.getInstance(context.getApplicationContext());
         boolean rootKnownGranted = !root.isRootDenied() && root.isRootAvailable(false);
         Tile[] all = {
             new Tile(
                     "Accessibility",
                     accessibility,
-                    () -> openSettings(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))),
+                    () -> openSettings(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)),
+                    new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)),
             new Tile(
                     "Draw over apps",
                     overlay,
                     () ->
                             permissions.checkAndRequestDrawOverAppsPermission(
-                                    requireActivity(), true)),
+                                    requireActivity(), true),
+                    forThisApp(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)),
             new Tile(
                     "Usage access",
                     permissions.hasUsageStatsPermission(context, false),
-                    () -> permissions.checkAndRequestUsageStatsPermission(requireActivity(), true)),
-            new Tile("Root", rootKnownGranted, null),
+                    () -> permissions.checkAndRequestUsageStatsPermission(requireActivity(), true),
+                    new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)),
+            new Tile("Root", rootKnownGranted, null, null),
             new Tile(
                     "Modify settings",
                     PieBrightness.canWrite(context),
-                    () -> PermissionChecker.checkAndRequestWriteSettingsPermission(context)),
+                    () -> PermissionChecker.checkAndRequestWriteSettingsPermission(context),
+                    forThisApp(Settings.ACTION_MANAGE_WRITE_SETTINGS)),
             new Tile(
                     "Phone calls",
                     permissions.hasPhoneCallPermission(context, false),
-                    () -> permissions.checkAndRequestPhoneCallPermission(requireActivity(), true))
+                    () -> permissions.checkAndRequestPhoneCallPermission(requireActivity(), true),
+                    forThisApp(Settings.ACTION_APPLICATION_DETAILS_SETTINGS))
         };
         LinearLayout row = null;
         for (int i = 0; i < all.length; i++) {
@@ -188,15 +203,23 @@ public class InfoFragment extends Fragment {
         int container;
         int onContainer;
         int badge;
+        int iconTint;
+        int subtitle;
         if (ok) {
-            // A green harmonized with the theme, in its container roles.
-            ColorRoles green =
-                    MaterialColors.getColorRoles(
-                            requireContext(),
-                            MaterialColors.harmonizeWithPrimary(requireContext(), 0xFF43A047));
-            container = green.getAccentContainer();
-            onContainer = green.getOnAccentContainer();
+            // A neutral card with only the badge in green: a green card or green text looked
+            // off in the light style.
+            container =
+                    MaterialColors.getColor(
+                            card, com.google.android.material.R.attr.colorSurfaceContainerHigh);
+            onContainer =
+                    MaterialColors.getColor(
+                            card, com.google.android.material.R.attr.colorOnSurface);
+            subtitle =
+                    MaterialColors.getColor(
+                            card, com.google.android.material.R.attr.colorOnSurfaceVariant);
+            ColorRoles green = green(requireContext());
             badge = green.getAccent();
+            iconTint = green.getOnAccent();
         } else {
             container =
                     MaterialColors.getColor(
@@ -205,6 +228,8 @@ public class InfoFragment extends Fragment {
                     MaterialColors.getColor(
                             card, com.google.android.material.R.attr.colorOnErrorContainer);
             badge = MaterialColors.getColor(card, com.google.android.material.R.attr.colorError);
+            iconTint = container;
+            subtitle = onContainer;
         }
         card.setBackgroundTintList(ColorStateList.valueOf(container));
         this.mRoot
@@ -212,15 +237,46 @@ public class InfoFragment extends Fragment {
                 .setBackgroundTintList(ColorStateList.valueOf(badge));
         ImageView icon = this.mRoot.findViewById(R.id.info_status_icon);
         icon.setImageResource(ok ? R.drawable.ic_check : R.drawable.ic_warning);
-        icon.setImageTintList(ColorStateList.valueOf(container));
+        icon.setImageTintList(ColorStateList.valueOf(iconTint));
         TextView titleView = this.mRoot.findViewById(R.id.info_status_title);
         titleView.setText(title);
         titleView.setTextColor(onContainer);
         TextView textView = this.mRoot.findViewById(R.id.info_status_text);
         textView.setText(text);
-        textView.setTextColor(onContainer);
+        textView.setTextColor(subtitle);
         card.setOnClickListener(onClick);
         card.setClickable(onClick != null);
+        if (onClick != null) {
+            ripple(card, 28);
+        } else {
+            card.setForeground(null);
+        }
+    }
+
+    /** A green harmonized with the theme, for the "on" dot and the ready badge. */
+    private static ColorRoles green(Context context) {
+        return MaterialColors.getColorRoles(
+                context, MaterialColors.harmonizeWithPrimary(context, 0xFF43A047));
+    }
+
+    private Intent forThisApp(String action) {
+        return new Intent(action, Uri.parse("package:" + requireContext().getPackageName()));
+    }
+
+    /** A rounded ripple, so a tap shows the card's or tile's own shape like the buttons do. */
+    private void ripple(View view, int radiusDp) {
+        android.graphics.drawable.GradientDrawable mask =
+                new android.graphics.drawable.GradientDrawable();
+        mask.setColor(0xFFFFFFFF);
+        mask.setCornerRadius(dp(radiusDp));
+        view.setForeground(
+                new android.graphics.drawable.RippleDrawable(
+                        ColorStateList.valueOf(
+                                MaterialColors.getColor(
+                                        view,
+                                        com.google.android.material.R.attr.colorControlHighlight)),
+                        null,
+                        mask));
     }
 
     private static final class Tile {
@@ -228,10 +284,14 @@ public class InfoFragment extends Fragment {
         final boolean on;
         final Runnable fix;
 
-        Tile(String name, boolean on, Runnable fix) {
+        /** Where an allowed permission is managed, or null (root). */
+        final Intent manage;
+
+        Tile(String name, boolean on, Runnable fix, Intent manage) {
             this.name = name;
             this.on = on;
             this.fix = fix;
+            this.manage = manage;
         }
     }
 
@@ -249,20 +309,26 @@ public class InfoFragment extends Fragment {
         name.setTextColor(
                 MaterialColors.getColor(view, com.google.android.material.R.attr.colorOnSurface));
         if (tile.on) {
-            status.setText("● On");
+            // Only the dot is green; the word stays in the theme's text color.
+            android.text.SpannableString on = new android.text.SpannableString("● On");
+            on.setSpan(
+                    new android.text.style.ForegroundColorSpan(green(context).getAccent()),
+                    0,
+                    1,
+                    android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            status.setText(on);
             status.setTextColor(
-                    MaterialColors.getColorRoles(
-                                    context,
-                                    MaterialColors.harmonizeWithPrimary(context, 0xFF43A047))
-                            .getAccent());
+                    MaterialColors.getColor(
+                            view, com.google.android.material.R.attr.colorOnSurfaceVariant));
+            if (tile.manage != null) {
+                ripple(view, 20);
+                view.setOnClickListener(v -> openSettings(tile.manage));
+            }
         } else if (tile.fix != null) {
             status.setText("○ Off · tap to allow");
             status.setTextColor(
                     MaterialColors.getColor(view, com.google.android.material.R.attr.colorPrimary));
-            android.util.TypedValue ripple = new android.util.TypedValue();
-            context.getTheme()
-                    .resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
-            view.setForeground(context.getDrawable(ripple.resourceId));
+            ripple(view, 20);
             view.setOnClickListener(v -> tile.fix.run());
         } else {
             status.setText("○ Not granted");

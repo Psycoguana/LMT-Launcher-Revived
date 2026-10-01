@@ -764,9 +764,10 @@ Chosen from mockups (canvas "LMT Info Tab Proposals"): header of A, body of B, p
   source in `docs/art/lmt_icon.svg`), a version chip (five double-taps open the debug menu),
   "Original app by noname81" (his XDA profile) and "Revived by Psycoguana" (GitHub), and
   stacked GitHub repo (no URL yet), XDA thread and Donate to noname81 buttons.
-- Status card: green "The pie is ready" when running with accessibility and overlay;
-  otherwise red with the first problem and a tap that fixes it (allow overlay, start the
-  service, open accessibility settings).
+- Status card: "LMT is ready" with the active features (pie, gestures, ISAs) on a neutral
+  card with a green badge; otherwise red with the first problem and, where it can, a tap that
+  fixes it (allow overlay, start the service, gestures without root, open accessibility).
+  Cards and tiles that react to taps get a rounded ripple.
 - Tiles for Accessibility, Draw over apps, Usage access, Root, Modify settings and Phone
   calls; an off tile opens its permission screen. Refreshed on every resume.
 
