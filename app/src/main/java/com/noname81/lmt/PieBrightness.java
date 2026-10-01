@@ -70,6 +70,19 @@ class PieBrightness implements PieMenu.PieView {
 
     private final Paint mSunGapFill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mText = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    /**
+     * The grabbed dial's own look: a grey track with a thin dark rim and a sun-gold fill, no
+     * shadows, and the percentage on a dark pill, so it reads on white apps too. The resting dial
+     * keeps the white look.
+     */
+    private final Paint mActiveTrack = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    private final Paint mActiveFill = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint mEdge = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint mPill = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint mPillText = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final android.graphics.RectF mPillBox = new android.graphics.RectF();
     private final Path mPath = new Path();
     private final float mGap;
     private final float mStroke;
@@ -143,6 +156,22 @@ class PieBrightness implements PieMenu.PieView {
                         14,
                         context.getResources().getDisplayMetrics()));
         this.mText.setShadowLayer(3 * density, 0, 0, Color.argb(160, 0, 0, 0));
+        this.mActiveTrack.setStyle(Paint.Style.STROKE);
+        this.mActiveTrack.setStrokeCap(Paint.Cap.ROUND);
+        this.mActiveTrack.setStrokeWidth(this.mStroke);
+        this.mActiveTrack.setColor(Color.argb(150, 128, 128, 128));
+        this.mActiveFill.setStyle(Paint.Style.STROKE);
+        this.mActiveFill.setStrokeCap(Paint.Cap.ROUND);
+        this.mActiveFill.setStrokeWidth(this.mStroke);
+        this.mActiveFill.setColor(SUN_GOLD);
+        this.mEdge.setStyle(Paint.Style.STROKE);
+        this.mEdge.setStrokeCap(Paint.Cap.ROUND);
+        this.mEdge.setStrokeWidth(this.mStroke + 3 * density);
+        this.mEdge.setColor(Color.argb(90, 0, 0, 0));
+        this.mPill.setColor(Color.argb(170, 0, 0, 0));
+        this.mPillText.setColor(Color.WHITE);
+        this.mPillText.setTextAlign(Paint.Align.CENTER);
+        this.mPillText.setTextSize(this.mText.getTextSize());
     }
 
     /** Not used: the dial arms with {@link #arm}, which knows the slice. */
@@ -307,8 +336,9 @@ class PieBrightness implements PieMenu.PieView {
         // The dial goes on a layer so a gap following the sun's outline can be cut out of it:
         // no white shows under or through the sun.
         int layer = canvas.saveLayer(null, null);
-        arc(canvas, r, 0f, 1f, this.mTrack);
-        arc(canvas, r, 0f, this.mFraction, this.mFill);
+        arc(canvas, r, 0f, 1f, this.mEdge);
+        arc(canvas, r, 0f, 1f, this.mActiveTrack);
+        arc(canvas, r, 0f, this.mFraction, this.mActiveFill);
         if (this.mHasSun) {
             Paint.FontMetrics metrics = this.mSun.getFontMetrics();
             float baseline = knob.y - (metrics.ascent + metrics.descent) / 2;
@@ -325,12 +355,18 @@ class PieBrightness implements PieMenu.PieView {
             canvas.drawCircle(knob.x, knob.y, this.mStroke * 0.9f, this.mKnobRing);
         }
         // The value sits just outside the knob, away from the finger.
-        PointF label = point(r + this.mStroke * 3.4f, angleOf(this.mFraction));
+        PointF label = point(r + this.mStroke * 3.8f, angleOf(this.mFraction));
+        String percent = Math.round(this.mFraction * 100) + "%";
+        float halfWidth = this.mPillText.measureText(percent) / 2 + this.mStroke * 0.8f;
+        float halfHeight = this.mPillText.getTextSize() * 0.75f;
+        this.mPillBox.set(
+                label.x - halfWidth,
+                label.y - halfHeight,
+                label.x + halfWidth,
+                label.y + halfHeight);
+        canvas.drawRoundRect(this.mPillBox, halfHeight, halfHeight, this.mPill);
         canvas.drawText(
-                Math.round(this.mFraction * 100) + "%",
-                label.x,
-                label.y + this.mText.getTextSize() / 3,
-                this.mText);
+                percent, label.x, label.y + this.mPillText.getTextSize() / 3, this.mPillText);
         return false;
     }
 
