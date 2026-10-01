@@ -10,3 +10,8 @@ local.properties
 
 # vendored upstream reference (cloned by tools/, not ours to track)
 reference/
+
+# build outputs (regenerated on every build; :app runs :inputcontext:helperJar)
+/build/
+inputcontext/build/
+*.apk
