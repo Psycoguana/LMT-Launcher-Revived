@@ -53,6 +53,22 @@ class PieBrightness implements PieMenu.PieView {
     private final Paint mFill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mKnob = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mKnobRing = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    /**
+     * The knob: Material Icons Round's brightness_high in sun gold. Only that glyph is bundled
+     * (assets/MaterialIconsRound-Brightness.otf, subset of the Apache 2.0 font); without it the
+     * knob falls back to a dot.
+     */
+    private final Paint mSun = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    private static final String SUN = "\ue1ac";
+    private static final int SUN_GOLD = 0xFFFFC107;
+    private boolean mHasSun;
+
+    /** Erasers for the gap around the sun: its outline widened, and its center filled. */
+    private final Paint mSunGap = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    private final Paint mSunGapFill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mText = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path mPath = new Path();
     private final float mGap;
@@ -97,6 +113,28 @@ class PieBrightness implements PieMenu.PieView {
         this.mKnobRing.setStrokeWidth(3 * density);
         this.mKnobRing.setColor(color | 0xFF000000);
         this.mKnob.setShadowLayer(3 * density, 0, 0, Color.argb(120, 0, 0, 0));
+        try {
+            this.mSun.setTypeface(
+                    android.graphics.Typeface.createFromAsset(
+                            context.getAssets(), "MaterialIconsRound-Brightness.otf"));
+            this.mHasSun = true;
+        } catch (RuntimeException e) {
+            Log.w(TAG, "No brightness icon font", e);
+        }
+        this.mSun.setColor(SUN_GOLD);
+        this.mSun.setTextAlign(Paint.Align.CENTER);
+        this.mSun.setTextSize(this.mStroke * 3.2f);
+        this.mSun.setShadowLayer(3 * density, 0, 0, Color.argb(170, 0, 0, 0));
+        android.graphics.PorterDuffXfermode clear =
+                new android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR);
+        this.mSunGap.setTypeface(this.mSun.getTypeface());
+        this.mSunGap.setTextAlign(Paint.Align.CENTER);
+        this.mSunGap.setTextSize(this.mSun.getTextSize());
+        this.mSunGap.setStyle(Paint.Style.FILL_AND_STROKE);
+        this.mSunGap.setStrokeJoin(Paint.Join.ROUND);
+        this.mSunGap.setStrokeWidth(6 * density);
+        this.mSunGap.setXfermode(clear);
+        this.mSunGapFill.setXfermode(clear);
         this.mText.setColor(Color.WHITE);
         this.mText.setTextAlign(Paint.Align.CENTER);
         this.mText.setTextSize(
@@ -265,13 +303,29 @@ class PieBrightness implements PieMenu.PieView {
             this.mFill.setAlpha(fill);
             return false;
         }
+        PointF knob = point(r, angleOf(this.mFraction));
+        // The dial goes on a layer so a gap following the sun's outline can be cut out of it:
+        // no white shows under or through the sun.
+        int layer = canvas.saveLayer(null, null);
         arc(canvas, r, 0f, 1f, this.mTrack);
         arc(canvas, r, 0f, this.mFraction, this.mFill);
-        PointF knob = point(r, angleOf(this.mFraction));
-        canvas.drawCircle(knob.x, knob.y, this.mStroke * 0.9f, this.mKnob);
-        canvas.drawCircle(knob.x, knob.y, this.mStroke * 0.9f, this.mKnobRing);
+        if (this.mHasSun) {
+            Paint.FontMetrics metrics = this.mSun.getFontMetrics();
+            float baseline = knob.y - (metrics.ascent + metrics.descent) / 2;
+            canvas.drawText(SUN, knob.x, baseline, this.mSunGap);
+            canvas.drawCircle(knob.x, knob.y, this.mSun.getTextSize() * 0.3f, this.mSunGapFill);
+        }
+        canvas.restoreToCount(layer);
+        if (this.mHasSun) {
+            Paint.FontMetrics metrics = this.mSun.getFontMetrics();
+            canvas.drawText(
+                    SUN, knob.x, knob.y - (metrics.ascent + metrics.descent) / 2, this.mSun);
+        } else {
+            canvas.drawCircle(knob.x, knob.y, this.mStroke * 0.9f, this.mKnob);
+            canvas.drawCircle(knob.x, knob.y, this.mStroke * 0.9f, this.mKnobRing);
+        }
         // The value sits just outside the knob, away from the finger.
-        PointF label = point(r + this.mStroke * 2.6f, angleOf(this.mFraction));
+        PointF label = point(r + this.mStroke * 3.4f, angleOf(this.mFraction));
         canvas.drawText(
                 Math.round(this.mFraction * 100) + "%",
                 label.x,
