@@ -5,8 +5,8 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -41,6 +41,15 @@ public class PieContainer {
      * overlay, which the input system doesn't count (ROADMAP 3.8).
      */
     private final boolean mTrusted;
+
+    /**
+     * Accessibility overlays also show above the lock screen, which app overlays never did. So
+     * while the phone is locked and "pie on lock screen" is off, the strips stop taking touches and
+     * swipes reach the lock screen (ROADMAP 3.8).
+     */
+    private final Context mContext;
+
+    private android.content.BroadcastReceiver mLockReceiver;
 
     private int getWindowFlags(int position) {
         return (position > 0 ? 131072 : 32) | 32 | 8;
@@ -206,6 +215,7 @@ public class PieContainer {
 
     PieContainer(Context context) {
         this.mSettings = SettingsValues.getInstance(context);
+        this.mContext = context;
         android.accessibilityservice.AccessibilityService service =
                 Build.VERSION.SDK_INT >= 26 ? AccessibilityHandler.connectedService() : null;
         this.mTrusted = service != null;
@@ -293,9 +303,18 @@ public class PieContainer {
             this.mWindowManager.updateViewLayout(this.mPieLayout3, layoutParams3);
             this.mAddedLayout3 = true;
         }
+        watchLock();
     }
 
     void removeFromWindowManager() {
+        if (this.mLockReceiver != null) {
+            try {
+                this.mContext.unregisterReceiver(this.mLockReceiver);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Lock receiver already gone", e);
+            }
+            this.mLockReceiver = null;
+        }
         if (DEBUG) {
             Log.d(TAG, "removeFromWindowManager");
         }
@@ -319,6 +338,56 @@ public class PieContainer {
             this.mWindowManager.removeView(layout);
         } catch (RuntimeException e) {
             Log.w(TAG, "Pie window already removed", e);
+        }
+    }
+
+    /** Follows locking and unlocking while the strips can show above the lock screen. */
+    private void watchLock() {
+        if (!this.mTrusted || this.mSettings.loadPieOnLockScreen() != 0) {
+            return;
+        }
+        this.mLockReceiver =
+                new android.content.BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, android.content.Intent intent) {
+                        applyLock();
+                    }
+                };
+        android.content.IntentFilter filter = new android.content.IntentFilter();
+        filter.addAction(android.content.Intent.ACTION_SCREEN_OFF);
+        filter.addAction(android.content.Intent.ACTION_SCREEN_ON);
+        filter.addAction(android.content.Intent.ACTION_USER_PRESENT);
+        this.mContext.registerReceiver(this.mLockReceiver, filter);
+        applyLock();
+    }
+
+    /** Untouchable strips while the keyguard is up; touchable again once unlocked. */
+    private void applyLock() {
+        android.app.KeyguardManager keyguard =
+                this.mContext.getSystemService(android.app.KeyguardManager.class);
+        boolean locked = keyguard != null && keyguard.isKeyguardLocked();
+        setTouchable(this.mAddedLayout1, this.mPieLayout1, !locked);
+        setTouchable(this.mAddedLayout2, this.mPieLayout2, !locked);
+        setTouchable(this.mAddedLayout3, this.mPieLayout3, !locked);
+    }
+
+    private void setTouchable(boolean added, View layout, boolean touchable) {
+        if (!added || !(layout.getLayoutParams() instanceof WindowManager.LayoutParams)) {
+            return;
+        }
+        WindowManager.LayoutParams params = (WindowManager.LayoutParams) layout.getLayoutParams();
+        int flags =
+                touchable
+                        ? params.flags & ~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        : params.flags | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        if (flags == params.flags) {
+            return;
+        }
+        params.flags = flags;
+        try {
+            this.mWindowManager.updateViewLayout(layout, params);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Pie window not attached", e);
         }
     }
 

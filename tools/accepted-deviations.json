@@ -550,6 +550,11 @@
       "class": "PieContainer.smali",
       "method": "removeFromWindowManager()V",
       "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): removes through removeQuietly, since accessibility overlays are already gone when the service unbinds."
+    },
+    {
+      "class": "PieContainer.smali",
+      "method": "attachToWindowManager()V",
+      "reason": "ROADMAP 3.8 lock screen: ends with watchLock(), which (for accessibility-overlay strips with 'pie on lock screen' off) makes the strips untouchable while the keyguard is up, since accessibility overlays show above the lock screen where app overlays never did."
     }
   ],
   "_note_fields": "The 11 `$assertionsDisabled` synthetic fields were removed along with their uses: jadx renders them as a constant `false`, they are never part of a real assert (no AssertionError anywhere in the app), and javac already inlined the constant. The oracle reports their removal as synthetic-only field differences. MultiSelectActivity also gains instance fields for the search query, the system-app toggle and the unfiltered candidate lists (ROADMAP 1.4).",
@@ -674,7 +679,7 @@
     },
     {
       "class": "PieContainer.smali",
-      "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): mTrusted, isTrusted and removeQuietly."
+      "reason": "ROADMAP 3.8 (Chrome can't ask for permissions): mTrusted, isTrusted and removeQuietly. ROADMAP 3.8 lock screen: mContext, mLockReceiver, watchLock, applyLock, setTouchable."
     }
   ],
   "_comment_classes": "Whole classes present on only one side. new_classes: expected only in our build. removed_classes: expected only in the reference (deleted on purpose). Anything else on one side fails the oracle.",
@@ -1106,6 +1111,10 @@
     {
       "class": "PieBrightness$ANON.smali",
       "reason": "ROADMAP 1.17 brightness dial: the grab Runnable (this::grab) of the always-there dial, posted when the finger rests on it."
+    },
+    {
+      "class": "PieContainer$ANON.smali",
+      "reason": "ROADMAP 3.8 lock screen: the screen off/on and user-present receiver that calls applyLock."
     }
   ],
   "removed_classes": [

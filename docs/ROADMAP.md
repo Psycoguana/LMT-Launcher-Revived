@@ -1175,6 +1175,10 @@ any bubbles or overlays from other apps. Then try again", and worked with LMT st
 - Verified on the test phone: location and microphone prompts accept taps with the pie running;
   `dumpsys window` shows `ty=ACCESSIBILITY_OVERLAY`, and `APPLICATION_OVERLAY` again with
   accessibility off.
+- Side effect, fixed: accessibility overlays also show above the lock screen, so the pie
+  opened there with "pie on lock screen" off. Now, in that case, a screen off/on and
+  user-present receiver makes the strips `FLAG_NOT_TOUCHABLE` while the keyguard is up, and
+  touchable again once unlocked (verified on the test phone: `fl` gains 0x10 when locked).
 
 ---
 
