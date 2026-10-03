@@ -763,7 +763,7 @@ Chosen from mockups (canvas "LMT Info Tab Proposals"): header of A, body of B, p
   app icon (`drawable-nodpi/lmt_icon.png`, redrawn as a vector from the 192 px legacy icon;
   source in `docs/art/lmt_icon.svg`), a version chip (five double-taps open the debug menu),
   "Original app by noname81" (his XDA profile) and "Revived by Psycoguana" (GitHub), and
-  stacked GitHub repo (no URL yet), XDA thread and Donate to noname81 buttons.
+  stacked GitHub repo, XDA thread and Donate to noname81 buttons.
 - Status card: "LMT is ready" with the active features (pie, gestures, ISAs) on a neutral
   card with a green badge; otherwise red with the first problem and, where it can, a tap that
   fixes it (allow overlay, start the service, gestures without root, open accessibility).

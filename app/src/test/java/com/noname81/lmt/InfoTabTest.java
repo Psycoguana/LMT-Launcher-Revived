@@ -2,8 +2,11 @@ package com.noname81.lmt;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.robolectric.Shadows.shadowOf;
 
+import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.text.Spanned;
 import android.text.style.URLSpan;
 import android.view.View;
@@ -70,6 +73,15 @@ public class InfoTabTest {
         LinearLayout column = (LinearLayout) github.getParent();
         assertTrue(column.indexOfChild(github) < column.indexOfChild(xda));
         assertTrue(column.indexOfChild(xda) < column.indexOfChild(donate));
+    }
+
+    @Test
+    public void githubButtonOpensTheRepository() {
+        View root = showInfo();
+        root.findViewById(R.id.info_github).performClick();
+        Intent started = shadowOf((Application) context).getNextStartedActivity();
+        assertEquals(Intent.ACTION_VIEW, started.getAction());
+        assertEquals(InfoFragment.REPOSITORY, started.getDataString());
     }
 
     @Test

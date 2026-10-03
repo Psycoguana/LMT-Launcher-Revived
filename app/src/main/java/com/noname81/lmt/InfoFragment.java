@@ -32,6 +32,7 @@ public class InfoFragment extends Fragment {
     static final String XDA_THREAD = "https://xdaforums.com/t/app-root-lmt-launcher-v3-2.1330150/";
     static final String NONAME81 = "https://xdaforums.com/m/noname81.1864347/";
     static final String PSYCOGUANA = "https://github.com/Psycoguana";
+    static final String REPOSITORY = "https://github.com/Psycoguana/LMT-Launcher-Revived";
     static final String DONATE =
             "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9C5JKBHDM6QSE";
 
@@ -60,8 +61,7 @@ public class InfoFragment extends Fragment {
         credits.setLinkTextColor(
                 MaterialColors.getColor(root, com.google.android.material.R.attr.colorPrimary));
 
-        // No repository yet: the button is there and answers the tap, it just doesn't go anywhere.
-        root.findViewById(R.id.info_github).setOnClickListener(v -> {});
+        root.findViewById(R.id.info_github).setOnClickListener(v -> open(REPOSITORY));
         root.findViewById(R.id.info_xda).setOnClickListener(v -> open(XDA_THREAD));
         root.findViewById(R.id.info_donate).setOnClickListener(v -> open(DONATE));
         return root;
