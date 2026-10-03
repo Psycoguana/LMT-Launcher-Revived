@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Guide for coding agents (and people) working in this repository. `CLAUDE.md` points here.
+Guide for coding agents (and people) working in this repository. Claude Code reads it too (2.1.277+).
 
 ## What this is
 
