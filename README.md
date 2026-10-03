@@ -1,17 +1,17 @@
-# LMT Launcher, revived
+# 🥧 LMT Launcher Revived
 
 LMT is a pie menu and edge-gesture launcher for Android, originally by **noname81**
 ([XDA thread](https://xdaforums.com/t/app-root-lmt-launcher-v3-2.1330150/), 2011 onwards).
 Swipe in from the screen edge and a pie of actions opens under your thumb: apps, shortcuts,
 Back/Home/Recents, toggles, Tasker tasks and more.
 
-This is a revived edition. The app was rebuilt from the last patched APK into a normal,
+This is a revived edition. The app was rebuilt from the last patched APK (thanks to [motomotomotoG](https://github.com/YMan84/lmt-launcher-android-patched) for the patches) into a normal,
 testable Java project, then fixed, modernized and extended. It runs on current Android
 (tested on Android 15 and 16) and most of it no longer needs root.
 
-## What's new
+## ✨ What's new
 
-### Redesign
+### 🎨 Redesign
 
 - **Material 3 throughout**: Material toolbar and tabs, preference-style Settings, Material
   dialogs, lists and pickers.
@@ -28,21 +28,21 @@ testable Java project, then fixed, modernized and extended. It runs on current A
 - **App picker**: search, and a "show system apps" toggle.
 - **File pickers** instead of typed paths for the pie image folder, scripts and backups.
 
-### New features
+### 🚀 New features
 
-- **Pie folders**: a slice can hold up to 8 actions that open in a ring around it, on hover
+- 📁 **Pie folders**: a slice can hold up to 8 actions that open in a ring around it, on hover
   or after a long press. Folders have a name and any of ~2,200 Material icons.
-- **Brightness dial**: a dial around the pie sets the screen brightness. Use it as a slice
+- ☀️ **Brightness dial**: a dial around the pie sets the screen brightness. Use it as a slice
   action, or turn on the "Brightness dial" setting to have it around every pie without
   spending a slice.
-- **Blur behind the pie**: behind the pie or the whole screen. On Samsung phones that
-  support it, a live blur (Samsung Live Blur) instead of a screenshot.
-- **New actions**: Flashlight, Keep screen on, Pop-up window (opens the current app in a
+- 🌫️ **Blur behind the pie**: behind the pie or the whole screen. On Samsung phones that
+  support it, a live blur (Samsung Live Blur) instead of static.
+- ⚡ **New actions**: Flashlight, Keep screen on, Pop-up window (opens the current app in a
   floating window; root or Shizuku).
-- **Backup and restore**: export every setting and pie icon to a zip, import it anywhere.
-- **Tasker task picker**: choose the task from Tasker's own list instead of typing its name.
+- 💾 **Backup and restore**: export every setting and pie icon to a zip, import it anywhere.
+- 🤖 **Tasker task picker**: choose the task from Tasker's own list instead of typing its name.
 
-### No longer needs root
+### 🔓 No longer needs root
 
 | Action | Before | Now |
 |---|---|---|
@@ -50,45 +50,35 @@ testable Java project, then fixed, modernized and extended. It runs on current A
 | Menu key | root | accessibility service (Android 16+) |
 | Nova / Apex / Holo app drawer | root | opens the system app drawer through accessibility (Android 12+); root still opens the launcher's own drawer |
 | Tasker task | root | no permission beyond Tasker's own (runs through Tasker's broadcast) |
-| Last app | labelled root-only | usage access (it already worked without root; the label was wrong and the picker blocked it) |
+| Last app | labelled root-only | usage access |
 
-New actions that never need root: Flashlight, Keep screen on, Brightness dial, Folder.
-Pop-up window works with root or with [Shizuku](https://shizuku.rikka.app/).
+New Pop-up window works with root or with [Shizuku](https://shizuku.rikka.app/).
 
 Without root, LMT now says so instead of failing silently: root-only actions are greyed out
 in the picker with an explanation, and gestures and ISAs (which read the touchscreen
 directly) are disabled until root is granted. The pie never needs root.
 
-### Bugs fixed
+### 🐛 Bugs fixed
 
 From the original app:
 
-- **Root key actions did nothing on Android 15**: the root helper crashed on a hidden API
-  (`InputManager.getInstance()`) for every key event. Reported on XDA since 2024; the
-  workaround was turning root off.
+- **Root key actions did nothing on Android 15**.
+- **Pie can now be shown in settings**.
 - **The accessibility service stopped working while still shown as enabled**: any app's
   accessibility "interrupt" made LMT think it was disconnected until you toggled it off and
   on.
 - **Chrome couldn't ask for camera, microphone or location** ("close bubbles or overlays")
   while LMT was running. The edge strips are now accessibility overlays, which Android
   trusts (Android 12+, with LMT's accessibility service on).
-- **Gestures never worked on some phones**: the default input device was a proximity sensor;
-  LMT now finds the touchscreen itself.
+- **Gestures now find the correct input device automatically**.
 - **Battery drain**: without working root, the gesture thread spun at ~96% of a CPU core with
-  the screen idle. A watchdog now stops it.
+  the screen idle.
 - **Root helpers leaked**: every service restart left another root `cat` process behind.
 - **Auto configuration** computed a touchscreen factor of 0 (integer division).
 - **The user image folder setting was ignored**: the saved path was never read.
-- **Pie showing and hiding at once until a restart**: hardened against the likely causes
-  (state left over after very quick taps, a stuck pie pointer, cancelled touches).
-- **Text looked greyed out on Samsung** (One UI reports reduced contrast) and **red themes
-  looked washed out** in dark mode.
-- An out-of-bounds read in `Action.toString()`.
 
-Also: the pie no longer opens on the lock screen unless that setting is on, and the root
-check is real (Magisk can start `su` and still deny it).
 
-## Requirements
+## 📋 Requirements
 
 - Android 5.0 or newer; the features above note their own minimum versions.
 - **Draw over other apps** for the pie.
@@ -96,13 +86,13 @@ check is real (Magisk can start `su` and still deny it).
   the pie and the Chrome fix.
 - Root only for gestures, ISAs and the actions marked `[Root]` in the picker.
 
-## Upgrading from the original LMT
+## ⬆️ Upgrading from the original LMT
 
 This build is signed with a different key, so it can't be installed over the original app.
 Uninstall the original first. Settings don't carry over from the original, which has no
 export; from this version on, Settings → Backup exports and imports everything.
 
-## Building
+## 🛠️ Building
 
 ```bash
 . tools/env.sh          # JDK 21, Android SDK 36
@@ -112,7 +102,7 @@ export; from this version on, Settings → Backup exports and imports everything
 
 Release signing reads `keystore/key.properties`, which is not in the repository.
 
-### Verifying a change against the original
+### 🔍 Verifying a change against the original
 
 ```bash
 ./tools/verify-equivalence.sh
@@ -125,7 +115,7 @@ resolved). It must print `RESULT: EQUIVALENT`. Intentional changes are listed, e
 reason, in `tools/accepted-deviations.json`. It needs the original repository cloned into
 `reference/`; details in [`docs/equivalence-oracle.md`](docs/equivalence-oracle.md).
 
-### Layout
+### 🗂️ Layout
 
 ```
 app/src/main/java/com/noname81/lmt/   the app
@@ -139,7 +129,7 @@ The root helper (`inputcontext/`) is the small program LMT runs under `su` to in
 and manage tasks. It used to ship as five prebuilt jars, one per Android version, and is now
 one jar built from source.
 
-## Credits
+## 🙏 Credits
 
 - **noname81**: the original LMT Launcher: the pie, the gesture engine and the action
   catalogue. [XDA profile](https://xdaforums.com/m/noname81.1864347/)
