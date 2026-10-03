@@ -404,12 +404,12 @@
     {
       "class": "RootContext.smali",
       "method": "constructor private <init>(Landroid/content/Context;)V",
-      "reason": "ROADMAP 1.13: starting su only proves the binary exists; Magisk can still deny it (the test phone test device does), and every root command then fails silently while isRootAvailable() said true. After the shells start, startRootCheck() sends `id` to the already-open root shell on a worker thread and records GRANTED (uid=0) or DENIED (EOF / other uid). If su can't start at all, the state is DENIED right away. Initialises the state and listener list."
+      "reason": "ROADMAP 1.13: starting su only proves the binary exists; Magisk can still deny it (the test phone does), and every root command then fails silently while isRootAvailable() said true. After the shells start, startRootCheck() sends `id` to the already-open root shell on a worker thread and records GRANTED (uid=0) or DENIED (EOF / other uid). If su can't start at all, the state is DENIED right away. Initialises the state and listener list."
     },
     {
       "class": "RootContext.smali",
       "method": "isRootAvailable(Z)Z",
-      "reason": "ROADMAP 1.13: starting su only proves the binary exists; Magisk can still deny it (the test phone test device does), and every root command then fails silently while isRootAvailable() said true. Now also false once the check says DENIED; while it is still running it answers as before, so nothing that worked is blocked by the check."
+      "reason": "ROADMAP 1.13: starting su only proves the binary exists; Magisk can still deny it (the test phone does), and every root command then fails silently while isRootAvailable() said true. Now also false once the check says DENIED; while it is still running it answers as before, so nothing that worked is blocked by the check."
     },
     {
       "class": "PieMenu.smali",

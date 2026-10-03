@@ -11,7 +11,7 @@ Every reconstruction step is compared against this.
   (`docs/baseline/01-settings-tabs.png`)
 - `ACTIVATE LMT` starts the service; "LMT started" toast appears.
 - Pie opens on an edge swipe-in and renders **three concentric rings** — the
-  third-ring patch is live. (`docs/baseline/02-pie-three-rings.png`)
+  third-ring patch is live.
 - No "grant external storage read permission" toast on launch — that patch is live.
 - `RootContext` reaches `su`: Magisk showed a superuser request for
   `com.noname81.lmt`, which is the fix from CHANGELOG §"Root prompt never

@@ -34,10 +34,9 @@ history, research and findings are in `docs/ROADMAP.md`.
 
 1. **JDK 21** and the **Android SDK** with platform 36, build-tools 36.0.0 and platform-tools
    (`adb`). Android Studio works too: open the repository root.
-2. **`tools/env.sh`** exports `JAVA_HOME`, `ANDROID_HOME` and `PATH` for the command line. It
-   holds macOS Homebrew paths (`/usr/local/opt/openjdk@21`,
-   `/usr/local/share/android-commandlinetools`); edit them for your machine. Source it before
-   building: `. tools/env.sh`.
+2. **`tools/env.sh`** exports `JAVA_HOME`, `ANDROID_HOME` and `PATH` for the command line.
+   It uses `LMT_JAVA_HOME` (a JDK 21) and `LMT_ANDROID_HOME` when set, else the macOS
+   Homebrew paths. Source it before building: `. tools/env.sh`.
 3. **Python 3**, for the bytecode check's scripts.
 4. **The upstream reference**, for the bytecode check only:
    `git clone https://github.com/YMan84/lmt-launcher-android-patched reference`.
@@ -45,7 +44,7 @@ history, research and findings are in `docs/ROADMAP.md`.
    `storePassword`, `keyAlias`, `keyPassword`; `storeFile` is relative to `keystore/`).
    Without it, debug builds use the standard debug key and release builds are unsigned.
 6. **google-java-format**: `brew install google-java-format`. Run it with JDK 21:
-   `J=$(ls -d /usr/local/Cellar/openjdk@21/*/bin | head -1); JAVA_HOME=${J%/bin} PATH=$J:$PATH google-java-format --aosp -i <files>`.
+   `. tools/env.sh; google-java-format --aosp -i <files>` (env.sh puts JDK 21 first on `PATH`).
 
 ## Build, install, run
 

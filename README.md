@@ -18,6 +18,21 @@ This is a revived edition. The app was rebuilt from the last patched APK (thanks
 testable Java project, then fixed, modernized and extended. It runs on current Android
 (tested on Android 15 and 16) and most of it no longer needs root.
 
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/01-pie.png" width="260" alt="The pie"><br>The pie</td>
+    <td align="center"><img src="docs/screenshots/02-brightness-dial.png" width="260" alt="Brightness dial"><br>Brightness dial</td>
+    <td align="center"><img src="docs/screenshots/03-info.png" width="260" alt="Info tab"><br>Info tab</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/04-settings.png" width="260" alt="Settings"><br>Settings</td>
+    <td align="center"><img src="docs/screenshots/05-pie-slots.png" width="260" alt="Pie slots"><br>Pie slots</td>
+    <td align="center"><img src="docs/screenshots/06-colors.png" width="260" alt="Appearance colors"><br>Appearance colors</td>
+  </tr>
+</table>
+
 ## ✨ What's new
 
 ### 🎨 Redesign
