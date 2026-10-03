@@ -15,3 +15,6 @@ reference/
 /build/
 inputcontext/build/
 *.apk
+
+# local agent memory config (engram), not part of the project
+.engram/
