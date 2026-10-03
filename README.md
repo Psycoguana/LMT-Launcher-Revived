@@ -1,5 +1,14 @@
 # 🥧 LMT Launcher Revived
 
+> [!WARNING]
+> **This is a 100% vibecoded project.** I'm a mobile developer, but I wanted to try building
+> something entirely with an AI agent, and this is the result. The code quality and structure
+> might not be the best, but it gets the job done.
+>
+> The app works fine for me, and I don't plan to provide support. If you run into a problem,
+> feel free to open an issue; I might or might not get to it. You're also welcome to fork it
+> and work on it yourself: an AI agent will probably fix whatever bug you're facing.
+
 LMT is a pie menu and edge-gesture launcher for Android, originally by **noname81**
 ([XDA thread](https://xdaforums.com/t/app-root-lmt-launcher-v3-2.1330150/), 2011 onwards).
 Swipe in from the screen edge and a pie of actions opens under your thumb: apps, shortcuts,
@@ -141,3 +150,10 @@ one jar built from source.
 Third-party assets: [Material Icons](https://github.com/google/material-design-icons)
 (Apache 2.0), brand icons from [Simple Icons](https://simpleicons.org/) (CC0),
 [Shizuku API](https://github.com/RikkaApps/Shizuku-API) (Apache 2.0).
+
+## ⚖️ License
+
+LMT Launcher was written by noname81 and released as a free app, not as open source, so
+this repository has no license. The original app and its code belong to noname81. This
+revived edition is a non-commercial, community effort to keep the app working on current
+Android. If you are noname81 and want it changed or taken down, please let me know.

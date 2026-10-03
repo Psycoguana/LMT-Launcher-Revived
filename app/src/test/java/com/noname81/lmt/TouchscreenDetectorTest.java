@@ -24,7 +24,7 @@ public class TouchscreenDetectorTest {
 
     @Test
     public void findsTheTouchscreenAndItsFactors() {
-        assertArrayEquals(new int[] {3, 100, 100}, TouchscreenDetector.detect(test phone, 1080, 2408));
+        assertArrayEquals(new int[] {3, 100, 100}, TouchscreenDetector.detect(TEST_PHONE, 1080, 2408));
     }
 
     @Test
@@ -38,20 +38,20 @@ public class TouchscreenDetectorTest {
         // The dialog used to take only the last character, turning event10 into 0.
         assertArrayEquals(
                 new int[] {10, 100, 100},
-                TouchscreenDetector.detect(test phone.replace("event3", "event10"), 1080, 2408));
+                TouchscreenDetector.detect(TEST_PHONE.replace("event3", "event10"), 1080, 2408));
     }
 
     @Test
     public void onlyTheTouchscreenReportsTouch() {
-        assertTrue(TouchscreenDetector.reportsTouch(test phone, 3));
-        assertFalse(TouchscreenDetector.reportsTouch(test phone, 4));
-        assertFalse(TouchscreenDetector.reportsTouch(test phone, 9));
+        assertTrue(TouchscreenDetector.reportsTouch(TEST_PHONE, 3));
+        assertFalse(TouchscreenDetector.reportsTouch(TEST_PHONE, 4));
+        assertFalse(TouchscreenDetector.reportsTouch(TEST_PHONE, 9));
     }
 
     @Test
     public void nothingToFind() {
         assertNull(TouchscreenDetector.detect("add device 1: /dev/input/event0\n", 1080, 2408));
         assertNull(TouchscreenDetector.detect(null, 1080, 2408));
-        assertNull(TouchscreenDetector.detect(test phone, 0, 0));
+        assertNull(TouchscreenDetector.detect(TEST_PHONE, 0, 0));
     }
 }

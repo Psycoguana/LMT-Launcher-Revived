@@ -329,7 +329,7 @@
     {
       "class": "SettingsViewActivity.smali",
       "method": "public onCreate(Landroid/os/Bundle;)V",
-      "reason": "Same minSdk-21 codegen change as AccessibilityHandler.createClick's entry above: D8 emits a direct Objects.requireNonNull null-check instead of a pre-21 backport helper. SettingsViewActivity is dead code (never started, ROADMAP 1.6 phase-1 HANDOFF), so this is inert either way."
+      "reason": "Same minSdk-21 codegen change as AccessibilityHandler.createClick's entry above: D8 emits a direct Objects.requireNonNull null-check instead of a pre-21 backport helper. SettingsViewActivity is dead code (never started, ROADMAP 1.6 phase 1), so this is inert either way."
     },
     {
       "class": "TouchService.smali",
@@ -1157,7 +1157,7 @@
     },
     {
       "class": "SettingsViewActivity.smali",
-      "reason": "ROADMAP 1.6 phase 2: dead code (never started, HANDOFF.md), deleted now that SettingsViewHelper - its only reason to exist - is gone too."
+      "reason": "ROADMAP 1.6 phase 2: dead code (never started), deleted now that SettingsViewHelper - its only reason to exist - is gone too."
     },
     {
       "class": "SettingsViewHelper.smali",

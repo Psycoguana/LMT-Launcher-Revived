@@ -449,7 +449,7 @@ notification shade and power menu, instead of drawing the pie over the plain app
     `SEM_EXTENSION_FLAG_CHANGE_DIM_EFFECT_TO_BLUR` window extension flag (turns dim-behind
     into blur); not yet traced.
 - **The screenshot route's cost is one capture per pie open, not a stream.**
-  `AbstractAccessibilityServiceConnection.takeScreenshot` (test phone `services.jar`) calls
+  `AbstractAccessibilityServiceConnection.takeScreenshot` (the test phone's `services.jar`) calls
   `WindowManagerService.captureDisplay` → SurfaceFlinger on the GPU → a `HardwareBuffer`
   handed over without a copy (`Bitmap.wrapHardwareBuffer`), rate-limited to one call per
   333 ms (confirmed in code), needs the `canTakeScreenshot` capability (flag 128). Upper
@@ -481,7 +481,7 @@ Disc details: the pie opens where you touch and grows outward, so the blur must 
 circle that follows it, not a square. Pick routes in the table's order, checked while
 the app runs, and listen with `addCrossWindowBlurEnabledListener` (battery saver turns it off).
 
-**Probe results (test phone, TEST_MODEL, Android 15, 2026-09-24).** `blurprobe/` is a separate
+**Probe results (test phone, Android 15, 2026-09-24).** `blurprobe/` is a separate
 throwaway app driven by adb broadcasts (commands in `ProbeService`'s javadoc). Sideloaded,
 it needs `cmd appops set com.noname81.blurprobe ACCESS_RESTRICTED_SETTINGS allow` before
 its accessibility service can be enabled.
@@ -790,7 +790,7 @@ The plumbing already exists: `AccessibilityHandler.performAction(int)` wraps
 | **5 Menu** | root `keyevent 82` | `GLOBAL_ACTION_MENU` (21) | **API 36** |
 
 `GLOBAL_ACTION_MENU` is API **36**, so it works on a Samsung flagship (SDK 36) but not on the
-Test phone (SDK 35). The drawer replacement opens the *system* all-apps surface, not
+test phone (SDK 35). The drawer replacement opens the *system* all-apps surface, not
 Nova's own drawer — close, not identical.
 
 Implemented as `Launcher.accessibilityFallback(actionType)` (the version gate,

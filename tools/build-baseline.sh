@@ -9,7 +9,10 @@ TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 
 apktool b "$ROOT/reference/apktool" -o "$TMP/unsigned.apk" -f >/dev/null
 zipalign -p -f 4 "$TMP/unsigned.apk" "$TMP/aligned.apk"
-apksigner sign --ks "$ROOT/keystore/lmt-release.jks" \
-  --ks-pass pass:***REMOVED*** --ks-key-alias lmt --key-pass pass:***REMOVED*** \
+# Signing reads keystore/key.properties (git-ignored), like app/build.gradle.
+prop() { grep "^$1=" "$ROOT/keystore/key.properties" | cut -d= -f2-; }
+apksigner sign --ks "$ROOT/keystore/$(prop storeFile)" \
+  --ks-pass "pass:$(prop storePassword)" --ks-key-alias "$(prop keyAlias)" \
+  --key-pass "pass:$(prop keyPassword)" \
   --out "$OUT" "$TMP/aligned.apk"
 echo "built: $OUT"

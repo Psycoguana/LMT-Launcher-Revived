@@ -628,7 +628,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
                 this.mSettings::savePieBlurRadius);
 
         // Shown everywhere, but only phones with Samsung's live window blur (the Samsung flagship, not the
-        // TEST_PHONE) can turn it on; there it is on by default.
+        // test phone) can turn it on; there it is on by default.
         addSwitch(
                         category,
                         "Samsung Live Blur",
