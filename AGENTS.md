@@ -101,7 +101,7 @@ explain a change in `tools/accepted-deviations.json`:
   deliberately restructured: removals and content changes are accepted too.
 - `new_classes`, `removed_classes`, `removed_members`.
 
-Write the reason as what changed and why, with the ROADMAP section. Details:
+Write the reason as what changed and why, with the GitHub issue or ROADMAP section. Details:
 `docs/equivalence-oracle.md`.
 
 ## Debugging
@@ -216,8 +216,7 @@ and take screenshots.
 ## Documentation
 
 - `docs/ROADMAP.md`: everything done, found and planned, with the research behind it. Part 1
-  features, Part 2 root → accessibility work, Part 3 bugs. Add a section when you finish
-  something.
+  features, Part 2 root → accessibility work, Part 3 bugs. Historical: no longer updated.
 - `docs/equivalence-oracle.md`: how the bytecode check works.
 - `docs/reconstruction-log.md`: how the Java was recovered from the APK.
 - `tools/inputcontext/README.md`: the root helper.
