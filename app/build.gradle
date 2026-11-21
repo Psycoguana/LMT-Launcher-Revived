@@ -5,7 +5,7 @@ plugins { id 'com.android.application' }
 // that, or Android refuses to install over 3.11 (INSTALL_FAILED_VERSION_DOWNGRADE).
 def versionMajor = 4
 def versionMinor = 0
-def versionPatch = 0
+def versionPatch = 1
 
 def keystoreProps = new Properties()
 def keystorePropsFile = rootProject.file("keystore/key.properties")
