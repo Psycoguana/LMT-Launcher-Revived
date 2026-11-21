@@ -25,11 +25,24 @@ import java.io.ByteArrayOutputStream;
 class IconUtils {
     IconUtils() {}
 
+    /**
+     * Largest side of an icon saved in the settings. Shortcut apps can return full-size bitmaps,
+     * which bloat the prefs and every backup; the pie shows icons at about 100 px.
+     */
+    static final int SAVED_ICON_MAX = 192;
+
+    /**
+     * Largest side {@link #toBitmap} draws, so a drawable claiming a huge size can't run out of
+     * memory.
+     */
+    static final int DRAWN_ICON_MAX = 512;
+
     static String convertDrawableToBase64String(Drawable drawable) {
         Bitmap bitmap = toBitmap(drawable);
         if (bitmap == null) {
             return null;
         }
+        bitmap = scaleDown(bitmap, SAVED_ICON_MAX);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         return Base64.encodeToString(byteArrayOutputStream.toByteArray(), 0);
@@ -184,6 +197,9 @@ class IconUtils {
             if (width <= 0 || height <= 0) {
                 width = height = 144; // the size of LMT's own action icons
             }
+            float scale = Math.min(1f, (float) DRAWN_ICON_MAX / Math.max(width, height));
+            width = Math.max(1, Math.round(width * scale));
+            height = Math.max(1, Math.round(height * scale));
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
             Rect bounds = new Rect(drawable.getBounds());
@@ -195,5 +211,20 @@ class IconUtils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /** The bitmap with its larger side at most {@code max}, keeping the aspect ratio. */
+    static Bitmap scaleDown(Bitmap bitmap, int max) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        if (width <= max && height <= max) {
+            return bitmap;
+        }
+        float scale = (float) max / Math.max(width, height);
+        return Bitmap.createScaledBitmap(
+                bitmap,
+                Math.max(1, Math.round(width * scale)),
+                Math.max(1, Math.round(height * scale)),
+                true);
     }
 }

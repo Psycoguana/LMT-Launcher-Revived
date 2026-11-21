@@ -579,7 +579,7 @@
     {
       "class": "IconUtils.smali",
       "method": "static convertDrawableToBase64String(Landroid/graphics/drawable/Drawable;)Ljava/lang/String;",
-      "reason": "GitHub #1: encodes any drawable through toBitmap instead of casting to BitmapDrawable. Shortcut Maker returns its icon as a resource that loads as an AdaptiveIconDrawable; the cast threw ClassCastException in MultiSelectActivity.onActivityResult, crashing LMT, so the shortcut was lost and the restarted process toasted 'Failed to get root permissions!' on phones without root. A null drawable still encodes to null."
+      "reason": "GitHub #1: encodes any drawable through toBitmap instead of casting to BitmapDrawable. Shortcut Maker returns its icon as a resource that loads as an AdaptiveIconDrawable; the cast threw ClassCastException in MultiSelectActivity.onActivityResult, crashing LMT, so the shortcut was lost and the restarted process toasted 'Failed to get root permissions!' on phones without root. A null drawable still encodes to null. Also scales the bitmap down to SAVED_ICON_MAX (192 px) before encoding: shortcut apps can return full-size bitmaps, which bloated the prefs and every backup."
     },
     {
       "class": "IconUtils.smali",
@@ -691,7 +691,7 @@
     },
     {
       "class": "IconUtils.smali",
-      "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike. saveImage writes through IconFolder. GitHub #1: toBitmap draws any drawable into a bitmap, for convertDrawableToBase64String and getBitmapFromDrawable."
+      "reason": "ROADMAP 1.13: the user image folder is picked with the system file picker (a content:// tree LMT keeps a persistent permission for), so image I/O goes through IconFolder, which handles that and plain paths alike. saveImage writes through IconFolder. GitHub #1: toBitmap draws any drawable into a bitmap, for convertDrawableToBase64String and getBitmapFromDrawable. SAVED_ICON_MAX, DRAWN_ICON_MAX and scaleDown cap saved icons at 192 px and what toBitmap draws at 512 px, so a drawable claiming a huge size cannot run out of memory."
     },
     {
       "class": "PieControl.smali",
