@@ -14,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,6 +49,7 @@ import java.util.concurrent.Executors;
  * couple of hundred otherwise. The toggle is remembered.
  */
 public class MultiSelectActivity extends ThemedActivity {
+    private static final String TAG = "LMT::MultiSelectActivity";
     public static int AppSelectMode = 0;
     public static final int REQUEST_CREATE_SHORTCUT = 1;
     public static final int SelectActivity = 2;
@@ -300,10 +302,15 @@ public class MultiSelectActivity extends ThemedActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Drawable drawable;
+        Intent shortcut = null;
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            extras.getClass();
-            String uri = ((Intent) extras.get("android.intent.extra.shortcut.INTENT")).toUri(0);
+            shortcut = data == null ? null : data.getParcelableExtra(Intent.EXTRA_SHORTCUT_INTENT);
+            if (shortcut == null) {
+                Log.w(TAG, "The shortcut app returned no shortcut intent");
+            }
+        }
+        if (shortcut != null) {
+            String uri = shortcut.toUri(0);
             Resources resources = getResources();
             Bitmap bitmap = (Bitmap) data.getParcelableExtra("android.intent.extra.shortcut.ICON");
             if (bitmap != null) {
