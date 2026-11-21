@@ -128,6 +128,9 @@ Write the reason as what changed and why, with the ROADMAP section. Details:
     the phone's dark mode doesn't change LMT if it's set to 1 or 2.
   - Without root, `su` may exist but be denied (Magisk); `RootContext` checks for real
     (`id` → `uid=0`).
+  - Icons from other apps can be any `Drawable` (Shortcut Maker sends an adaptive icon): use
+    `IconUtils.toBitmap`, never cast to `BitmapDrawable`. The cast crashed LMT when saving a
+    shortcut, and the restarted process toasted "Failed to get root permissions!" (GitHub #1).
 
 ## Where things are
 

@@ -5,11 +5,11 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Base64;
 import android.util.TypedValue;
 import android.widget.ImageView;
@@ -26,10 +26,10 @@ class IconUtils {
     IconUtils() {}
 
     static String convertDrawableToBase64String(Drawable drawable) {
-        if (drawable == null) {
+        Bitmap bitmap = toBitmap(drawable);
+        if (bitmap == null) {
             return null;
         }
-        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         return Base64.encodeToString(byteArrayOutputStream.toByteArray(), 0);
@@ -159,30 +159,38 @@ class IconUtils {
     }
 
     private static Bitmap getBitmapFromDrawable(Drawable drawable) {
-        if (Build.VERSION.SDK_INT >= 26) {
-            return getBitmapFromDrawableV26(drawable);
-        }
-        return ((BitmapDrawable) drawable).getBitmap();
+        return toBitmap(drawable);
     }
 
-    private static Bitmap getBitmapFromDrawableV26(Drawable drawable) {
+    /**
+     * The drawable as a bitmap: a bitmap icon's own, anything else (adaptive icons, vectors,
+     * layers) drawn at its intrinsic size. Issue #1: shortcut apps such as Shortcut Maker return
+     * their icon as a resource that loads as an {@link AdaptiveIconDrawable}; storing it cast it to
+     * BitmapDrawable and crashed LMT, so the shortcut was never saved.
+     */
+    static Bitmap toBitmap(Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
+        if (drawable instanceof BitmapDrawable) {
+            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+            if (bitmap != null) {
+                return bitmap;
+            }
+        }
         try {
-            if (drawable instanceof BitmapDrawable) {
-                return ((BitmapDrawable) drawable).getBitmap();
+            int width = drawable.getIntrinsicWidth();
+            int height = drawable.getIntrinsicHeight();
+            if (width <= 0 || height <= 0) {
+                width = height = 144; // the size of LMT's own action icons
             }
-            if (!(drawable instanceof AdaptiveIconDrawable)) {
-                return null;
-            }
-            AdaptiveIconDrawable adaptiveIconDrawableM284m = ((AdaptiveIconDrawable) drawable);
-            Bitmap bitmapCreateBitmap =
-                    Bitmap.createBitmap(
-                            adaptiveIconDrawableM284m.getIntrinsicWidth(),
-                            adaptiveIconDrawableM284m.getIntrinsicHeight(),
-                            Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmapCreateBitmap);
-            adaptiveIconDrawableM284m.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            adaptiveIconDrawableM284m.draw(canvas);
-            return bitmapCreateBitmap;
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            Rect bounds = new Rect(drawable.getBounds());
+            drawable.setBounds(0, 0, width, height);
+            drawable.draw(canvas);
+            drawable.setBounds(bounds);
+            return bitmap;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
