@@ -71,6 +71,12 @@ public class RootContext {
             return;
         }
         this.mRootState = ROOT_DENIED;
+        if (!suExists()) {
+            // No su at all: an unrooted phone, which runs on accessibility. Nothing failed, so say
+            // nothing; root features explain themselves when used.
+            Log.i(TAG, "No su binary, running without root");
+            return;
+        }
         Toast.makeText(context, "Failed to get root permissions!", Toast.LENGTH_SHORT).show();
         Log.e(TAG, "Failed to get root permissions!");
     }

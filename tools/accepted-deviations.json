@@ -404,7 +404,7 @@
     {
       "class": "RootContext.smali",
       "method": "constructor private <init>(Landroid/content/Context;)V",
-      "reason": "ROADMAP 1.13: starting su only proves the binary exists; Magisk can still deny it (the test phone does), and every root command then fails silently while isRootAvailable() said true. After the shells start, startRootCheck() sends `id` to the already-open root shell on a worker thread and records GRANTED (uid=0) or DENIED (EOF / other uid). If su can't start at all, the state is DENIED right away. Initialises the state and listener list."
+      "reason": "ROADMAP 1.13: starting su only proves the binary exists; Magisk can still deny it (the test phone does), and every root command then fails silently while isRootAvailable() said true. After the shells start, startRootCheck() sends `id` to the already-open root shell on a worker thread and records GRANTED (uid=0) or DENIED (EOF / other uid). If su can't start at all, the state is DENIED right away. Initialises the state and listener list. GitHub #1: when no su binary exists (suExists), an unrooted phone, it logs instead of toasting 'Failed to get root permissions!', which showed on every cold start."
     },
     {
       "class": "RootContext.smali",
